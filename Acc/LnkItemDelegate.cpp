@@ -31,7 +31,7 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	rect.setY(rect.y() + padding);
 
 	QVariantMap vm = index.data().toMap();
-	painter->drawPixmap(rect.x(), rect.y(), vm["icon"].value<QPixmap>());
+	painter->drawPixmap(rect.x(), rect.y(), vm["pixmap"].value<QPixmap>());
 	
 	const int titleVSpace = 6;
 	int fontSize = painter->fontInfo().pixelSize();
@@ -41,7 +41,9 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	painter->drawText(rect, Qt::AlignLeft, vm["name"].toString());
 
 	rect.setY(rect.y() + fontSize + titleVSpace);
-	painter->drawText(rect, Qt::AlignLeft, vm["path"].toString());
+	QString path = vm["path"].toString();
+	path = painter->fontMetrics().elidedText(path, Qt::TextElideMode::ElideMiddle, rect.width());
+	painter->drawText(rect, Qt::AlignLeft, path);
 
 	painter->restore();
 	

@@ -16,18 +16,19 @@ LnkModel::LnkModel(QObject *parent)
 			target = info.symLinkTarget();
 		}
 		QString filename = info.fileName();
-		QString filepath = info.filePath();
-		QVariantMap vm;
-		vm["name"] = filename;
-		vm["path"] = target.isEmpty() ? filepath : target;
+		QString filepath = target.isEmpty() ? info.filePath() : target;
+
+		QSharedDataPointer<LnkData> p(new LnkData());
+		p->name = filename.remove(".lnk", Qt::CaseInsensitive);
+		p->basename = QFileInfo(filepath).baseName();
+		p->path = filepath;
 		if (!target.isEmpty()) {
-			vm["icon"] = iconProvider.icon(QFileInfo(target)).pixmap(LNK_ICON_SIZE).scaled(LNK_ICON_SIZE);
+			p->pixmap = iconProvider.icon(QFileInfo(target)).pixmap(LNK_ICON_SIZE).scaled(LNK_ICON_SIZE);
 		}
 		else {
-			vm["icon"] = iconProvider.icon(info).pixmap(LNK_ICON_SIZE);
+			p->pixmap = iconProvider.icon(info).pixmap(LNK_ICON_SIZE);
 		}
-		
-		data_.append(vm);
+		pdata_.append(p);
 	}
 }
 
@@ -35,15 +36,32 @@ LnkModel::~LnkModel()
 {
 }
 
+void LnkModel::filter(const QString &text)
+{
+	pfilterdata_.clear();
+	for (auto iter = pdata_.begin(); iter != pdata_.end(); ++iter) {
+		const LnkData *p = (*iter).data();
+		if (p->name.contains(text, Qt::CaseInsensitive)) {
+			pfilterdata_.append(*iter);
+		}
+		else if (p->basename.contains(text, Qt::CaseInsensitive)) {
+			pfilterdata_.append(*iter);
+		}
+	}
+	int count = pfilterdata_.size();
+	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));
+}
+
 int LnkModel::rowCount(const QModelIndex &parent) const
 {
-	return data_.count();
+	return pfilterdata_.count();
 }
 
 QVariant LnkModel::data(const QModelIndex &index, int role) const
 {
-	if (role == Qt::DisplayRole) {
-		return data_[index.row()];
+	int row = index.row();
+	if (role == Qt::DisplayRole && row < pfilterdata_.size()) {
+		return pfilterdata_[row]->toVariant();
 	}
 	return QVariant();
 }

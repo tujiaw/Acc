@@ -3,6 +3,7 @@
 #include "LnkListView.h"
 #include "LnkModel.h"
 #include "LnkItemDelegate.h"
+#include "Constants.h"
 #include <QtWidgets>
 
 MainWidget::MainWidget(QWidget *parent)
@@ -20,7 +21,9 @@ MainWidget::MainWidget(QWidget *parent)
 	mLayout->setSpacing(10);
 
 	m_lineEdit = new QLineEdit(this);
-	m_lineEdit->setFixedHeight(50);
+	m_lineEdit->setObjectName("SearchLineEdit");
+	connect(m_lineEdit, &QLineEdit::textChanged, this, &MainWidget::slotSearch);
+
 	m_lnkListView = new LnkListView(this);
 	m_lnkListView->setModel(new LnkModel(this));
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
@@ -56,21 +59,40 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 				m_lnkListView->selectPrev();
 			}
 		}
+		else if (keyEvent->key() == Qt::Key_Escape) {
+			this->parentWidget()->hide();
+		}
 	}
+	else if (event->type() == QEvent::Show) {
+		m_lineEdit->setFocus();
+	}
+
 	return false;
 }
 
 void MainWidget::slotTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
 	if (reason == QSystemTrayIcon::Trigger) {
-		this->parentWidget()->showNormal();
-		this->parentWidget()->raise();
+		slotMainShortcut();
 	}
 }
 
 void MainWidget::slotMainShortcut()
 {
-	this->parentWidget()->showNormal();
-	this->parentWidget()->activateWindow();
-	this->parentWidget()->raise();
+	if (this->parentWidget()->isHidden()) {
+		this->parentWidget()->showNormal();
+		this->parentWidget()->activateWindow();
+		this->parentWidget()->raise();
+	}
+	else {
+		this->parentWidget()->hide();
+	}
+}
+
+void MainWidget::slotSearch(const QString &text)
+{
+	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
+	LnkItemDelegate *delegate = static_cast<LnkItemDelegate*>(m_lnkListView->itemDelegate());
+	model->filter(text.trimmed());
+	m_lnkListView->setSelect(0);
 }

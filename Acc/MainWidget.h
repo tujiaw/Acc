@@ -20,6 +20,7 @@ protected:
 private slots:
 	void slotTrayActivated(QSystemTrayIcon::ActivationReason reason);
 	void slotMainShortcut();
+	void slotSearch(const QString &text);
 
 private:
 	SystemTray *tray_;

@@ -38,7 +38,7 @@ void Acc::openWidget(const QString &id)
 		if (id == WidgetID::MAIN) {
 			MainWidget *content = new MainWidget(widget);
 			widget->setContent(content);
-			widget->setFixedWidth(600);
+			widget->setFixedSize(650, 350);
 		}
 
 		widgets_[id] = widget;

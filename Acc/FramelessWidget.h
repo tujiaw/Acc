@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
+#include <QFrame>
 
-class FramelessWidget : public QWidget
+class FramelessWidget : public QFrame
 {
 	Q_OBJECT
 
@@ -12,6 +12,7 @@ public:
 	void setContent(QWidget *content);
 
 protected:
+	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
