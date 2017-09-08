@@ -127,6 +127,15 @@
     <ClCompile Include="LnkModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LnkItemDelegate.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LnkItemDelegate.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="LnkItemDelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Acc.h">
@@ -157,6 +166,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="LnkModel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="LnkItemDelegate.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

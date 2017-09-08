@@ -1,6 +1,8 @@
 #include "MainWidget.h"
 #include "qxtglobalshortcut/qxtglobalshortcut.h"
 #include "LnkListView.h"
+#include "LnkModel.h"
+#include "LnkItemDelegate.h"
 #include <QtWidgets>
 
 MainWidget::MainWidget(QWidget *parent)
@@ -18,8 +20,11 @@ MainWidget::MainWidget(QWidget *parent)
 	mLayout->setSpacing(10);
 
 	m_lineEdit = new QLineEdit(this);
-	m_lineEdit->setFixedHeight(60);
+	m_lineEdit->setFixedHeight(50);
 	m_lnkListView = new LnkListView(this);
+	m_lnkListView->setModel(new LnkModel(this));
+	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
+
 	mLayout->addWidget(m_lineEdit);
 	mLayout->addWidget(m_lnkListView);
 
@@ -36,6 +41,21 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 {
 	if (QEvent::WindowDeactivate == event->type()) {
 		this->parentWidget()->hide();
+		return false;
+	}
+
+	if (event->type() == QEvent::KeyPress) {
+		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+		if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
+			m_lnkListView->openIndex(m_lnkListView->currentIndex());
+			return true;
+		} else if (object == m_lineEdit) {
+			if (keyEvent->key() == Qt::Key_Down) {
+				m_lnkListView->selectNext();
+			} else if (keyEvent->key() == Qt::Key_Up) {
+				m_lnkListView->selectPrev();
+			}
+		}
 	}
 	return false;
 }
