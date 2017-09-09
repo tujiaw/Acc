@@ -18,6 +18,8 @@ protected:
 	bool eventFilter(QObject *, QEvent *);
 
 private slots:
+	void slotSetting();
+	void slotReload();
 	void slotTrayActivated(QSystemTrayIcon::ActivationReason reason);
 	void slotMainShortcut();
 	void slotSearch(const QString &text);

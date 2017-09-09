@@ -139,6 +139,9 @@
     <ClCompile Include="hanzi2pinyin.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="RunGuard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Acc.h">
@@ -192,6 +195,9 @@
       <Filter>qxtglobalshortcut</Filter>
     </ClInclude>
     <ClInclude Include="hanzi2pinyin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RunGuard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

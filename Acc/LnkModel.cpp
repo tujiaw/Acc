@@ -4,52 +4,70 @@
 #include <QFileIconProvider>
 #include <QDebug>
 #include <QStandardPaths>
+#include <QImageReader>
 
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
 {
+	load();
+}
+
+LnkModel::~LnkModel()
+{
+}
+
+void LnkModel::load()
+{
+	QFileInfo info;
+	for (int i = pdata_.size() - 1; i >= 0; i--) {
+		info.setFile(pdata_[i]->lnkPath);
+		if (!info.exists()) {
+			pdata_.removeAt(i);
+		}
+	}
+
 	QFileIconProvider iconProvider;
 	QStringList strList = getAllLnk();
-	QStringList keyList;
-	QStringList xx;
 	for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
-		QFileInfo info(*iter);
-		QString target;
-		if (info.isSymLink()) {
-			target = info.symLinkTarget();
-		} else {
+		info.setFile(*iter);
+		QString target = info.isSymLink() ? info.symLinkTarget() : info.filePath();
+		if (target.isEmpty()) {
 			continue;
 		}
-
-		QString filename = info.fileName();
-		QString filepath = target.isEmpty() ? info.filePath() : target;
 
 		QSharedDataPointer<LnkData> p(new LnkData());
-		p->name = filename.remove(".lnk", Qt::CaseInsensitive);
-		p->path = filepath;
+		// 链接名
+		p->lnkName = info.fileName().remove(".lnk", Qt::CaseInsensitive);
+		// 链接路径
+		p->lnkPath = info.filePath();
+		// 目录可执行程序路径
+		p->targetPath = target;
+		// 目标名字
+		p->targetName = QFileInfo(p->targetPath).baseName();
 
 		// 过滤重复
-		QString key = p->name + "-" + p->path;
-		if (keyList.contains(key)) {
+		QString key = p->key();
+		if (isExist(key)) {
 			continue;
 		}
-		keyList.append(key);
 
-		p->basename = QFileInfo(filepath).baseName();
-		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->name.trimmed());
+		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->lnkName.trimmed());
 		p->pinyin = pinyin.first;
 		p->jianpin = pinyin.second;
 		p->pixmap = iconProvider.icon(QFileInfo(target)).pixmap(LNK_ICON_SIZE).scaled(LNK_ICON_SIZE);
 		if (p->pixmap.isNull()) {
 			p->pixmap = iconProvider.icon(info).pixmap(LNK_ICON_SIZE);
+			if (p->pixmap.isNull()) {
+				p->pixmap = iconProvider.icon(QFileIconProvider::File).pixmap(LNK_ICON_SIZE);
+			}
 		}
 		pdata_.append(p);
+		if (p->pinyin.isEmpty() || p->jianpin.isEmpty()) {
+			qDebug() << "hanzi2pinyin empty, text:" << p->lnkName;
+		}
 	}
-	qDebug() << "lnk count:" << keyList.size();
-}
 
-LnkModel::~LnkModel()
-{
+	qDebug() << "lnk count:" << pdata_.size();
 }
 
 QStringList LnkModel::getAllLnk() const
@@ -96,10 +114,10 @@ void LnkModel::filter(const QString &text)
 	if (!text.isEmpty()) {
 		for (auto iter = pdata_.begin(); iter != pdata_.end(); ++iter) {
 			const LnkData *p = (*iter).data();
-			if (p->name.contains(text, Qt::CaseInsensitive)) {
+			if (p->lnkName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
 			}
-			else if (p->basename.contains(text, Qt::CaseInsensitive)) {
+			else if (p->targetName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
 			}
 			else if (p->jianpin.contains(text, Qt::CaseInsensitive)) {
@@ -122,6 +140,16 @@ int LnkModel::totalCount() const
 int LnkModel::showCount() const
 {
 	return pfilterdata_.size();
+}
+
+bool LnkModel::isExist(const QString &key)
+{
+	for (int i = 0; i < pdata_.size(); i++) {
+		if (pdata_[i]->key() == key) {
+			return true;
+		}
+	}
+	return false;
 }
 
 int LnkModel::rowCount(const QModelIndex &parent) const

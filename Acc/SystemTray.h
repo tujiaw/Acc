@@ -11,6 +11,10 @@ public:
 	SystemTray(QWidget *parent);
 	~SystemTray();
 
+signals:
+	void sigSetting();
+	void sigReload();
+
 private slots:
 	void slotTriggered(QAction *action);
 

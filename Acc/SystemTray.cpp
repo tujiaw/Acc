@@ -10,6 +10,7 @@ SystemTray::SystemTray(QWidget *parent)
 	connect(menu_, &QMenu::triggered, this, &SystemTray::slotTriggered);
 	menu_->addAction(tr("Open"));
 	menu_->addAction(tr("Setting"));
+	menu_->addAction(tr("Reload"));
 	menu_->addAction(tr("Exit"));
 	this->setContextMenu(menu_);
 }
@@ -24,8 +25,12 @@ void SystemTray::slotTriggered(QAction *action)
 	if (text == tr("Open")) {
 		Acc::instance()->openWidget(WidgetID::MAIN);
 	} else if (text == tr("Setting")) {
-
-	} else if (text == tr("Exit")) {
+		emit sigSetting();
+	}
+	else if (text == tr("Reload")) {
+		emit sigReload();
+	}
+	else if (text == tr("Exit")) {
 		qApp->exit();
 	}
 }

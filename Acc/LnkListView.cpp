@@ -1,7 +1,7 @@
 #include "LnkListView.h"
 #include <QMouseEvent>
-#include <QProcess>
 #include <QDebug>
+#include "Util.h"
 
 LnkListView::LnkListView(QWidget *parent)
 	: QListView(parent)
@@ -59,12 +59,10 @@ void LnkListView::openIndex(const QModelIndex &index)
 		return;
 	}
 
-	qDebug() << index.row();
 	QVariantMap vm = this->model()->data(index).toMap();
-	QString path = vm["path"].toString();
+	QString path = vm["targetPath"].toString();
 	if (!path.isEmpty()) {
-		bool ok = QProcess::startDetached("\"" + path + "\"");
-		qDebug() << path << ",ok:" << ok;
+		Util::shellExecute(path);
 	}
 }
 

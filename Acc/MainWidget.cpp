@@ -11,11 +11,22 @@ MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
 	tray_ = new SystemTray(this);
+	connect(tray_, &SystemTray::sigSetting, this, &MainWidget::slotSetting);
+	connect(tray_, &SystemTray::sigReload, this, &MainWidget::slotReload);
 	connect(tray_, &QSystemTrayIcon::activated, this, &MainWidget::slotTrayActivated);
 	tray_->show();
 
-	mainShortcut_ = new QxtGlobalShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space), this);
+	QList<QKeySequence> keyList;
+	keyList.append(QKeySequence(Qt::ALT + Qt::Key_Space));
+	keyList.append(QKeySequence(Qt::CTRL + Qt::Key_Space));
+	keyList.append(QKeySequence(Qt::SHIFT + Qt::Key_Space));
+	mainShortcut_ = new QxtGlobalShortcut(this);
 	connect(mainShortcut_, &QxtGlobalShortcut::activated, this, &MainWidget::slotMainShortcut);
+	for (auto iter = keyList.begin(); iter != keyList.end(); ++iter) {
+		if (mainShortcut_->setShortcut(*iter)) {
+			break;
+		}
+	}
 
 	QVBoxLayout *mLayout = new QVBoxLayout(this);
 	mLayout->setContentsMargins(10, 10, 10, 10);
@@ -73,6 +84,17 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 	return false;
 }
 
+void MainWidget::slotSetting()
+{
+
+}
+
+void MainWidget::slotReload()
+{
+	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
+	model->load();
+}
+
 void MainWidget::slotTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
 	if (reason == QSystemTrayIcon::Trigger) {
@@ -83,7 +105,7 @@ void MainWidget::slotTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void MainWidget::slotMainShortcut()
 {
 	if (this->parentWidget()->isHidden()) {
-		this->parentWidget()->showNormal();
+		this->parentWidget()->show();
 		this->parentWidget()->activateWindow();
 		this->parentWidget()->raise();
 	}

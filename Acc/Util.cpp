@@ -4,6 +4,7 @@
 #include <QDirIterator>
 #include <QDebug>
 #include "hanzi2pinyin.h"
+#include <windows.h>
 
 namespace Util
 {
@@ -38,31 +39,25 @@ namespace Util
 
 	QPair<QString, QString> getPinyinAndJianpin(const QString &text)
 	{
-		static const QStringList s_dyz1 = QStringList() << QStringLiteral("°®ÆæÒÕ");
-		static const QStringList s_dyz2 = QStringList() << QStringLiteral("Ææ");
-		static const QStringList s_dyz3 = QStringList() << "qi";
+		static const QStringList s_dyz1 = QStringList()
+			<< QStringLiteral("°® Ææ ÒÕ")
+			<< QStringLiteral("Òô ÀÖ")
+			<< QStringLiteral("Ïº Ã×");
+		static const QStringList s_dyz2 = QStringList()
+			<< "ai qi yi"
+			<< "yin yue"
+			<< "xia mi";
+		Q_ASSERT(s_dyz1.size() == s_dyz2.size());
 
-		int index = -1;
+		QStringList strList = text.split("", QString::SkipEmptyParts);
+		QString spaceText = strList.join(" ");
 		for (int i = 0; i < s_dyz1.size(); i++) {
-			if (text.contains(s_dyz1[i])) {
-				index = i;
-				break;
+			if (spaceText.contains(s_dyz1[i])) {
+				spaceText.replace(s_dyz1[i], s_dyz2[i]);
 			}
 		}
 
-		QStringList strList;
-		if (index < 0) {
-			strList = text.split("", QString::SkipEmptyParts);
-		} else {
-			for (auto iter = text.begin(); iter != text.end(); ++iter) {
-				if (*iter == s_dyz2[index]) {
-					strList.append(s_dyz3[index]);
-				} else {
-					strList.append(*iter);
-				}
-			}
-		}
-
+		strList = spaceText.split(" ", QString::SkipEmptyParts);
 		QString pinyin, jianpin;
 		for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
 			QString tmp = getPinyin(*iter);
@@ -72,5 +67,16 @@ namespace Util
 			}
 		}
 		return qMakePair(pinyin, jianpin);
+	}
+
+	bool shellExecute(const QString &path)
+	{
+		HINSTANCE hinst = ShellExecute(nullptr, L"open", path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
+		LONG64 result = (LONG64)hinst;
+		if (result <= 32) {
+			qDebug() << "shellExecute failed, code:" << result;
+			return false;
+		}
+		return true;
 	}
 }

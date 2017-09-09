@@ -38,10 +38,10 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 
 	rect.setX(LNK_ICON_SIZE.width() + 4 * padding);
 	rect.setY(option.rect.y() + (ROW_HEIGHT - 2 * fontSize - titleVSpace) / 2);
-	painter->drawText(rect, Qt::AlignLeft, vm["name"].toString());
+	painter->drawText(rect, Qt::AlignLeft, vm["lnkName"].toString());
 
 	rect.setY(rect.y() + fontSize + titleVSpace);
-	QString path = vm["path"].toString();
+	QString path = vm["targetPath"].toString();
 	path = painter->fontMetrics().elidedText(path, Qt::TextElideMode::ElideMiddle, rect.width());
 	painter->drawText(rect, Qt::AlignLeft, path);
 
