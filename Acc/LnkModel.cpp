@@ -26,16 +26,19 @@ LnkModel::LnkModel(QObject *parent)
 
 		QSharedDataPointer<LnkData> p(new LnkData());
 		p->name = filename.remove(".lnk", Qt::CaseInsensitive);
-		p->basename = QFileInfo(filepath).baseName();
 		p->path = filepath;
 
 		// ¹ýÂËÖØ¸´
-		QString key = p->name + p->path;
+		QString key = p->name + "-" + p->path;
 		if (keyList.contains(key)) {
 			continue;
 		}
 		keyList.append(key);
 
+		p->basename = QFileInfo(filepath).baseName();
+		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->name.trimmed());
+		p->pinyin = pinyin.first;
+		p->jianpin = pinyin.second;
 		p->pixmap = iconProvider.icon(QFileInfo(target)).pixmap(LNK_ICON_SIZE).scaled(LNK_ICON_SIZE);
 		if (p->pixmap.isNull()) {
 			p->pixmap = iconProvider.icon(info).pixmap(LNK_ICON_SIZE);
@@ -97,6 +100,12 @@ void LnkModel::filter(const QString &text)
 				pfilterdata_.append(*iter);
 			}
 			else if (p->basename.contains(text, Qt::CaseInsensitive)) {
+				pfilterdata_.append(*iter);
+			}
+			else if (p->jianpin.contains(text, Qt::CaseInsensitive)) {
+				pfilterdata_.append(*iter);
+			}
+			else if (p->pinyin.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
 			}
 		}

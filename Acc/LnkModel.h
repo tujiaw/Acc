@@ -28,6 +28,8 @@ public:
 	QString basename;
 	QString path;
 	QPixmap pixmap;
+	QString pinyin;
+	QString jianpin;
 };
 
 class LnkModel : public QAbstractListModel
