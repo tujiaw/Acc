@@ -584,6 +584,9 @@
     </Image>
     <Image Include="rc\images\Acc.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="rc\Acc.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

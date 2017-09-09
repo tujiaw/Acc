@@ -6,6 +6,7 @@
 #include "Constants.h"
 #include <QtWidgets>
 
+const int TOP_HEIGHT = 70;
 MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
@@ -27,9 +28,10 @@ MainWidget::MainWidget(QWidget *parent)
 	m_lnkListView = new LnkListView(this);
 	m_lnkListView->setModel(new LnkModel(this));
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
+	m_lnkListView->hide();
 
 	mLayout->addWidget(m_lineEdit);
-	mLayout->addWidget(m_lnkListView);
+	mLayout->addWidget(m_lnkListView, 1);
 
 	qApp->installEventFilter(this);
 }
@@ -63,7 +65,8 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 			this->parentWidget()->hide();
 		}
 	}
-	else if (event->type() == QEvent::Show) {
+	else if (this == object && event->type() == QEvent::Show) {
+		m_lineEdit->selectAll();
 		m_lineEdit->setFocus();
 	}
 
@@ -95,4 +98,16 @@ void MainWidget::slotSearch(const QString &text)
 	LnkItemDelegate *delegate = static_cast<LnkItemDelegate*>(m_lnkListView->itemDelegate());
 	model->filter(text.trimmed());
 	m_lnkListView->setSelect(0);
+	
+	if (model->showCount() > 0) {
+		if (m_lnkListView->isHidden()) {
+			m_lnkListView->show();
+		}
+		this->parentWidget()->setFixedHeight(qMin(5, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
+	}
+	else {
+		m_lnkListView->hide();
+		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
+	}
+	
 }

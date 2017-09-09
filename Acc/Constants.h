@@ -11,6 +11,7 @@ namespace WidgetID {
 
 namespace ScanDir {
 	const QString START_MENU = QDir::homePath() + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs";
+	const QString PROGRAM_DATA = QDir::rootPath() + "/ProgramData/Microsoft/Windows/Start Menu/Programs";
 }
 
 const QSize LNK_ICON_SIZE(40, 40);

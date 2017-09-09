@@ -3,5 +3,5 @@
 #include <QObject>
 
 namespace Util {
-	QStringList getFiles(QString path);
+	QStringList getFiles(QString path, bool containsSubDir = true);
 }

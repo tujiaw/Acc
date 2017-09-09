@@ -263,4 +263,9 @@
     </Image>
     <Image Include="rc\images\Acc.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="rc\Acc.rc">
+      <Filter>rc</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

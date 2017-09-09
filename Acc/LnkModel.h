@@ -37,7 +37,10 @@ class LnkModel : public QAbstractListModel
 public:
 	LnkModel(QObject *parent);
 	~LnkModel();
+	QStringList getAllLnk() const;
 	void filter(const QString &text);
+	int totalCount() const;
+	int showCount() const;
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;

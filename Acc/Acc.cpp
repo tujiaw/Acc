@@ -38,7 +38,12 @@ void Acc::openWidget(const QString &id)
 		if (id == WidgetID::MAIN) {
 			MainWidget *content = new MainWidget(widget);
 			widget->setContent(content);
-			widget->setFixedSize(650, 350);
+
+			int width = 650;
+			widget->resize(width, content->height());
+			QRect mainRect = qApp->desktop()->screenGeometry(qApp->desktop()->primaryScreen());
+			QPoint movePoin((mainRect.width() - width) / 2, mainRect.height() / 4);
+			widget->move(movePoin);
 		}
 
 		widgets_[id] = widget;
