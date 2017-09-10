@@ -72,10 +72,24 @@ namespace Util
 
 	bool shellExecute(const QString &path)
 	{
-		HINSTANCE hinst = ShellExecute(nullptr, L"open", path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
+		HINSTANCE hinst = ::ShellExecute(nullptr, L"open", path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
 		LONG64 result = (LONG64)hinst;
 		if (result <= 32) {
 			qDebug() << "shellExecute failed, code:" << result;
+			return false;
+		}
+		return true;
+	}
+
+	bool locateFile(const QString &dir)
+	{
+		QString newDir = dir;
+		QString cmd = QString("/select, \"%1\"").arg(newDir.replace("/", "\\"));
+		qDebug() << cmd;
+		HINSTANCE hinst = ::ShellExecute(NULL, L"open", L"explorer.exe", cmd.toStdWString().c_str(), NULL, SW_SHOW);
+		LONG64 result = (LONG64)hinst;
+		if (result <= 32) {
+			qDebug() << "locateFile failed, code:" << result;
 			return false;
 		}
 		return true;
@@ -107,5 +121,11 @@ namespace Util
 			GetWindowRect(hwnd, &rect);
 			SetWindowPos(hwnd, HWND_NOTOPMOST, rect.left, rect.top, abs(rect.right - rect.left), abs(rect.bottom - rect.top), SWP_SHOWWINDOW);
 		}
+	}
+
+	QPixmap img(const QString &name)
+	{
+		QString path = ":/images/" + name;
+		return QPixmap(path);
 	}
 }

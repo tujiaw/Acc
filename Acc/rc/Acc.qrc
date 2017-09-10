@@ -5,5 +5,7 @@
         <file>images/icon_window_maximize.png</file>
         <file>images/icon_window_minimize.png</file>
         <file>images/icon_window_restore.png</file>
+        <file>images/folder_open.png</file>
+        <file>images/folder_open_hover.png</file>
     </qresource>
 </RCC>

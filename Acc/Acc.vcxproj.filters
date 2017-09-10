@@ -145,6 +145,15 @@
     <ClCompile Include="ForegroundWindowGuard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ImageButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ImageButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Acc.h">
@@ -178,6 +187,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="LnkItemDelegate.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ImageButton.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

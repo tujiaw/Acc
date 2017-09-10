@@ -1,6 +1,9 @@
 #include "LnkListView.h"
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <QDebug>
+#include <QScrollBar>
+#include "ImageButton.h"
 #include "Util.h"
 
 LnkListView::LnkListView(QWidget *parent)
@@ -10,7 +13,12 @@ LnkListView::LnkListView(QWidget *parent)
 	this->setMouseTracking(true); // 否则mouse over样式不起作用
 	this->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	connect(this, &QListView::pressed, this, &LnkListView::slotItemPressed);
+	folderOpenBtn_ = new ImageButton(this);
+	folderOpenBtn_->setImages(Util::img("folder_open"), Util::img("folder_open_hover"), Util::img("folder_open_hover"));
+	setFolderOpenBtnVisible(false);
+	connect(folderOpenBtn_, &QPushButton::clicked, this, &LnkListView::slotFolerOpen);
+	connect(this, &QListView::clicked, this, &LnkListView::slotItemClicked);
+	connect(this->verticalScrollBar(), &QScrollBar::sliderPressed, [this] { setFolderOpenBtnVisible(false); });
 }
 
 LnkListView::~LnkListView()
@@ -39,6 +47,7 @@ void LnkListView::selectPrev()
 
 void LnkListView::setSelect(int row)
 {
+	setFolderOpenBtnVisible(false);
 	QModelIndex index = this->model()->index(row, 0);
 	if (index.isValid()) {
 		this->selectionModel()->clear();
@@ -68,6 +77,21 @@ void LnkListView::openIndex(const QModelIndex &index)
 
 void LnkListView::mouseMoveEvent(QMouseEvent *e)
 {
+	QListView::mouseMoveEvent(e);
+	QModelIndex index = this->indexAt(e->pos());
+	if (index.isValid()) {
+		setFolderOpenBtnVisible(true);
+		this->selectionModel()->clear();
+		this->selectionModel()->select(index, QItemSelectionModel::Select);
+	}
+	else {
+		setFolderOpenBtnVisible(false);
+	}
+}
+
+void LnkListView::wheelEvent(QWheelEvent *e)
+{
+	QListView::wheelEvent(e);
 	QModelIndex index = this->indexAt(e->pos());
 	if (index.isValid()) {
 		this->selectionModel()->clear();
@@ -75,7 +99,45 @@ void LnkListView::mouseMoveEvent(QMouseEvent *e)
 	}
 }
 
-void LnkListView::slotItemPressed(const QModelIndex &index)
+void LnkListView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+	QListView::selectionChanged(selected, deselected);
+	QModelIndexList indexList = selected.indexes();
+	if (indexList.size() > 0 && folderOpenBtn_->property("enableVisible").toBool()) {
+		QModelIndex index = indexList[0];
+		if (index.isValid()) {
+			folderOpenBtn_->setProperty("index", index);
+			folderOpenBtn_->show();
+
+			QScrollBar *scrollbar = this->verticalScrollBar();
+			int x = this->rect().width() - 40 - (scrollbar->isVisible() ? scrollbar->width() : 0);
+			folderOpenBtn_->move(x, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
+		}
+		else {
+			folderOpenBtn_->hide();
+		}
+	}
+}
+
+void LnkListView::setFolderOpenBtnVisible(bool visible)
+{
+	folderOpenBtn_->setProperty("enableVisible", visible);
+	folderOpenBtn_->setVisible(visible);
+}
+
+void LnkListView::slotFolerOpen()
+{
+	QModelIndex index = this->sender()->property("index").toModelIndex();
+	if (index.isValid()) {
+		QString targetPath = this->model()->data(index).toMap()["targetPath"].toString();
+		QFileInfo info(targetPath);
+		if (info.exists()) {
+			Util::locateFile(targetPath);
+		}
+	}
+}
+
+void LnkListView::slotItemClicked(const QModelIndex &index)
 {
 	openIndex(index);
 }
