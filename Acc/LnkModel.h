@@ -3,7 +3,7 @@
 #include <QAbstractListModel>
 #include <QSharedDataPointer>
 #include <QPixmap>
-
+#include <QIcon>
 class LnkData : public QSharedData
 {
 public:
@@ -14,7 +14,7 @@ public:
 		QVariantMap result;
 		result["lnkName"] = lnkName;
 		result["targetPath"] = targetPath;
-		result["pixmap"] = pixmap;
+		result["icon"] = icon;
 		return result;
 	}
 
@@ -27,9 +27,9 @@ public:
 	QString lnkPath;
 	QString targetName;
 	QString targetPath;
-	QPixmap pixmap;
 	QString pinyin;
 	QString jianpin;
+	QIcon icon;
 };
 
 class LnkModel : public QAbstractListModel

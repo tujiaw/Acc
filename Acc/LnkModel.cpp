@@ -53,14 +53,13 @@ void LnkModel::load()
 
 		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->lnkName.trimmed());
 		p->pinyin = pinyin.first;
-		p->jianpin = pinyin.second;
-		p->pixmap = iconProvider.icon(QFileInfo(target)).pixmap(LNK_ICON_SIZE).scaled(LNK_ICON_SIZE);
-		if (p->pixmap.isNull()) {
-			p->pixmap = iconProvider.icon(info).pixmap(LNK_ICON_SIZE);
-			if (p->pixmap.isNull()) {
-				p->pixmap = iconProvider.icon(QFileIconProvider::File).pixmap(LNK_ICON_SIZE);
-			}
+		p->jianpin = pinyin.second; 
+
+		p->icon = iconProvider.icon(QFileInfo(target));
+		if (p->icon.isNull()) {
+			p->icon = iconProvider.icon(QFileIconProvider::File);
 		}
+
 		pdata_.append(p);
 		if (p->pinyin.isEmpty() || p->jianpin.isEmpty()) {
 			qDebug() << "hanzi2pinyin empty, text:" << p->lnkName;

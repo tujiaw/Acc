@@ -71,3 +71,17 @@ void FramelessWidget::mouseMoveEvent(QMouseEvent *event)
 	}
 	event->ignore();
 }
+
+bool FramelessWidget::nativeEvent(const QByteArray & eventType, void * message, long * result)
+{
+	const MSG *msg = static_cast<MSG*>(message);
+	if (!msg) {
+		return false;
+	}
+
+	if (msg->message == WM_LBUTTONUP) {
+		isPressed_ = false;
+	}
+	
+	return false;
+}

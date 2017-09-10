@@ -18,8 +18,6 @@ LnkItemDelegate::~LnkItemDelegate()
 
 void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-	painter->save();
-
 	int row = index.row();
 	if (option.state & QStyle::State_Selected) {
 		painter->fillRect(option.rect, option.palette.highlight());
@@ -31,22 +29,19 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	rect.setY(rect.y() + padding);
 
 	QVariantMap vm = index.data().toMap();
-	painter->drawPixmap(rect.x(), rect.y(), vm["pixmap"].value<QPixmap>());
-	
-	const int titleVSpace = 6;
-	int fontSize = painter->fontInfo().pixelSize();
+	QIcon icon = vm["icon"].value<QIcon>();
+	QRect iconRect(rect.x(), rect.y(), LNK_ICON_SIZE.width(), LNK_ICON_SIZE.height());
+	icon.paint(painter, iconRect);
 
 	rect.setX(LNK_ICON_SIZE.width() + 4 * padding);
-	rect.setY(option.rect.y() + (ROW_HEIGHT - 2 * fontSize - titleVSpace) / 2);
 	painter->drawText(rect, Qt::AlignLeft, vm["lnkName"].toString());
 
+	const int titleVSpace = 6;
+	int fontSize = painter->fontInfo().pixelSize();
 	rect.setY(rect.y() + fontSize + titleVSpace);
 	QString path = vm["targetPath"].toString();
 	path = painter->fontMetrics().elidedText(path, Qt::TextElideMode::ElideMiddle, rect.width());
 	painter->drawText(rect, Qt::AlignLeft, path);
-
-	painter->restore();
-	
 }
 
 QSize LnkItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const

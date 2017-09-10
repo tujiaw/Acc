@@ -5,6 +5,7 @@
 #include <QDebug>
 #include "hanzi2pinyin.h"
 #include <windows.h>
+#include <QWidget>
 
 namespace Util
 {
@@ -78,5 +79,33 @@ namespace Util
 			return false;
 		}
 		return true;
+	}
+
+	void setForegroundWindow(QWidget *widget)
+	{
+		if (widget) {
+			HWND hwnd = (HWND)widget->winId();
+			::SetForegroundWindow(hwnd);
+		}
+	}
+
+	void showWndTopMost(QWidget *widget)
+	{
+		if (widget) {
+			HWND hwnd = (HWND)widget->winId();
+			RECT rect;
+			GetWindowRect(hwnd, &rect);
+			SetWindowPos(hwnd, HWND_TOPMOST, rect.left, rect.top, abs(rect.right - rect.left), abs(rect.bottom - rect.top), SWP_SHOWWINDOW);
+		}
+	}
+
+	void cancelTopMost(QWidget *widget)
+	{
+		if (widget) {
+			HWND hwnd = (HWND)widget->winId();
+			RECT rect;
+			GetWindowRect(hwnd, &rect);
+			SetWindowPos(hwnd, HWND_NOTOPMOST, rect.left, rect.top, abs(rect.right - rect.left), abs(rect.bottom - rect.top), SWP_SHOWWINDOW);
+		}
 	}
 }

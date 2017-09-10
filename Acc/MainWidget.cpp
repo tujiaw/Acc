@@ -5,6 +5,7 @@
 #include "LnkItemDelegate.h"
 #include "Constants.h"
 #include <QtWidgets>
+#include "ForegroundWindowGuard.h"
 
 const int TOP_HEIGHT = 70;
 MainWidget::MainWidget(QWidget *parent)
@@ -108,6 +109,11 @@ void MainWidget::slotMainShortcut()
 		this->parentWidget()->show();
 		this->parentWidget()->activateWindow();
 		this->parentWidget()->raise();
+		if (!this->parentWidget()->isActiveWindow()) {
+			ForegroundWindowGuard guard;
+			this->parentWidget()->activateWindow();
+			this->parentWidget()->raise();
+		}
 	}
 	else {
 		this->parentWidget()->hide();

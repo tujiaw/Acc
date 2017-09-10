@@ -142,6 +142,9 @@
     <ClCompile Include="RunGuard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ForegroundWindowGuard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Acc.h">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RunGuard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ForegroundWindowGuard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
