@@ -1,11 +1,11 @@
 #include "MainWidget.h"
-#include "qxtglobalshortcut/qxtglobalshortcut.h"
-#include "LnkListView.h"
-#include "LnkModel.h"
-#include "LnkItemDelegate.h"
-#include "Constants.h"
 #include <QtWidgets>
-#include "ForegroundWindowGuard.h"
+#include "component/qxtglobalshortcut/qxtglobalshortcut.h"
+#include "LnkListView.h"
+#include "model/LnkModel.h"
+#include "LnkItemDelegate.h"
+#include "common/Util.h"
+#include "common/ForegroundWindowGuard.h"
 
 const int TOP_HEIGHT = 70;
 MainWidget::MainWidget(QWidget *parent)

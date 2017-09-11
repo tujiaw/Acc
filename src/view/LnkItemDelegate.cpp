@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QStyle>
 #include <QApplication>
-#include "Constants.h"
+#include "common/Constants.h"
 
 LnkItemDelegate::LnkItemDelegate(QObject *parent)
 	: QStyledItemDelegate(parent)

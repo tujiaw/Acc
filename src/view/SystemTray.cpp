@@ -1,6 +1,6 @@
 #include "SystemTray.h"
 #include <QtWidgets>
-#include "Acc.h"
+#include "controller/Acc.h"
 
 SystemTray::SystemTray(QWidget *parent)
 	: QSystemTrayIcon(parent)

@@ -3,8 +3,8 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QScrollBar>
-#include "ImageButton.h"
-#include "Util.h"
+#include "component/ImageButton.h"
+#include "common/Util.h"
 
 LnkListView::LnkListView(QWidget *parent)
 	: QListView(parent)

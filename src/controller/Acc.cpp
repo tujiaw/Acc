@@ -1,9 +1,9 @@
 #include "Acc.h"
 #include <QtWidgets>
-#include "FramelessWidget.h"
-#include "MainWidget.h"
+#include "component/FramelessWidget.h"
+#include "view/MainWidget.h"
 
-Acc::Acc() : QObject(nullptr)
+Acc::Acc()
 {
 
 }

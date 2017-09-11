@@ -1,10 +1,9 @@
 #include "LnkModel.h"
-#include "Util.h"
-#include "Constants.h"
 #include <QFileIconProvider>
 #include <QDebug>
 #include <QStandardPaths>
 #include <QImageReader>
+#include "common/Util.h"
 
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)

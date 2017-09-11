@@ -3,3 +3,9 @@
 /Acc/GeneratedFiles
 /Acc/x64
 /Acc/Release
+/src/Acc.vcxproj.user
+/src/Acc.sdf
+/src/Acc.vcxproj.filters
+/src/GeneratedFiles
+/build
+/Acc.v12.suo

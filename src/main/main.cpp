@@ -1,8 +1,7 @@
-#include "Acc.h"
 #include <QtWidgets/QApplication>
-#include "DarkStyle.h"
-#include "FramelessWidget.h"
-#include "RunGuard.h"
+#include "controller/Acc.h"
+#include "common/DarkStyle.h"
+#include "common/RunGuard.h"
 
 int main(int argc, char *argv[])
 {
