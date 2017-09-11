@@ -11,6 +11,13 @@ public:
 	SettingWidget(QWidget *parent = Q_NULLPTR);
 	~SettingWidget();
 
+private slots:
+	void slotFirst();
+	void slotSecond();
+
+protected:
+	void keyPressEvent(QKeyEvent *e);
+
 private:
 	Ui::SettingWidget ui;
 };

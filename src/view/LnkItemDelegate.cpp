@@ -18,6 +18,7 @@ LnkItemDelegate::~LnkItemDelegate()
 
 void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+	painter->save();
 	int row = index.row();
 	if (option.state & QStyle::State_Selected) {
 		painter->fillRect(option.rect, option.palette.highlight());
@@ -33,15 +34,21 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	QRect iconRect(rect.x(), rect.y(), LNK_ICON_SIZE.width(), LNK_ICON_SIZE.height());
 	icon.paint(painter, iconRect);
 
+	QFont font = painter->font();
+	font.setPixelSize(16);
+	painter->setFont(font);
 	rect.setX(LNK_ICON_SIZE.width() + 4 * padding);
 	painter->drawText(rect, Qt::AlignLeft, vm["lnkName"].toString());
 
-	const int titleVSpace = 6;
-	int fontSize = painter->fontInfo().pixelSize();
-	rect.setY(rect.y() + fontSize + titleVSpace);
+	const int titleVSpace = 4;
+	rect.setY(rect.y() + font.pixelSize() + titleVSpace);
+	font.setPixelSize(14);
+	painter->setPen(QColor("#eee"));
+	painter->setFont(font);
 	QString path = vm["targetPath"].toString();
 	path = painter->fontMetrics().elidedText(path, Qt::TextElideMode::ElideMiddle, rect.width());
 	painter->drawText(rect, Qt::AlignLeft, path);
+	painter->restore();
 }
 
 QSize LnkItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const

@@ -17,7 +17,7 @@ MainWidget::MainWidget(QWidget *parent)
 	tray_->show();
 
 	m_searchTimer = new QTimer(this);
-	m_searchTimer->setInterval(300);
+	m_searchTimer->setInterval(200);
 	connect(m_searchTimer, &QTimer::timeout, this, &MainWidget::slotSearchTimer);
 
 	QList<QKeySequence> keyList;

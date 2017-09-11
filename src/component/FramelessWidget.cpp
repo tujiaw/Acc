@@ -6,6 +6,7 @@ FramelessWidget::FramelessWidget(QWidget *parent)
 {
 	setMouseTracking(true);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
+	setAttribute(Qt::WA_DeleteOnClose, true);
 	//setAttribute(Qt::WA_NoSystemBackground, true);
 
 	title_ = new QWidget(this);
@@ -14,7 +15,7 @@ FramelessWidget::FramelessWidget(QWidget *parent)
 	mLayout->setContentsMargins(0, 0, 0, 0);
 	mLayout->setSpacing(0);
 	mLayout->addWidget(title_);
-	mLayout->addWidget(content_);
+	mLayout->addWidget(content_, 1);
 	this->setObjectName("FramelessWidget");
 }
 

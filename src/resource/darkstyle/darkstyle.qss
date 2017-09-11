@@ -1,5 +1,5 @@
 *{
-    font-size:15px;
+    font-size:12px;
     font-family:"Microsoft YaHei";
 }
 
@@ -64,19 +64,19 @@ QMenu::indicator{
   height:18px;
 }
 QMenu::indicator:non-exclusive:checked{
-  image:url(:/darkstyle/icon_checkbox_checked.png);
+  image:url(:/images/icon_checkbox_checked.png);
   padding-left:2px;
 }
 QMenu::indicator:non-exclusive:unchecked{
-  image:url(:/darkstyle/icon_checkbox_unchecked.png);
+  image:url(:/images/icon_checkbox_unchecked.png);
   padding-left:2px;
 }
 QMenu::indicator:exclusive:checked{
-  image:url(:/darkstyle/icon_radiobutton_checked.png);
+  image:url(:/images/icon_radiobutton_checked.png);
   padding-left:2px;
 }
 QMenu::indicator:exclusive:unchecked{
-  image:url(:/darkstyle/icon_radiobutton_unchecked.png);
+  image:url(:/images/icon_radiobutton_unchecked.png);
   padding-left:2px;
 }
 QToolBar::top{
@@ -116,8 +116,8 @@ QDockWidget::title{
   border-bottom:2px solid rgba(25,25,25,75);
 }
 QDockWidget{
-  titlebar-close-icon:url(:/darkstyle/icon_window_close.png);
-  titlebar-normal-icon:url(:/darkstyle/icon_window_restore.png);
+  titlebar-close-icon:url(:/images/icon_window_close.png);
+  titlebar-normal-icon:url(:/images/icon_window_restore.png);
 }
 QDockWidget::close-button,QDockWidget::float-button{
   subcontrol-position:top right;
@@ -351,4 +351,12 @@ QLineEdit#SearchLineEdit {
   border: 0px;
 }
 
+QPushButton#closeButton {
+	border-image:url(:/images/icon_window_close.png);
+	width: 24px;
+	height: 24px;
+}
+QPushButton#closeButton:hover {
+	background:palette(highlight);
+}
 
