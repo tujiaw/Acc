@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{cb5cb866-c1b0-407f-a96a-e6bf384f087f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="component">
+      <UniqueIdentifier>{ecfd8d82-12e6-441c-9cb6-46f4b83a7db6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="controller">
+      <UniqueIdentifier>{af301c07-f279-4334-83c5-ac178d6f4fd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{af4358bd-edf7-4abd-89ba-9b4fc4de6cf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="model">
+      <UniqueIdentifier>{d18b5d7f-52ba-403d-923b-60b4552547a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="view">
+      <UniqueIdentifier>{28b09e26-ac6b-46e1-8770-a553110baeed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{a070b2cc-4a96-4910-95b7-f099025cba7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{f517eacf-1d34-4651-a155-dd1223bdf39e}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{3e8703d8-efd6-475c-a6f6-aad6fc7e9a56}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="component\qxtglobalshortcut">
+      <UniqueIdentifier>{131f2ad1-cb54-4ab4-b199-7cee2493bdaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="rc\images\Acc.ico" />
+    <Image Include="resource\images\Acc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\icon_window_close.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\icon_window_maximize.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\icon_window_minimize.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\icon_window_restore.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\folder_open.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\images\folder_open_hover.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_close.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_undock.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_branch_closed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_branch_end.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_branch_more.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_branch_open.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_vline.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_checked.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_indeterminate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_unchecked.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_checked_pressed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_indeterminate_pressed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_unchecked_pressed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_checked_disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_indeterminate_disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_checkbox_unchecked_disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_checked.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_unchecked.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_checked_pressed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_unchecked_pressed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_checked_disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resource\darkstyle\icon_radiobutton_unchecked_disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common\Constants.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\DarkStyle.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\ForegroundWindowGuard.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\hanzi2pinyin.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\RunGuard.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Util.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="component\qxtglobalshortcut\qxtglobal.h">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </ClInclude>
+    <ClInclude Include="component\qxtglobalshortcut\qxtglobalshortcut_p.h">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="common\ForegroundWindowGuard.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\hanzi2pinyin.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\RunGuard.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Util.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="component\FramelessWidget.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_FramelessWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_FramelessWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="component\ImageButton.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ImageButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ImageButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="component\qxtglobalshortcut\qxtglobal.cpp">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </ClCompile>
+    <ClCompile Include="component\qxtglobalshortcut\qxtglobalshortcut.cpp">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qxtglobalshortcut.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qxtglobalshortcut.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="component\qxtglobalshortcut\qxtglobalshortcut_win.cpp">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </ClCompile>
+    <ClCompile Include="controller\Acc.cpp">
+      <Filter>controller</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Acc.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Acc.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="main\main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="model\LnkModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LnkModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LnkModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_Acc.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_darkstyle.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view\LnkItemDelegate.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LnkItemDelegate.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LnkItemDelegate.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\LnkListView.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LnkListView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LnkListView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\MainWidget.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MainWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MainWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\SystemTray.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SystemTray.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SystemTray.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="component\FramelessWidget.h">
+      <Filter>component</Filter>
+    </CustomBuild>
+    <CustomBuild Include="component\ImageButton.h">
+      <Filter>component</Filter>
+    </CustomBuild>
+    <CustomBuild Include="component\qxtglobalshortcut\qxtglobalshortcut.h">
+      <Filter>component\qxtglobalshortcut</Filter>
+    </CustomBuild>
+    <CustomBuild Include="controller\Acc.h">
+      <Filter>controller</Filter>
+    </CustomBuild>
+    <CustomBuild Include="model\LnkModel.h">
+      <Filter>model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="resource\Acc.qrc">
+      <Filter>resource</Filter>
+    </CustomBuild>
+    <CustomBuild Include="resource\darkstyle.qrc">
+      <Filter>resource</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\LnkItemDelegate.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\LnkListView.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\MainWidget.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\SystemTray.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource\Acc.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resource\darkstyle\darkstyle.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
