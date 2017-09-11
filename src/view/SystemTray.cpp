@@ -25,7 +25,7 @@ void SystemTray::slotTriggered(QAction *action)
 	if (text == tr("Open")) {
 		Acc::instance()->openWidget(WidgetID::MAIN);
 	} else if (text == tr("Setting")) {
-		emit sigSetting();
+		Acc::instance()->openWidget(WidgetID::SETTING);
 	}
 	else if (text == tr("Reload")) {
 		emit sigReload();

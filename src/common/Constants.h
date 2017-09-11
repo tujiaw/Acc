@@ -7,6 +7,7 @@
 
 namespace WidgetID {
 	const QString MAIN = "MAIN";
+	const QString SETTING = "SETTING";
 }
 
 namespace ScanDir {

@@ -1,11 +1,12 @@
 #include "Acc.h"
 #include <QtWidgets>
+#include "component/TitleWidget.h"
 #include "component/FramelessWidget.h"
 #include "view/MainWidget.h"
+#include "view/SettingWidget.h"
 
 Acc::Acc()
 {
-
 }
 
 Acc::~Acc()
@@ -44,6 +45,12 @@ void Acc::openWidget(const QString &id)
 			QRect mainRect = qApp->desktop()->screenGeometry(qApp->desktop()->primaryScreen());
 			QPoint movePoin((mainRect.width() - width) / 2, mainRect.height() / 4);
 			widget->move(movePoin);
+		} else if (id == WidgetID::SETTING) {
+			TitleWidget *title = new TitleWidget(widget);
+			SettingWidget *content = new SettingWidget(widget);
+			widget->setTitle(title);
+			widget->setContent(content);
+			widget->resize(600, 450);
 		}
 
 		widgets_[id] = widget;

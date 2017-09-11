@@ -8,10 +8,12 @@ FramelessWidget::FramelessWidget(QWidget *parent)
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
 	//setAttribute(Qt::WA_NoSystemBackground, true);
 
+	title_ = new QWidget(this);
 	content_ = new QWidget(this);
 	QVBoxLayout *mLayout = new QVBoxLayout(this);
 	mLayout->setContentsMargins(0, 0, 0, 0);
 	mLayout->setSpacing(0);
+	mLayout->addWidget(title_);
 	mLayout->addWidget(content_);
 	this->setObjectName("FramelessWidget");
 }
@@ -19,6 +21,13 @@ FramelessWidget::FramelessWidget(QWidget *parent)
 FramelessWidget::~FramelessWidget()
 {
 
+}
+
+void FramelessWidget::setTitle(QWidget *title)
+{
+	this->layout()->replaceWidget(title_, title);
+	title_->deleteLater();
+	title_ = title;
 }
 
 void FramelessWidget::setContent(QWidget *content)

@@ -12,7 +12,6 @@ public:
 	~SystemTray();
 
 signals:
-	void sigSetting();
 	void sigReload();
 
 private slots:

@@ -12,10 +12,13 @@ MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
 	tray_ = new SystemTray(this);
-	connect(tray_, &SystemTray::sigSetting, this, &MainWidget::slotSetting);
 	connect(tray_, &SystemTray::sigReload, this, &MainWidget::slotReload);
 	connect(tray_, &QSystemTrayIcon::activated, this, &MainWidget::slotTrayActivated);
 	tray_->show();
+
+	m_searchTimer = new QTimer(this);
+	m_searchTimer->setInterval(300);
+	connect(m_searchTimer, &QTimer::timeout, this, &MainWidget::slotSearchTimer);
 
 	QList<QKeySequence> keyList;
 	keyList.append(QKeySequence(Qt::ALT + Qt::Key_Space));
@@ -35,7 +38,7 @@ MainWidget::MainWidget(QWidget *parent)
 
 	m_lineEdit = new QLineEdit(this);
 	m_lineEdit->setObjectName("SearchLineEdit");
-	connect(m_lineEdit, &QLineEdit::textChanged, this, &MainWidget::slotSearch);
+	connect(m_lineEdit, &QLineEdit::textChanged, [this] { m_searchTimer->stop();  m_searchTimer->start(); });
 
 	m_lnkListView = new LnkListView(this);
 	m_lnkListView->setModel(new LnkModel(this));
@@ -85,11 +88,6 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 	return false;
 }
 
-void MainWidget::slotSetting()
-{
-
-}
-
 void MainWidget::slotReload()
 {
 	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
@@ -120,22 +118,22 @@ void MainWidget::slotMainShortcut()
 	}
 }
 
-void MainWidget::slotSearch(const QString &text)
+void MainWidget::slotSearchTimer()
 {
+	m_searchTimer->stop();
+	QString text = m_lineEdit->text().trimmed();
 	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
 	LnkItemDelegate *delegate = static_cast<LnkItemDelegate*>(m_lnkListView->itemDelegate());
 	model->filter(text.trimmed());
 	m_lnkListView->setSelect(0);
-	
+
 	if (model->showCount() > 0) {
 		if (m_lnkListView->isHidden()) {
 			m_lnkListView->show();
 		}
 		this->parentWidget()->setFixedHeight(qMin(5, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
-	}
-	else {
+	} else {
 		m_lnkListView->hide();
 		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
 	}
-	
 }

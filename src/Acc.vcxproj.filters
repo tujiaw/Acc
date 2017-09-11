@@ -50,6 +50,11 @@
       <Extensions>qrc;*</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="rc\images\Acc.ico" />
@@ -166,6 +171,9 @@
     <ClInclude Include="component\qxtglobalshortcut\qxtglobalshortcut_p.h">
       <Filter>component\qxtglobalshortcut</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_SettingWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
@@ -276,6 +284,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_SystemTray.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SettingWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SettingWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\SettingWidget.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="component\TitleWidget.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TitleWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TitleWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -310,6 +336,15 @@
     </CustomBuild>
     <CustomBuild Include="view\SystemTray.h">
       <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\SettingWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\SettingWidget.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="component\TitleWidget.h">
+      <Filter>component</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

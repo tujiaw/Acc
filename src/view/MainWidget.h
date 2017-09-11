@@ -18,15 +18,15 @@ protected:
 	bool eventFilter(QObject *, QEvent *);
 
 private slots:
-	void slotSetting();
 	void slotReload();
 	void slotTrayActivated(QSystemTrayIcon::ActivationReason reason);
 	void slotMainShortcut();
-	void slotSearch(const QString &text);
+	void slotSearchTimer();
 
 private:
 	SystemTray *tray_;
 	QxtGlobalShortcut *mainShortcut_;
 	QLineEdit *m_lineEdit;
 	LnkListView *m_lnkListView;
+	QTimer *m_searchTimer;
 };

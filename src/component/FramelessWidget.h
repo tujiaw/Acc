@@ -9,6 +9,7 @@ class FramelessWidget : public QFrame
 public:
 	FramelessWidget(QWidget *parent = Q_NULLPTR);
 	~FramelessWidget();
+	void setTitle(QWidget *title);
 	void setContent(QWidget *content);
 
 protected:
@@ -21,5 +22,6 @@ protected:
 private:
 	QPoint movePoint_;
 	bool isPressed_;
+	QWidget *title_;
 	QWidget *content_;
 };
