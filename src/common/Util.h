@@ -17,4 +17,5 @@ namespace Util {
 	QString getRunDir();
 	QString getConfigDir();
 	QString getConfigPath();
+	QString getSystemDir(int csidl);
 }
