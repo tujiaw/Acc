@@ -6,6 +6,7 @@
 #include "hanzi2pinyin.h"
 #include <windows.h>
 #include <QWidget>
+#include <QApplication>
 
 namespace Util
 {
@@ -127,5 +128,24 @@ namespace Util
 	{
 		QString path = ":/images/" + name;
 		return QPixmap(path);
+	}
+
+	QString getRunDir()
+	{
+		return QApplication::applicationDirPath();
+	}
+
+	QString getConfigDir()
+	{
+		QDir configDir(getRunDir() + "/config");
+		if (!configDir.exists()) {
+			configDir.mkdir("config");
+		}
+		return configDir.absolutePath();
+	}
+
+	QString getConfigPath()
+	{
+		return getConfigDir() + "/base.ini";
 	}
 }

@@ -6,14 +6,14 @@
 #include "view/SettingWidget.h"
 
 Acc::Acc()
+	: lnkModel_(nullptr)
+	, settingModel_(nullptr)
 {
 }
 
 Acc::~Acc()
 {
-	for (auto iter = widgets_.begin(); iter != widgets_.end(); ++iter) {
-		(*iter)->close();
-	}
+	destory();
 }
 
 Acc* Acc::instance()
@@ -24,13 +24,20 @@ Acc* Acc::instance()
 
 void Acc::destory()
 {
-	QMapIterator<QString, QWidget*> i(widgets_);
-	while (i.hasNext()) {
-		i.next();
-		QWidget *widget = i.value();
-		delete widget;
+	for (auto iter = widgets_.begin(); iter != widgets_.end(); ++iter) {
+		(*iter)->close();
 	}
 	widgets_.clear();
+
+	if (lnkModel_) {
+		lnkModel_->deleteLater();
+		lnkModel_ = nullptr;
+	}
+	
+	if (settingModel_) {
+		settingModel_->deleteLater();
+		settingModel_ = nullptr;
+	}
 }
 
 void Acc::openWidget(const QString &id)
@@ -69,4 +76,20 @@ void Acc::closeWidget(const QString &id)
 		widgets_[id]->close();
 		widgets_.remove(id);
 	}
+}
+
+LnkModel* Acc::getLnkModel()
+{
+	if (!lnkModel_) {
+		lnkModel_ = new LnkModel(this);
+	}
+	return lnkModel_;
+}
+
+SettingModel* Acc::getSettingModel()
+{
+	if (!settingModel_) {
+		settingModel_ = new SettingModel(this);
+	}
+	return settingModel_;
 }

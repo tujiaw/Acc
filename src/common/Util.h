@@ -5,7 +5,6 @@
 
 class QWidget;
 namespace Util {
-
 	QStringList getFiles(QString path, bool containsSubDir = true);
 	QString getPinyin(const QString &text);
 	QPair<QString, QString> getPinyinAndJianpin(const QString &text);
@@ -15,4 +14,7 @@ namespace Util {
 	void showWndTopMost(QWidget *widget);
 	void cancelTopMost(QWidget *widget);
 	QPixmap img(const QString &name);
+	QString getRunDir();
+	QString getConfigDir();
+	QString getConfigPath();
 }

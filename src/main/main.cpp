@@ -3,6 +3,12 @@
 #include "common/DarkStyle.h"
 #include "common/RunGuard.h"
 
+bool isDoubleEqual(double d1, double d2, double EPSINON = 0.000001)
+{
+	return abs(d1 - d2) < EPSINON;
+}
+
+
 int main(int argc, char *argv[])
 {
 	RunGuard guard("69619FA7-4944-4CCA-BF69-83323F34D32F");

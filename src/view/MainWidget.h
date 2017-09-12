@@ -21,6 +21,7 @@ private slots:
 	void slotReload();
 	void slotTrayActivated(QSystemTrayIcon::ActivationReason reason);
 	void slotMainShortcut();
+	void slotMainShortcutChanged(const QString &textKey);
 	void slotSearchTimer();
 
 private:

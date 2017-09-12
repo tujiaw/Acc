@@ -302,6 +302,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TitleWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="model\SettingModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SettingModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SettingModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -345,6 +354,9 @@
     </CustomBuild>
     <CustomBuild Include="component\TitleWidget.h">
       <Filter>component</Filter>
+    </CustomBuild>
+    <CustomBuild Include="model\SettingModel.h">
+      <Filter>model</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

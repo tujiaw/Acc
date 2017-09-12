@@ -12,8 +12,7 @@ public:
 	~SettingWidget();
 
 private slots:
-	void slotFirst();
-	void slotSecond();
+	void slotHotkeyConfirm();
 
 protected:
 	void keyPressEvent(QKeyEvent *e);

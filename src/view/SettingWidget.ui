@@ -64,28 +64,15 @@
         <rect>
          <x>20</x>
          <y>20</y>
-         <width>91</width>
+         <width>61</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>First Hot Key</string>
+        <string>Hot Key</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>50</y>
-         <width>101</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Second Hot Key</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="leFirst">
+      <widget class="QLineEdit" name="leHotkey">
        <property name="geometry">
         <rect>
          <x>130</x>
@@ -95,64 +82,29 @@
         </rect>
        </property>
        <property name="text">
-        <string>Ctrl + Space</string>
+        <string>Ctrl+Space</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
        <property name="readOnly">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="placeholderText">
         <string>Press the new shortcut key</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="leSecond">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>50</y>
-         <width>171</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Alt + Space</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="placeholderText">
-        <string>Press the new shortcut key</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbFirst">
+      <widget class="QPushButton" name="pbHotkeyConfirm">
        <property name="geometry">
         <rect>
          <x>320</x>
          <y>20</y>
-         <width>41</width>
+         <width>71</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string>Edit</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbSecond">
-       <property name="geometry">
-        <rect>
-         <x>320</x>
-         <y>50</y>
-         <width>41</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Edit</string>
+        <string>confirm</string>
        </property>
       </widget>
      </widget>

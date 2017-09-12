@@ -6,6 +6,7 @@
 #include "LnkItemDelegate.h"
 #include "common/Util.h"
 #include "common/ForegroundWindowGuard.h"
+#include "controller/Acc.h"
 
 const int TOP_HEIGHT = 70;
 MainWidget::MainWidget(QWidget *parent)
@@ -20,15 +21,19 @@ MainWidget::MainWidget(QWidget *parent)
 	m_searchTimer->setInterval(200);
 	connect(m_searchTimer, &QTimer::timeout, this, &MainWidget::slotSearchTimer);
 
-	QList<QKeySequence> keyList;
-	keyList.append(QKeySequence(Qt::ALT + Qt::Key_Space));
-	keyList.append(QKeySequence(Qt::CTRL + Qt::Key_Space));
-	keyList.append(QKeySequence(Qt::SHIFT + Qt::Key_Space));
 	mainShortcut_ = new QxtGlobalShortcut(this);
 	connect(mainShortcut_, &QxtGlobalShortcut::activated, this, &MainWidget::slotMainShortcut);
-	for (auto iter = keyList.begin(); iter != keyList.end(); ++iter) {
-		if (mainShortcut_->setShortcut(*iter)) {
-			break;
+	connect(Acc::instance(), &Acc::sigSetMainShortcut, this, &MainWidget::slotMainShortcutChanged);
+
+	// 从配置文件获取热键，如果不存在或注册失败则依次使用默认热键
+	QString mainShortcutText = Acc::instance()->getSettingModel()->mainShortcutText();
+	if (mainShortcutText.isEmpty() || !mainShortcut_->setShortcut(QKeySequence(mainShortcutText))) {
+		QStringList keyList = QStringList() << "Alt+Space" << "Ctrl+Space" << "Shift+Space";
+		for (auto iter = keyList.begin(); iter != keyList.end(); ++iter) {
+			if (mainShortcut_->setShortcut(QKeySequence(*iter))) {
+				Acc::instance()->getSettingModel()->setMainShortcutText(*iter);
+				break;
+			}
 		}
 	}
 
@@ -41,7 +46,7 @@ MainWidget::MainWidget(QWidget *parent)
 	connect(m_lineEdit, &QLineEdit::textChanged, [this] { m_searchTimer->stop();  m_searchTimer->start(); });
 
 	m_lnkListView = new LnkListView(this);
-	m_lnkListView->setModel(new LnkModel(this));
+	m_lnkListView->setModel(Acc::instance()->getLnkModel());
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
 	m_lnkListView->hide();
 
@@ -115,6 +120,18 @@ void MainWidget::slotMainShortcut()
 	}
 	else {
 		this->parentWidget()->hide();
+	}
+}
+
+void MainWidget::slotMainShortcutChanged(const QString &textKey)
+{
+	QKeySequence newKey(textKey);
+	QKeySequence oldKey = mainShortcut_->shortcut();
+	if (!mainShortcut_->setShortcut(newKey)) {
+		QMessageBox::warning(nullptr, tr("Warning"), tr("Set main shortcut failed!"));
+		mainShortcut_->setShortcut(oldKey);
+	} else {
+		Acc::instance()->getSettingModel()->setMainShortcutText(textKey);
 	}
 }
 
