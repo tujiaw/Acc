@@ -14,31 +14,19 @@
 #ifndef _CDarkStyle_HPP
 #define _CDarkStyle_HPP
 
-/* INCLUDE FILES **************************************************************/
 #include <QtCore>
 #include <QtGui>
 #include <QStyleFactory>
 
-/* CLASS DECLARATION **********************************************************/
-/** CMainWindow class is a simple singleton to adjust style/palette/stylesheets
-*******************************************************************************/
 class CDarkStyle
 {
-	// PUBLIC MEMBERS *************************************************************
-	// PROTECTED MEMBERS **********************************************************
-	// PRIVATE MEMBERS ************************************************************
-	// CONSTRUCTOR/DESTRUCTOR *****************************************************
-	// PUBLIC METHODS *************************************************************
 public:
 	static void assign()
 	{
 		// set style
 		qApp->setStyle(QStyleFactory::create("Fusion"));
-		// increase font size for better reading
-		QFont defaultFont = QApplication::font();
-		static int fontSize = defaultFont.pointSize() + 2;
-		defaultFont.setPointSize(fontSize);
-		qApp->setFont(defaultFont);
+		// set font
+		setFontFamily();
 		// modify palette to dark
 		QPalette darkPalette;
 		darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -74,19 +62,18 @@ public:
 		}
 	}
 
-	static void setFontFamily(const QString &fontFamily)
+	static void setFontFamily(const QString &fontFamily = "", bool isBold = false)
 	{
 		QFont defaultFont = QApplication::font();
-		defaultFont.setFamily(fontFamily);
+		static int fontSize = defaultFont.pointSize() + 2;
+		if (!fontFamily.isEmpty()) {
+			defaultFont.setFamily(fontFamily);
+		}
+		defaultFont.setBold(isBold);
+		defaultFont.setPointSize(fontSize);
 		qApp->setFont(defaultFont);
 	}
-
-	// PROTECTED METHODS **********************************************************
-	// PRIVATE METHODS ************************************************************
 };
 
 #endif  // _CDarkStyle_HPP
 
-//*****************************************************************************
-// END OF FILE
-//*****************************************************************************
