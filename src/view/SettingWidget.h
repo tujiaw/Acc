@@ -10,6 +10,7 @@ class SettingWidget : public QWidget
 public:
 	SettingWidget(QWidget *parent = Q_NULLPTR);
 	~SettingWidget();
+	void init();
 
 private slots:
 	void slotMaxResultChanged(const QString &text);

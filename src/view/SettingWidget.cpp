@@ -16,7 +16,7 @@ SettingWidget::SettingWidget(QWidget *parent)
 	for (int i = 3; i < 10; i++) {
 		ui.cbMaxResult->addItem(QString::number(i));
 	}
-	ui.cbMaxResult->setCurrentText(QString::number(Acc::instance()->getSettingModel()->maxResult()));
+	
 	connect(ui.cbMaxResult, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotMaxResultChanged(QString)));
 	connect(ui.pbHotkeyConfirm, &QPushButton::clicked, this, &SettingWidget::slotHotkeyConfirm);
 	connect(ui.cbAutoStart, &QCheckBox::stateChanged, this, &SettingWidget::slotAutoStartChanged);
@@ -27,18 +27,23 @@ SettingWidget::SettingWidget(QWidget *parent)
 	for (int i = 0; i < menuList.size(); i++) {
 		ui.listWidget->addItem(menuList[i]);
 	}
-	ui.listWidget->setCurrentRow(0);
 
-	SettingModel *settingModel = Acc::instance()->getSettingModel();
-	ui.leHotkey->setText(settingModel->mainShortcutText());
-	ui.cbAutoStart->setChecked(settingModel->autoStart());
-
-	ui.hsOpacity->setValue(ui.hsOpacity->maximum() - settingModel->mainOpacity());
-	ui.fcbFont->setCurrentText(Acc::instance()->getSettingModel()->fontFamily());
+	init();
 }
 
 SettingWidget::~SettingWidget()
 {
+}
+
+void SettingWidget::init()
+{
+	ui.listWidget->setCurrentRow(0);
+	SettingModel *settingModel = Acc::instance()->getSettingModel();
+	ui.cbMaxResult->setCurrentText(QString::number(settingModel->maxResult()));
+	ui.leHotkey->setText(settingModel->mainShortcutText());
+	ui.cbAutoStart->setChecked(settingModel->autoStart());
+	ui.hsOpacity->setValue(ui.hsOpacity->maximum() - settingModel->mainOpacity());
+	ui.fcbFont->setCurrentText(Acc::instance()->getSettingModel()->fontFamily());
 }
 
 void SettingWidget::slotMaxResultChanged(const QString &text)

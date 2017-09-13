@@ -68,7 +68,6 @@ void Acc::openWidget(const QString &id)
 			SettingWidget *content = new SettingWidget(widget);
 			widget->setTitle(title);
 			widget->setContent(content);
-			widget->resize(600, 450);
 		}
 
 		widgets_[id] = widget;
