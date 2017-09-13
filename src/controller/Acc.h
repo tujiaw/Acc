@@ -17,6 +17,7 @@ public:
 	void openWidget(const QString &id);
 	void closeWidget(const QString &id);
 	void hideWidget(const QString &id);
+	QWidget* getContentWidget(const QString &id);
 
 	LnkModel* getLnkModel();
 	SettingModel* getSettingModel();
@@ -24,6 +25,7 @@ public:
 
 signals:
 	void sigSetMainShortcut(const QString &textKey);
+	void sigClearResult();
 
 private:
 	Acc();

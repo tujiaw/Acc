@@ -12,6 +12,7 @@ public:
 	~SettingWidget();
 
 private slots:
+	void slotMaxResultChanged(const QString &text);
 	void slotHotkeyConfirm();
 	void slotAutoStartChanged(int state);
 

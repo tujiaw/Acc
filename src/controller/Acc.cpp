@@ -114,3 +114,12 @@ HitsModel* Acc::getHitsModel()
 	}
 	return hitsModel_;
 }
+
+QWidget* Acc::getContentWidget(const QString &id)
+{
+	QWidget *result = nullptr;
+	if (widgets_.contains(id)) {
+		result = widgets_[id];
+	}
+	return result;
+}

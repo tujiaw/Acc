@@ -16,6 +16,10 @@ public:
 	void setAutoStart(bool isAutoStart);
 	bool autoStart() const;
 
+	void setMaxResult(int count);
+	int maxResult() const;
+
 private:
 	QSettings settings_;
+	int maxResult_;
 };
