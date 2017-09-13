@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 #include <QImageReader>
 #include "common/Util.h"
+#include "controller/Acc.h"
 
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
@@ -125,6 +126,12 @@ void LnkModel::filter(const QString &text)
 				pfilterdata_.append(*iter);
 			}
 		}
+		qSort(pfilterdata_.begin(), pfilterdata_.end(), 
+			[](const QSharedDataPointer<LnkData> &left, const QSharedDataPointer<LnkData> &right) -> bool {
+			int leftHits = Acc::instance()->getHitsModel()->hits(left->lnkName, left->targetPath);
+			int rightHits = Acc::instance()->getHitsModel()->hits(right->lnkName, right->targetPath);
+			return leftHits > rightHits;
+		});
 	}
 	int count = pfilterdata_.size();
 	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));

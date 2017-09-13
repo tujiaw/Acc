@@ -5,6 +5,7 @@
 #include "common/Constants.h"
 #include "model/LnkModel.h"
 #include "model/SettingModel.h"
+#include "model/HitsModel.h"
 
 class Acc : public QObject
 {
@@ -18,6 +19,7 @@ public:
 
 	LnkModel* getLnkModel();
 	SettingModel* getSettingModel();
+	HitsModel* getHitsModel();
 
 signals:
 	void sigSetMainShortcut(const QString &textKey);
@@ -30,4 +32,5 @@ private:
 	QMap<QString, QWidget*> widgets_;
 	LnkModel *lnkModel_;
 	SettingModel *settingModel_;
+	HitsModel *hitsModel_;
 };

@@ -7,6 +7,9 @@
 #include <windows.h>
 #include <QWidget>
 #include <QApplication>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 #include <ShlObj.h>
 #pragma comment(lib, "Shell32.lib")
@@ -181,5 +184,47 @@ namespace Util
 			pShellMalloc->Release();
 		}
 		return QString::fromStdWString(szDir);
+	}
+
+	QVariantMap json2map(const QByteArray &val)
+	{
+		QJsonParseError jError;
+		QJsonDocument jDoc = QJsonDocument::fromJson(val, &jError);
+		if (jError.error == QJsonParseError::NoError) {
+			if (jDoc.isObject()) {
+				QJsonObject jObj = jDoc.object();
+				return jObj.toVariantMap();
+			}
+		}
+		QVariantMap ret;
+		return ret;
+	}
+
+	QString map2json(const QVariantMap &val)
+	{
+		QJsonObject jobj = QJsonObject::fromVariantMap(val);
+		QJsonDocument jdoc(jobj);
+		return QString(jdoc.toJson(QJsonDocument::Indented));
+	}
+
+	QVariantList json2list(const QByteArray &val)
+	{
+		QJsonParseError jError;
+		QJsonDocument jDoc = QJsonDocument::fromJson(val, &jError);
+		if (jError.error == QJsonParseError::NoError) {
+			if (jDoc.isArray()) {
+				QJsonArray jArr = jDoc.array();
+				return jArr.toVariantList();
+			}
+		}
+		QVariantList ret;
+		return ret;
+	}
+
+	QString list2json(const QVariantList &val)
+	{
+		QJsonArray jArr = QJsonArray::fromVariantList(val);
+		QJsonDocument jDoc(jArr);
+		return QString(jDoc.toJson(QJsonDocument::Indented));
 	}
 }

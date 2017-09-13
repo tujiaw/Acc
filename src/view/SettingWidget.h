@@ -13,6 +13,7 @@ public:
 
 private slots:
 	void slotHotkeyConfirm();
+	void slotAutoStartChanged(int state);
 
 protected:
 	void keyPressEvent(QKeyEvent *e);

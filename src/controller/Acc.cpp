@@ -8,6 +8,7 @@
 Acc::Acc()
 	: lnkModel_(nullptr)
 	, settingModel_(nullptr)
+	, hitsModel_(nullptr)
 {
 }
 
@@ -37,6 +38,11 @@ void Acc::destory()
 	if (settingModel_) {
 		settingModel_->deleteLater();
 		settingModel_ = nullptr;
+	}
+
+	if (hitsModel_) {
+		hitsModel_->deleteLater();
+		hitsModel_ = nullptr;
 	}
 }
 
@@ -92,4 +98,12 @@ SettingModel* Acc::getSettingModel()
 		settingModel_ = new SettingModel(this);
 	}
 	return settingModel_;
+}
+
+HitsModel* Acc::getHitsModel()
+{
+	if (!hitsModel_) {
+		hitsModel_ = new HitsModel(this);
+	}
+	return hitsModel_;
 }
