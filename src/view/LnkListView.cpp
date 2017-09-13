@@ -69,6 +69,7 @@ void LnkListView::openIndex(const QModelIndex &index)
 		return;
 	}
 
+	Acc::instance()->hideWidget(WidgetID::MAIN);
 	QVariantMap vm = this->model()->data(index).toMap();
 	QString path = vm["targetPath"].toString();
 	if (!path.isEmpty() && Util::shellExecute(path)) {

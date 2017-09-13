@@ -16,6 +16,7 @@ public:
 	void destory();
 	void openWidget(const QString &id);
 	void closeWidget(const QString &id);
+	void hideWidget(const QString &id);
 
 	LnkModel* getLnkModel();
 	SettingModel* getSettingModel();

@@ -43,10 +43,22 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="currentRow">
+      <number>-1</number>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -55,8 +67,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>475</width>
-        <height>380</height>
+        <width>477</width>
+        <height>382</height>
        </rect>
       </property>
       <widget class="QLabel" name="label">
@@ -130,7 +142,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Run</string>
+        <string>Start</string>
        </property>
       </widget>
      </widget>

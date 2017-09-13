@@ -14,6 +14,8 @@ SettingWidget::SettingWidget(QWidget *parent)
 	connect(ui.cbAutoStart, &QCheckBox::stateChanged, this, &SettingWidget::slotAutoStartChanged);
 
 	ui.listWidget->addItem(tr("Hot Key"));
+	ui.listWidget->addItem(tr("Start"));
+	ui.listWidget->setCurrentRow(0);
 
 	SettingModel *settingModel = Acc::instance()->getSettingModel();
 	ui.leHotkey->setText(settingModel->mainShortcutText());

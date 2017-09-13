@@ -84,6 +84,13 @@ void Acc::closeWidget(const QString &id)
 	}
 }
 
+void Acc::hideWidget(const QString &id)
+{
+	if (widgets_.contains(id)) {
+		widgets_[id]->hide();
+	}
+}
+
 LnkModel* Acc::getLnkModel()
 {
 	if (!lnkModel_) {
