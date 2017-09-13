@@ -5,6 +5,8 @@
 static const QString REG_RUN = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 static const QString MAIN_SHORTCUT = "MainShortcut";
 static const QString MAX_RESULT = "MaxResult";
+static const QString MAIN_OPACITY = "MainOpacity";
+static const QString FONT_FAMILY = "FontFamily";
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
 	, settings_(Util::getConfigPath(), QSettings::IniFormat)
@@ -54,4 +56,29 @@ void SettingModel::setMaxResult(int count)
 int SettingModel::maxResult() const
 {
 	return maxResult_;
+}
+
+void SettingModel::setMainOpacity(int level)
+{
+	settings_.setValue(MAIN_OPACITY, level);
+}
+
+int SettingModel::mainOpacity() const
+{
+	int opacity = settings_.value(MAIN_OPACITY).toInt();
+	return opacity <= 0 ? 1 : opacity;
+}
+
+void SettingModel::setFontFamily(const QString &font)
+{
+	settings_.setValue(FONT_FAMILY, font);
+}
+
+QString SettingModel::fontFamily() const
+{
+	QString font = settings_.value(FONT_FAMILY).toString();
+	if (font.isEmpty()) {
+		font = "Microsoft YaHei";
+	}
+	return font;
 }

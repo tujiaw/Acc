@@ -36,7 +36,8 @@ public:
 		qApp->setStyle(QStyleFactory::create("Fusion"));
 		// increase font size for better reading
 		QFont defaultFont = QApplication::font();
-		defaultFont.setPointSize(defaultFont.pointSize() + 2);
+		static int fontSize = defaultFont.pointSize() + 2;
+		defaultFont.setPointSize(fontSize);
 		qApp->setFont(defaultFont);
 		// modify palette to dark
 		QPalette darkPalette;
@@ -72,6 +73,14 @@ public:
 			qfDarkstyle.close();
 		}
 	}
+
+	static void setFontFamily(const QString &fontFamily)
+	{
+		QFont defaultFont = QApplication::font();
+		defaultFont.setFamily(fontFamily);
+		qApp->setFont(defaultFont);
+	}
+
 	// PROTECTED METHODS **********************************************************
 	// PRIVATE METHODS ************************************************************
 };

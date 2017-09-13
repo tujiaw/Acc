@@ -1,7 +1,3 @@
-*{
-    font-size:12px;
-    font-family:"Microsoft YaHei";
-}
 
 QToolTip{
   color:#ffffff;
@@ -357,7 +353,7 @@ QPushButton#closeButton {
 	height: 24px;
 }
 QPushButton#closeButton:hover {
-	background:palette(highlight);
+	background: #f00;
 }
 
 QListView {
@@ -365,9 +361,9 @@ QListView {
 }
 
 QListView::item {
-	padding-left: 20px;
 	height: 40px;
 	border: 0px;
+	padding-left: 20px;
 }
 
 QListView::item:selected {
@@ -375,7 +371,7 @@ QListView::item:selected {
 }
 
 QListView::item:hover {
-	background:palette(highlight);
+	background:#404040;
 }
 
 QFrame#TitleWidget {

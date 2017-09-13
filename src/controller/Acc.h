@@ -18,6 +18,7 @@ public:
 	void closeWidget(const QString &id);
 	void hideWidget(const QString &id);
 	QWidget* getContentWidget(const QString &id);
+	void setWindowOpacity(const QString &id, int level);
 
 	LnkModel* getLnkModel();
 	SettingModel* getSettingModel();

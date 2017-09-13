@@ -13,11 +13,14 @@ int main(int argc, char *argv[])
 
 	QApplication a(argc, argv);
 
-
 	a.setWindowIcon(QIcon(":/images/Acc.ico"));
+	CDarkStyle::setFontFamily(Acc::instance()->getSettingModel()->fontFamily());
 	CDarkStyle::assign();
+
 	a.setQuitOnLastWindowClosed(false);
 	QObject::connect(&a, &QApplication::aboutToQuit, []{ Acc::instance()->destory(); });
 	Acc::instance()->openWidget(WidgetID::MAIN);
+	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
+
 	return a.exec();
 }

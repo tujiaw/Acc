@@ -2,6 +2,7 @@
 #include "common/Util.h"
 #include <QTextStream>
 #include <QDateTime>
+#include <QDebug>
 
 HitsModel::HitsModel(QObject *parent)
 	: QObject(parent)
@@ -22,6 +23,9 @@ void HitsModel::load()
 		QByteArray json = file.readAll();
 		data_ = Util::json2list(json);
 	}
+	else {
+		qWarning() << "open read file failed, path:" << hitspath;
+	}
 }
 
 void HitsModel::unload()
@@ -34,6 +38,9 @@ void HitsModel::unload()
 			return left.toMap()["hits"].toInt() > right.toMap()["hits"].toInt();
 		});
 		out << Util::list2json(data_);
+	}
+	else {
+		qWarning() << "open write file failed, path:" << hitspath;
 	}
 }
 

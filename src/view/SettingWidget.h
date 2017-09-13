@@ -15,6 +15,8 @@ private slots:
 	void slotMaxResultChanged(const QString &text);
 	void slotHotkeyConfirm();
 	void slotAutoStartChanged(int state);
+	void slotOpacityChanged();
+	void slotCurrentFontChanged(const QFont &font);
 
 protected:
 	void keyPressEvent(QKeyEvent *e);

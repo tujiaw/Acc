@@ -123,3 +123,10 @@ QWidget* Acc::getContentWidget(const QString &id)
 	}
 	return result;
 }
+
+void Acc::setWindowOpacity(const QString &id, int level)
+{
+	if (widgets_.contains(id)) {
+		widgets_[id]->setWindowOpacity(level * 0.1);
+	}
+}

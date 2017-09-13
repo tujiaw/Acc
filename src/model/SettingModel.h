@@ -19,6 +19,12 @@ public:
 	void setMaxResult(int count);
 	int maxResult() const;
 
+	void setMainOpacity(int level);
+	int mainOpacity() const;
+
+	void setFontFamily(const QString &font);
+	QString fontFamily() const;
+
 private:
 	QSettings settings_;
 	int maxResult_;
