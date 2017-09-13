@@ -24,6 +24,7 @@ MainWidget::MainWidget(QWidget *parent)
 	mainShortcut_ = new QxtGlobalShortcut(this);
 	connect(mainShortcut_, &QxtGlobalShortcut::activated, this, &MainWidget::slotMainShortcut);
 	connect(Acc::instance(), &Acc::sigSetMainShortcut, this, &MainWidget::slotMainShortcutChanged);
+	connect(Acc::instance(), &Acc::sigClearResult, this, &MainWidget::slotClearResult);
 
 	// 从配置文件获取热键，如果不存在或注册失败则依次使用默认热键
 	QString mainShortcutText = Acc::instance()->getSettingModel()->mainShortcutText();
@@ -135,6 +136,11 @@ void MainWidget::slotMainShortcutChanged(const QString &textKey)
 	}
 }
 
+void MainWidget::slotClearResult()
+{
+	m_lineEdit->clear();
+}
+
 void MainWidget::slotSearchTimer()
 {
 	m_searchTimer->stop();
@@ -148,7 +154,8 @@ void MainWidget::slotSearchTimer()
 		if (m_lnkListView->isHidden()) {
 			m_lnkListView->show();
 		}
-		this->parentWidget()->setFixedHeight(qMin(5, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
+		int maxResult = Acc::instance()->getSettingModel()->maxResult();
+		this->parentWidget()->setFixedHeight(qMin(maxResult, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
 	} else {
 		m_lnkListView->hide();
 		this->parentWidget()->setFixedHeight(TOP_HEIGHT);

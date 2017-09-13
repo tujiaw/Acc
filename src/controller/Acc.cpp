@@ -8,6 +8,7 @@
 Acc::Acc()
 	: lnkModel_(nullptr)
 	, settingModel_(nullptr)
+	, hitsModel_(nullptr)
 {
 }
 
@@ -37,6 +38,11 @@ void Acc::destory()
 	if (settingModel_) {
 		settingModel_->deleteLater();
 		settingModel_ = nullptr;
+	}
+
+	if (hitsModel_) {
+		hitsModel_->deleteLater();
+		hitsModel_ = nullptr;
 	}
 }
 
@@ -78,6 +84,13 @@ void Acc::closeWidget(const QString &id)
 	}
 }
 
+void Acc::hideWidget(const QString &id)
+{
+	if (widgets_.contains(id)) {
+		widgets_[id]->hide();
+	}
+}
+
 LnkModel* Acc::getLnkModel()
 {
 	if (!lnkModel_) {
@@ -92,4 +105,21 @@ SettingModel* Acc::getSettingModel()
 		settingModel_ = new SettingModel(this);
 	}
 	return settingModel_;
+}
+
+HitsModel* Acc::getHitsModel()
+{
+	if (!hitsModel_) {
+		hitsModel_ = new HitsModel(this);
+	}
+	return hitsModel_;
+}
+
+QWidget* Acc::getContentWidget(const QString &id)
+{
+	QWidget *result = nullptr;
+	if (widgets_.contains(id)) {
+		result = widgets_[id];
+	}
+	return result;
 }

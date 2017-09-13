@@ -19,4 +19,8 @@ namespace Util {
 	QString getConfigPath();
 	QString getSystemDir(int csidl);
 	QStringList getAllLnk();
+	QVariantMap json2map(const QByteArray &val);
+	QString map2json(const QVariantMap &val);
+	QVariantList json2list(const QByteArray &val);
+	QString list2json(const QVariantList &val);
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QWidget>
+#include <QFrame>
 
 class QLabel;
 class QPushButton;
-class TitleWidget : public QWidget
+class TitleWidget : public QFrame
 {
 	Q_OBJECT
 

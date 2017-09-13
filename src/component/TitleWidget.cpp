@@ -4,8 +4,9 @@
 #include <QHBoxLayout>
 
 TitleWidget::TitleWidget(QWidget *parent)
-	: QWidget(parent)
+	: QFrame(parent)
 {
+	this->setObjectName("TitleWidget");
 	labelTitle_ = new QLabel(this);
 	pbClose_ = new QPushButton(this);
 	pbClose_->setObjectName("closeButton");

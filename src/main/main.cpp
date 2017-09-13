@@ -2,7 +2,7 @@
 #include "controller/Acc.h"
 #include "common/DarkStyle.h"
 #include "common/RunGuard.h"
-
+#include "common/Util.h"
 
 int main(int argc, char *argv[])
 {	
@@ -12,6 +12,8 @@ int main(int argc, char *argv[])
 	}
 
 	QApplication a(argc, argv);
+
+
 	a.setWindowIcon(QIcon(":/images/Acc.ico"));
 	CDarkStyle::assign();
 	a.setQuitOnLastWindowClosed(false);

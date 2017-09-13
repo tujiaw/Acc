@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include "component/ImageButton.h"
 #include "common/Util.h"
+#include "controller/Acc.h"
 
 LnkListView::LnkListView(QWidget *parent)
 	: QListView(parent)
@@ -68,10 +69,14 @@ void LnkListView::openIndex(const QModelIndex &index)
 		return;
 	}
 
+	Acc::instance()->hideWidget(WidgetID::MAIN);
 	QVariantMap vm = this->model()->data(index).toMap();
 	QString path = vm["targetPath"].toString();
-	if (!path.isEmpty()) {
-		Util::shellExecute(path);
+	if (!path.isEmpty() && Util::shellExecute(path)) {
+		QString title = vm["lnkName"].toString();
+		QString subtitle = vm["targetPath"].toString();
+		Acc::instance()->getHitsModel()->increase(title, subtitle);
+		Acc::instance()->getHitsModel()->unload();
 	}
 }
 
