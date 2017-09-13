@@ -4,10 +4,10 @@
 #include <QDirIterator>
 #include <QDebug>
 #include "hanzi2pinyin.h"
-#include <windows.h>
 #include <QWidget>
 #include <QApplication>
 
+#pragma warning(disable:4091)
 #include <ShlObj.h>
 #pragma comment(lib, "Shell32.lib")
 
@@ -182,4 +182,19 @@ namespace Util
 		}
 		return QString::fromStdWString(szDir);
 	}
+
+	QStringList getAllLnk()
+	{
+		QStringList result;
+		QString desktop = getSystemDir(CSIDL_DESKTOP);
+		QString commonPrograms = getSystemDir(CSIDL_COMMON_PROGRAMS);
+		QString programs = getSystemDir(CSIDL_PROGRAMS);
+
+		result.append(getFiles(desktop, false));
+		result.append(getFiles(commonPrograms));
+		result.append(getFiles(programs));
+
+		return result;
+	}
+
 }
