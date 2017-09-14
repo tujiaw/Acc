@@ -186,7 +186,7 @@ void MainWidget::slotReturnPressed()
 	}
 	else if (search.first == SEARCH_ENGINE_PREFIX) {
 		//Util::shellExecute(QString("http://cn.bing.com/search?q=%1").arg(search.second));
-		Util::shellExecute(QString("https://www.baidu.com/s?wd=%1").arg(search.second));
+		Util::shellExecute(QString("https://www.baidu.com/s?wd=%1").arg(QString(QUrl::toPercentEncoding(search.second))));
 		// https://www.google.com/search?q=vimperator
 	}
 	else {
