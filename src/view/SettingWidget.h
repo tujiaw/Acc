@@ -10,7 +10,8 @@ class SettingWidget : public QWidget
 public:
 	SettingWidget(QWidget *parent = Q_NULLPTR);
 	~SettingWidget();
-	void init();
+	void readData();
+	void writeData(QObject *sender = nullptr);
 
 private slots:
 	void slotMaxResultChanged(const QString &text);
@@ -18,9 +19,8 @@ private slots:
 	void slotAutoStartChanged(int state);
 	void slotOpacityChanged();
 	void slotCurrentFontChanged(const QFont &font);
-
-protected:
-	void keyPressEvent(QKeyEvent *e);
+	void slotBoldChanged(int state);
+	void slotDefaultActivated(const QString &link);
 
 private:
 	Ui::SettingWidget ui;

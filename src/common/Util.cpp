@@ -79,6 +79,10 @@ namespace Util
 
 	bool shellExecute(const QString &path)
 	{
+		if (path.isEmpty()) {
+			return false;
+		}
+
 		HINSTANCE hinst = ::ShellExecute(nullptr, L"open", path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
 		LONG64 result = (LONG64)hinst;
 		if (result <= 32) {

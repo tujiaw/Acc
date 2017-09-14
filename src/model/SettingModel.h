@@ -9,6 +9,8 @@ class SettingModel : public QObject
 	Q_OBJECT
 public:
 	SettingModel(QObject *parent = 0);
+	void sync();
+	void revertDefault();
 
 	void setMainShortcutText(const QString &keyText);
 	QString mainShortcutText() const;
@@ -22,8 +24,9 @@ public:
 	void setMainOpacity(int level);
 	int mainOpacity() const;
 
-	void setFontFamily(const QString &font);
+	void setFontFamily(const QString &font, bool isBold);
 	QString fontFamily() const;
+	bool isBold() const;
 
 private:
 	QSettings settings_;

@@ -24,6 +24,11 @@ private slots:
 	void slotMainShortcutChanged(const QString &textKey);
 	void slotClearResult();
 	void slotSearchTimer();
+	void slotTextChanged(const QString &text);
+	void slotReturnPressed();
+
+private:
+	QString getUrl() const;
 
 private:
 	SystemTray *tray_;

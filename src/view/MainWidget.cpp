@@ -28,15 +28,7 @@ MainWidget::MainWidget(QWidget *parent)
 
 	// 从配置文件获取热键，如果不存在或注册失败则依次使用默认热键
 	QString mainShortcutText = Acc::instance()->getSettingModel()->mainShortcutText();
-	if (mainShortcutText.isEmpty() || !mainShortcut_->setShortcut(QKeySequence(mainShortcutText))) {
-		QStringList keyList = QStringList() << "Alt+Space" << "Ctrl+Space" << "Shift+Space";
-		for (auto iter = keyList.begin(); iter != keyList.end(); ++iter) {
-			if (mainShortcut_->setShortcut(QKeySequence(*iter))) {
-				Acc::instance()->getSettingModel()->setMainShortcutText(*iter);
-				break;
-			}
-		}
-	}
+	slotMainShortcutChanged(mainShortcutText);
 
 	QVBoxLayout *mLayout = new QVBoxLayout(this);
 	mLayout->setContentsMargins(10, 10, 10, 10);
@@ -44,7 +36,7 @@ MainWidget::MainWidget(QWidget *parent)
 
 	m_lineEdit = new QLineEdit(this);
 	m_lineEdit->setObjectName("SearchLineEdit");
-	connect(m_lineEdit, &QLineEdit::textChanged, [this] { m_searchTimer->stop();  m_searchTimer->start(); });
+	connect(m_lineEdit, &QLineEdit::textChanged, this, &MainWidget::slotTextChanged);
 
 	m_lnkListView = new LnkListView(this);
 	m_lnkListView->setModel(Acc::instance()->getLnkModel());
@@ -73,7 +65,7 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
 		if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
-			m_lnkListView->openIndex(m_lnkListView->currentIndex());
+			slotReturnPressed();
 			return true;
 		} else if (object == m_lineEdit) {
 			if (keyEvent->key() == Qt::Key_Down) {
@@ -126,6 +118,17 @@ void MainWidget::slotMainShortcut()
 
 void MainWidget::slotMainShortcutChanged(const QString &textKey)
 {
+	if (textKey.isEmpty()) {
+		QStringList keyList = QStringList() << "Alt+Space" << "Ctrl+Space" << "Shift+Space";
+		for (auto iter = keyList.begin(); iter != keyList.end(); ++iter) {
+			if (mainShortcut_->setShortcut(QKeySequence(*iter))) {
+				Acc::instance()->getSettingModel()->setMainShortcutText(*iter);
+				break;
+			}
+		}
+		return;
+	}
+
 	QKeySequence newKey(textKey);
 	QKeySequence oldKey = mainShortcut_->shortcut();
 	if (!mainShortcut_->setShortcut(newKey)) {
@@ -146,7 +149,6 @@ void MainWidget::slotSearchTimer()
 	m_searchTimer->stop();
 	QString text = m_lineEdit->text().trimmed();
 	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
-	LnkItemDelegate *delegate = static_cast<LnkItemDelegate*>(m_lnkListView->itemDelegate());
 	model->filter(text.trimmed());
 	m_lnkListView->setSelect(0);
 
@@ -160,4 +162,41 @@ void MainWidget::slotSearchTimer()
 		m_lnkListView->hide();
 		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
 	}
+}
+
+void MainWidget::slotTextChanged(const QString &text)
+{
+	QString searchText = text.trimmed();
+	if (!getUrl().isEmpty()) {
+		slotClearResult();
+	} else {
+		m_searchTimer->stop();
+		m_searchTimer->start();
+	}
+}
+
+void MainWidget::slotReturnPressed()
+{
+	QString url = getUrl();
+	if (url.isEmpty()) {
+		m_lnkListView->openIndex(m_lnkListView->currentIndex());
+	} else {
+		Util::shellExecute(url);
+	}
+}
+
+QString MainWidget::getUrl() const
+{
+	QString url = m_lineEdit->text().trimmed();
+	if (url.size() > 0 && url[0] == ">") {
+		url = url.mid(1).trimmed().toLower();
+		QStringList headList = QStringList() << "http://" << "https://";
+		for (auto iter = headList.begin(); iter != headList.end(); ++iter) {
+			if (url.indexOf(*iter) == 0) {
+				return url;
+			}
+		}
+		return headList[0] + url;
+	}
+	return "";
 }

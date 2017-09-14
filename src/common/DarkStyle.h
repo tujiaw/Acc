@@ -25,8 +25,7 @@ public:
 	{
 		// set style
 		qApp->setStyle(QStyleFactory::create("Fusion"));
-		// set font
-		setFontFamily();
+		
 		// modify palette to dark
 		QPalette darkPalette;
 		darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -62,7 +61,7 @@ public:
 		}
 	}
 
-	static void setFontFamily(const QString &fontFamily = "", bool isBold = false)
+	static void setFontFamily(const QString &fontFamily, bool isBold)
 	{
 		QFont defaultFont = QApplication::font();
 		static int fontSize = defaultFont.pointSize() + 2;

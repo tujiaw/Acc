@@ -7,6 +7,7 @@ static const QString MAIN_SHORTCUT = "MainShortcut";
 static const QString MAX_RESULT = "MaxResult";
 static const QString MAIN_OPACITY = "MainOpacity";
 static const QString FONT_FAMILY = "FontFamily";
+static const QString FONT_BOLD = "FontBold";
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
 	, settings_(Util::getConfigPath(), QSettings::IniFormat)
@@ -15,6 +16,18 @@ SettingModel::SettingModel(QObject *parent)
 	if (maxResult_ <= 0) {
 		maxResult_ = 5;
 	}
+}
+
+void SettingModel::sync()
+{
+	settings_.sync();
+}
+
+void SettingModel::revertDefault()
+{
+	settings_.clear();
+	setAutoStart(false);
+	settings_.sync();
 }
 
 void SettingModel::setMainShortcutText(const QString &keyText)
@@ -66,12 +79,13 @@ void SettingModel::setMainOpacity(int level)
 int SettingModel::mainOpacity() const
 {
 	int opacity = settings_.value(MAIN_OPACITY).toInt();
-	return opacity <= 0 ? 1 : opacity;
+	return opacity <= 0 ? 10 : opacity;
 }
 
-void SettingModel::setFontFamily(const QString &font)
+void SettingModel::setFontFamily(const QString &font, bool isBold)
 {
 	settings_.setValue(FONT_FAMILY, font);
+	settings_.setValue(FONT_BOLD, isBold);
 }
 
 QString SettingModel::fontFamily() const
@@ -81,4 +95,13 @@ QString SettingModel::fontFamily() const
 		font = "Microsoft YaHei";
 	}
 	return font;
+}
+
+bool SettingModel::isBold() const
+{
+	QVariant isBold = settings_.value(FONT_BOLD);
+	if (!isBold.isValid()) {
+		return false;
+	}
+	return isBold.toBool();
 }
