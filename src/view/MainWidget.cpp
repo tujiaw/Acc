@@ -167,8 +167,9 @@ void MainWidget::slotSearchTimer()
 void MainWidget::slotTextChanged(const QString &text)
 {
 	QString searchText = text.trimmed();
-	if (!getUrl().isEmpty()) {
-		slotClearResult();
+	if (searchText.size() > 0 && searchText[0] == ">") {
+		m_lnkListView->hide();
+		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
 	} else {
 		m_searchTimer->stop();
 		m_searchTimer->start();
