@@ -29,6 +29,7 @@ private slots:
 
 private:
 	QString getUrl() const;
+	QPair<QString, QString> getPrefixAndText() const;
 
 private:
 	SystemTray *tray_;

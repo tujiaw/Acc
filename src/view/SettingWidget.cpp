@@ -17,18 +17,22 @@ SettingWidget::SettingWidget(QWidget *parent)
 		ui.cbMaxResult->addItem(QString::number(i));
 	}
 	
-	connect(ui.cbMaxResult, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotMaxResultChanged(QString)));
+	connect(ui.cbMaxResult, SIGNAL(activated(QString)), this, SLOT(slotMaxResultChanged(QString)));
 	connect(ui.pbHotkeyConfirm, &QPushButton::clicked, this, &SettingWidget::slotHotkeyConfirm);
-	connect(ui.cbAutoStart, &QCheckBox::stateChanged, this, &SettingWidget::slotAutoStartChanged);
+	connect(ui.cbAutoStart, &QCheckBox::clicked, this, &SettingWidget::slotAutoStartChanged);
 	connect(ui.hsOpacity, &QSlider::sliderReleased, this, &SettingWidget::slotOpacityChanged);
-	connect(ui.fcbFont, &QFontComboBox::currentFontChanged, this, &SettingWidget::slotCurrentFontChanged);
-	connect(ui.cbBold, &QCheckBox::stateChanged, this, &SettingWidget::slotBoldChanged);
+	connect(ui.fcbFont, SIGNAL(activated(int)), this, SLOT(slotCurrentFontChanged(int)));
+	connect(ui.cbBold, &QCheckBox::clicked, this, &SettingWidget::slotBoldChanged);
 	connect(ui.labelDefault, &QLabel::linkActivated, this, &SettingWidget::slotDefaultActivated);
 
 	QStringList menuList = QStringList() << tr("Hot Key") << tr("Start") << tr("Shown");
 	for (int i = 0; i < menuList.size(); i++) {
 		ui.listWidget->addItem(menuList[i]);
 	}
+
+	ui.cbSearchEngine->addItem(tr("Baidu"));
+	ui.cbSearchEngine->addItem(tr("Bing"));
+	ui.cbSearchEngine->addItem(tr("Google"));
 
 	readData();
 }
@@ -57,7 +61,7 @@ void SettingWidget::writeData(QObject *sender)
 	if (!sender || ui.cbMaxResult == sender) {
 		bool ok;
 		int count = ui.cbMaxResult->currentText().toInt(&ok);
-		if (ok && settingModel->maxResult() != count) {
+		if (ok) {
 			settingModel->setMaxResult(count);
 			emit Acc::instance()->sigClearResult();
 		}
@@ -67,37 +71,29 @@ void SettingWidget::writeData(QObject *sender)
 	if (!sender || ui.leHotkey == sender) {
 		QString text = ui.leHotkey->text().trimmed();
 		text.remove(" ");
-		if (settingModel->mainShortcutText() != text) {
-			emit Acc::instance()->sigSetMainShortcut(text);
-		}
+		emit Acc::instance()->sigSetMainShortcut(text);
 	}
 	
 	// 开机重启
 	if (!sender || ui.cbAutoStart == sender) {
 		bool isAutoStart = ui.cbAutoStart->isChecked();
-		if (isAutoStart != settingModel->autoStart()) {
-			Acc::instance()->getSettingModel()->setAutoStart(isAutoStart);
-		}
+		Acc::instance()->getSettingModel()->setAutoStart(isAutoStart);
 	}
 
 	// 透明度
 	if (!sender || ui.hsOpacity == sender) {
 		int opacity = ui.hsOpacity->maximum() - ui.hsOpacity->value();
-		if (settingModel->mainOpacity() != opacity) {
-			Acc::instance()->setWindowOpacity(WidgetID::MAIN, opacity);
-			Acc::instance()->getSettingModel()->setMainOpacity(opacity);
-		}
+		Acc::instance()->setWindowOpacity(WidgetID::MAIN, opacity);
+		Acc::instance()->getSettingModel()->setMainOpacity(opacity);
 	}
 
 	// 字体
 	if (!sender || (ui.cbBold == sender || ui.fcbFont == sender)) {
 		bool isBold = ui.cbBold->isChecked();
 		QString family = ui.fcbFont->currentText();
-		if (isBold != settingModel->isBold() || family != settingModel->fontFamily()) {
-			CDarkStyle::setFontFamily(family, isBold);
-			CDarkStyle::assign();
-			Acc::instance()->getSettingModel()->setFontFamily(family, isBold);
-		}
+		CDarkStyle::setFontFamily(family, isBold);
+		CDarkStyle::assign();
+		Acc::instance()->getSettingModel()->setFontFamily(family, isBold);
 	}
 }
 
@@ -121,7 +117,7 @@ void SettingWidget::slotOpacityChanged()
 	writeData(sender());
 }
 
-void SettingWidget::slotCurrentFontChanged(const QFont &font)
+void SettingWidget::slotCurrentFontChanged(int index)
 {
 	writeData(sender());
 }

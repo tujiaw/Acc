@@ -18,7 +18,7 @@ private slots:
 	void slotHotkeyConfirm();
 	void slotAutoStartChanged(int state);
 	void slotOpacityChanged();
-	void slotCurrentFontChanged(const QFont &font);
+	void slotCurrentFontChanged(int index);
 	void slotBoldChanged(int state);
 	void slotDefaultActivated(const QString &link);
 

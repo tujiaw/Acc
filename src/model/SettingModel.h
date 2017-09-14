@@ -30,5 +30,4 @@ public:
 
 private:
 	QSettings settings_;
-	int maxResult_;
 };

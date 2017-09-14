@@ -9,6 +9,8 @@
 #include "controller/Acc.h"
 
 const int TOP_HEIGHT = 70;
+const QString OPEN_URL_PREFIX = "<";
+const QString SEARCH_ENGINE_PREFIX = ">";
 MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
@@ -166,30 +168,36 @@ void MainWidget::slotSearchTimer()
 
 void MainWidget::slotTextChanged(const QString &text)
 {
-	QString searchText = text.trimmed();
-	if (searchText.size() > 0 && searchText[0] == ">") {
-		m_lnkListView->hide();
-		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
-	} else {
+	if (getPrefixAndText().first.isEmpty()) {
 		m_searchTimer->stop();
 		m_searchTimer->start();
+	}
+	else {
+		m_lnkListView->hide();
+		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
 	}
 }
 
 void MainWidget::slotReturnPressed()
 {
-	QString url = getUrl();
-	if (url.isEmpty()) {
+	QPair<QString, QString> search = getPrefixAndText();
+	if (search.first == OPEN_URL_PREFIX) {
+		Util::shellExecute(getUrl());
+	}
+	else if (search.first == SEARCH_ENGINE_PREFIX) {
+		//Util::shellExecute(QString("http://cn.bing.com/search?q=%1").arg(search.second));
+		Util::shellExecute(QString("https://www.baidu.com/s?wd=%1").arg(search.second));
+		// https://www.google.com/search?q=vimperator
+	}
+	else {
 		m_lnkListView->openIndex(m_lnkListView->currentIndex());
-	} else {
-		Util::shellExecute(url);
 	}
 }
 
 QString MainWidget::getUrl() const
 {
 	QString url = m_lineEdit->text().trimmed();
-	if (url.size() > 0 && url[0] == ">") {
+	if (url.size() > 0 && url[0] == OPEN_URL_PREFIX) {
 		url = url.mid(1).trimmed().toLower();
 		QStringList headList = QStringList() << "http://" << "https://";
 		for (auto iter = headList.begin(); iter != headList.end(); ++iter) {
@@ -200,4 +208,18 @@ QString MainWidget::getUrl() const
 		return headList[0] + url;
 	}
 	return "";
+}
+
+QPair<QString, QString> MainWidget::getPrefixAndText() const
+{
+	QPair<QString, QString> result;
+	QString text = m_lineEdit->text().trimmed();
+	if (text.size() > 0) {
+		if (text[0] == OPEN_URL_PREFIX || text[0] == SEARCH_ENGINE_PREFIX) {
+			result.first = text[0];
+			text = text.mid(1);
+		}
+	}
+	result.second = text;
+	return result;
 }

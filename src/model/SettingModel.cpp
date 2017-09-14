@@ -12,10 +12,6 @@ SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
 	, settings_(Util::getConfigPath(), QSettings::IniFormat)
 {
-	maxResult_ = settings_.value(MAX_RESULT).toInt();
-	if (maxResult_ <= 0) {
-		maxResult_ = 5;
-	}
 }
 
 void SettingModel::sync()
@@ -62,13 +58,13 @@ bool SettingModel::autoStart() const
 
 void SettingModel::setMaxResult(int count)
 {
-	maxResult_ = count;
 	settings_.setValue(MAX_RESULT, count);
 }
 
 int SettingModel::maxResult() const
 {
-	return maxResult_;
+	int count = settings_.value(MAX_RESULT).toInt();
+	return count <= 0 ? 5 : count;
 }
 
 void SettingModel::setMainOpacity(int level)
@@ -99,9 +95,5 @@ QString SettingModel::fontFamily() const
 
 bool SettingModel::isBold() const
 {
-	QVariant isBold = settings_.value(FONT_BOLD);
-	if (!isBold.isValid()) {
-		return false;
-	}
-	return isBold.toBool();
+	return settings_.value(FONT_BOLD).toString().toLower() == "true";
 }
