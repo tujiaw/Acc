@@ -27,6 +27,12 @@ public:
 	void setFontFamily(const QString &font, bool isBold);
 	QString fontFamily() const;
 	bool isBold() const;
+	
+	void setEnableOpenUrl(bool enable);
+	bool enableOpenUrl() const;
+
+	void setSearchEngine(bool enable, const QString &text);
+	QPair<bool , QString> searchEngine() const;
 
 private:
 	QSettings settings_;

@@ -17,22 +17,25 @@ SettingWidget::SettingWidget(QWidget *parent)
 		ui.cbMaxResult->addItem(QString::number(i));
 	}
 	
+	// 这里应该用点击的信号，设置值得时候不应该触发槽函数
 	connect(ui.cbMaxResult, SIGNAL(activated(QString)), this, SLOT(slotMaxResultChanged(QString)));
-	connect(ui.pbHotkeyConfirm, &QPushButton::clicked, this, &SettingWidget::slotHotkeyConfirm);
-	connect(ui.cbAutoStart, &QCheckBox::clicked, this, &SettingWidget::slotAutoStartChanged);
+	connect(ui.pbHotkeyConfirm, &QPushButton::clicked, [this]() { this->writeData(ui.pbHotkeyConfirm); });
+	connect(ui.cbAutoStart, &QCheckBox::clicked, [this]() { this->writeData(ui.cbAutoStart); });
 	connect(ui.hsOpacity, &QSlider::sliderReleased, this, &SettingWidget::slotOpacityChanged);
 	connect(ui.fcbFont, SIGNAL(activated(int)), this, SLOT(slotCurrentFontChanged(int)));
-	connect(ui.cbBold, &QCheckBox::clicked, this, &SettingWidget::slotBoldChanged);
+	connect(ui.cbBold, &QCheckBox::clicked, [this]() { this->writeData(ui.cbBold); });
 	connect(ui.labelDefault, &QLabel::linkActivated, this, &SettingWidget::slotDefaultActivated);
+	connect(ui.cbSearchEngine, SIGNAL(activated(QString)), this, SLOT(slotSearchEngineActivated(QString)));
+	connect(ui.cbOpenUrlOn, &QCheckBox::clicked, [this](){ this->writeData(ui.cbOpenUrlOn); });
+	connect(ui.cbSearchEngineOn, &QCheckBox::clicked, [this]() { this->writeData(ui.cbSearchEngineOn); });
 
 	QStringList menuList = QStringList() << tr("Hot Key") << tr("Start") << tr("Shown");
 	for (int i = 0; i < menuList.size(); i++) {
 		ui.listWidget->addItem(menuList[i]);
 	}
 
-	ui.cbSearchEngine->addItem(tr("Baidu"));
-	ui.cbSearchEngine->addItem(tr("Bing"));
-	ui.cbSearchEngine->addItem(tr("Google"));
+	QStringList searchEngineList = QStringList() << tr("Baidu") << tr("Bing") << tr("Google");
+	ui.cbSearchEngine->addItems(searchEngineList);
 
 	readData();
 }
@@ -49,8 +52,11 @@ void SettingWidget::readData()
 	ui.leHotkey->setText(settingModel->mainShortcutText());
 	ui.cbAutoStart->setChecked(settingModel->autoStart());
 	ui.hsOpacity->setValue(ui.hsOpacity->maximum() - settingModel->mainOpacity());
-	ui.fcbFont->setCurrentText(Acc::instance()->getSettingModel()->fontFamily());
-	ui.cbBold->setChecked(Acc::instance()->getSettingModel()->isBold());
+	ui.fcbFont->setCurrentText(settingModel->fontFamily());
+	ui.cbBold->setChecked(settingModel->isBold());
+	ui.cbOpenUrlOn->setChecked(settingModel->enableOpenUrl());
+	ui.cbSearchEngineOn->setChecked(settingModel->searchEngine().first);
+	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
 }
 
 void SettingWidget::writeData(QObject *sender)
@@ -73,7 +79,7 @@ void SettingWidget::writeData(QObject *sender)
 		text.remove(" ");
 		emit Acc::instance()->sigSetMainShortcut(text);
 	}
-	
+
 	// 开机重启
 	if (!sender || ui.cbAutoStart == sender) {
 		bool isAutoStart = ui.cbAutoStart->isChecked();
@@ -95,19 +101,17 @@ void SettingWidget::writeData(QObject *sender)
 		CDarkStyle::assign();
 		Acc::instance()->getSettingModel()->setFontFamily(family, isBold);
 	}
+
+	if (!sender || (ui.cbOpenUrlOn == sender)) {
+		Acc::instance()->getSettingModel()->setEnableOpenUrl(ui.cbOpenUrlOn->isChecked());
+	}
+	// 搜索引擎
+	if (!sender || (ui.cbSearchEngineOn == sender || ui.cbSearchEngine == sender)) {
+		Acc::instance()->getSettingModel()->setSearchEngine(ui.cbSearchEngineOn->isChecked(), ui.cbSearchEngine->currentText());
+	}
 }
 
 void SettingWidget::slotMaxResultChanged(const QString &text)
-{
-	writeData(sender());
-}
-
-void SettingWidget::slotHotkeyConfirm()
-{
-	writeData(sender());
-}
-
-void SettingWidget::slotAutoStartChanged(int state)
 {
 	writeData(sender());
 }
@@ -122,15 +126,15 @@ void SettingWidget::slotCurrentFontChanged(int index)
 	writeData(sender());
 }
 
-void SettingWidget::slotBoldChanged(int state)
-{
-	writeData(sender());
-}
-
 void SettingWidget::slotDefaultActivated(const QString &link)
 {
 	Acc::instance()->getSettingModel()->revertDefault();
 	emit Acc::instance()->sigSetMainShortcut("");
 	readData();
 	writeData();
+}
+
+void SettingWidget::slotSearchEngineActivated(const QString &text)
+{
+	writeData(sender());
 }

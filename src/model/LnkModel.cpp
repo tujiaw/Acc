@@ -109,9 +109,14 @@ QStringList LnkModel::getAllLnk() const
 
 void LnkModel::filter(const QString &text)
 {
+	const int MAX_RESULT = 50;
 	pfilterdata_.clear();
 	if (!text.isEmpty()) {
 		for (auto iter = pdata_.begin(); iter != pdata_.end(); ++iter) {
+			if (pfilterdata_.size() >= MAX_RESULT) {
+				break;
+			}
+
 			const LnkData *p = (*iter).data();
 			if (p->lnkName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);

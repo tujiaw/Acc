@@ -15,12 +15,10 @@ public:
 
 private slots:
 	void slotMaxResultChanged(const QString &text);
-	void slotHotkeyConfirm();
-	void slotAutoStartChanged(int state);
 	void slotOpacityChanged();
 	void slotCurrentFontChanged(int index);
-	void slotBoldChanged(int state);
 	void slotDefaultActivated(const QString &link);
+	void slotSearchEngineActivated(const QString &text);
 
 private:
 	Ui::SettingWidget ui;

@@ -8,6 +8,10 @@ static const QString MAX_RESULT = "MaxResult";
 static const QString MAIN_OPACITY = "MainOpacity";
 static const QString FONT_FAMILY = "FontFamily";
 static const QString FONT_BOLD = "FontBold";
+static const QString OPEN_URL_ON = "OpenUrlOn";
+static const QString SEARCH_ENGINE_ON = "SearchEngineOn";
+static const QString SEARCH_ENGINE = "SearchEngine";
+
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
 	, settings_(Util::getConfigPath(), QSettings::IniFormat)
@@ -95,5 +99,36 @@ QString SettingModel::fontFamily() const
 
 bool SettingModel::isBold() const
 {
-	return settings_.value(FONT_BOLD).toString().toLower() == "true";
+	return settings_.value(FONT_BOLD).toBool();
 }
+
+void SettingModel::setEnableOpenUrl(bool enable)
+{
+	settings_.setValue(OPEN_URL_ON, enable);
+}
+
+bool SettingModel::enableOpenUrl() const
+{
+	if (settings_.value(OPEN_URL_ON).isValid()) {
+		return settings_.value(OPEN_URL_ON).toBool();
+	}
+	return true;
+}
+
+void SettingModel::setSearchEngine(bool enable, const QString &text)
+{
+	settings_.setValue(SEARCH_ENGINE_ON, enable);
+	settings_.setValue(SEARCH_ENGINE, text);
+}
+
+QPair<bool, QString> SettingModel::searchEngine() const
+{
+	bool enable = true;
+	if (settings_.value(SEARCH_ENGINE_ON).isValid()) {
+		enable = settings_.value(SEARCH_ENGINE_ON).toBool();
+	}
+	QString name = settings_.value(SEARCH_ENGINE).toString();
+	name = name.isEmpty() ? tr("Baidu") : name;
+	return qMakePair(enable, name);
+}
+

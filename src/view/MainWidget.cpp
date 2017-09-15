@@ -168,11 +168,11 @@ void MainWidget::slotSearchTimer()
 
 void MainWidget::slotTextChanged(const QString &text)
 {
+	LnkItemDelegate::setSearchText(text.trimmed());
 	if (getPrefixAndText().first.isEmpty()) {
 		m_searchTimer->stop();
 		m_searchTimer->start();
-	}
-	else {
+	} else {
 		m_lnkListView->hide();
 		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
 	}
@@ -181,13 +181,25 @@ void MainWidget::slotTextChanged(const QString &text)
 void MainWidget::slotReturnPressed()
 {
 	QPair<QString, QString> search = getPrefixAndText();
-	if (search.first == OPEN_URL_PREFIX) {
+	if (search.first == OPEN_URL_PREFIX && Acc::instance()->getSettingModel()->enableOpenUrl()) {
 		Util::shellExecute(getUrl());
 	}
-	else if (search.first == SEARCH_ENGINE_PREFIX) {
-		//Util::shellExecute(QString("http://cn.bing.com/search?q=%1").arg(search.second));
-		Util::shellExecute(QString("https://www.baidu.com/s?wd=%1").arg(QString(QUrl::toPercentEncoding(search.second))));
-		// https://www.google.com/search?q=vimperator
+	else if (search.first == SEARCH_ENGINE_PREFIX && Acc::instance()->getSettingModel()->searchEngine().first) {
+		QString searchEngine = Acc::instance()->getSettingModel()->searchEngine().second.toLower();
+		if (!searchEngine.isEmpty()) {
+			QString searchUrl;
+			if (searchEngine.contains("baidu")) {
+				searchUrl = "https://www.baidu.com/s?wd=%1";
+			} else if (searchEngine.contains("bing")) {
+				searchUrl = "http://cn.bing.com/search?q=%1";
+			} else if (searchEngine.contains("google")) {
+				searchUrl = "https://www.google.com/search?q=%1";
+			}
+			if (!searchUrl.isEmpty() && !search.second.isEmpty()) {
+				searchUrl = searchUrl.arg(QString(QUrl::toPercentEncoding(search.second)));
+				Util::shellExecute(searchUrl);
+			}
+		}
 	}
 	else {
 		m_lnkListView->openIndex(m_lnkListView->currentIndex());

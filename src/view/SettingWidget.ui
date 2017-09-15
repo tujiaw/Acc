@@ -82,7 +82,7 @@
           <x>0</x>
           <y>0</y>
           <width>429</width>
-          <height>431</height>
+          <height>423</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -325,7 +325,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="cbOpenUrlOn">
                <property name="text">
                 <string>&lt; prefix open url.(eg:&lt; 3inns.cn)</string>
                </property>
@@ -337,7 +337,7 @@
                 <number>15</number>
                </property>
                <item>
-                <widget class="QCheckBox" name="checkBox_2">
+                <widget class="QCheckBox" name="cbSearchEngineOn">
                  <property name="text">
                   <string>&gt; prefix use search engine</string>
                  </property>
@@ -366,10 +366,6 @@
           </spacer>
          </item>
         </layout>
-        <zorder>label_7</zorder>
-        <zorder>checkBox</zorder>
-        <zorder>checkBox_2</zorder>
-        <zorder>cbSearchEngine</zorder>
         <zorder></zorder>
         <zorder></zorder>
         <zorder>verticalSpacer</zorder>

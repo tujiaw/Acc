@@ -10,6 +10,9 @@ class LnkItemDelegate : public QStyledItemDelegate
 public:
 	LnkItemDelegate(QObject *parent);
 	~LnkItemDelegate();
+	static void setSearchText(const QString &text);
+	void drawHighlightText(QPainter *painter, QRect rect, const QString &text, const QString &highlightText, 
+		const QColor &color, const QColor &highlightColor) const;
 
 protected:
 	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
