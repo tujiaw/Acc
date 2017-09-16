@@ -40,7 +40,6 @@ public:
 	LnkModel(QObject *parent);
 	~LnkModel();
 	void load();
-	QStringList getAllLnk() const;
 	void filter(const QString &text);
 	int totalCount() const;
 	int showCount() const;

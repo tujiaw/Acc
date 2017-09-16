@@ -79,6 +79,15 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 		else if (keyEvent->key() == Qt::Key_Escape) {
 			this->parentWidget()->hide();
 		}
+		else if (keyEvent->modifiers() == Qt::ControlModifier) {
+			if (keyEvent->key() == Qt::Key_N) {
+				m_lnkListView->selectNext();
+			}
+			else if (keyEvent->key() == Qt::Key_P) {
+				m_lnkListView->selectPrev();
+			}
+			return true;
+		}
 	}
 	else if (this == object && event->type() == QEvent::Show) {
 		m_lineEdit->selectAll();
@@ -201,8 +210,11 @@ void MainWidget::slotReturnPressed()
 			}
 		}
 	}
-	else {
+	else if (m_lnkListView->isVisible()) {
 		m_lnkListView->openIndex(m_lnkListView->currentIndex());
+	}
+	else {
+		Util::shellExecute(search.second);
 	}
 }
 

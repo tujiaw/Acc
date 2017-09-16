@@ -26,7 +26,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -308,6 +308,7 @@
   <ItemGroup>
     <ClInclude Include="common\Constants.h" />
     <ClInclude Include="common\DarkStyle.h" />
+    <ClInclude Include="common\FileVersionInfo.h" />
     <ClInclude Include="common\ForegroundWindowGuard.h" />
     <ClInclude Include="common\hanzi2pinyin.h" />
     <ClInclude Include="common\RunGuard.h" />
@@ -569,6 +570,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="common\FileVersionInfo.cpp" />
     <ClCompile Include="common\ForegroundWindowGuard.cpp" />
     <ClCompile Include="common\hanzi2pinyin.cpp" />
     <ClCompile Include="common\RunGuard.cpp" />
@@ -797,7 +799,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="Qt5.9.1" Qt5Version_x0020_x64="Qt5.9.1" MocOptions="" />
+      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="msvc2015" Qt5Version_x0020_x64="Qt5.9.1" MocOptions="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

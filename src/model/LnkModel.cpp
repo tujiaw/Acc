@@ -5,6 +5,7 @@
 #include <QImageReader>
 #include "common/Util.h"
 #include "controller/Acc.h"
+#include "common/FileVersionInfo.h"
 
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
@@ -27,7 +28,7 @@ void LnkModel::load()
 	}
 
 	QFileIconProvider iconProvider;
-	QStringList strList = getAllLnk();
+	QStringList strList = Util::getAllLnk();
 	for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
 		info.setFile(*iter);
 		QString target = info.isSymLink() ? info.symLinkTarget() : info.filePath();
@@ -44,6 +45,16 @@ void LnkModel::load()
 		p->targetPath = target;
 		// 目标名字
 		p->targetName = QFileInfo(p->targetPath).baseName();
+
+		if (p->targetName.contains(p->lnkName, Qt::CaseInsensitive)) {
+			CFileVersionInfo verinfo;
+			if (verinfo.Create(p->targetPath.toStdWString().c_str())) {
+				std::wstring desc = verinfo.GetFileDescription();
+				if (!desc.empty()) {
+					p->lnkName = QString::fromStdWString(desc);
+				}
+			}
+		}
 
 		// 过滤重复
 		QString key = p->key();
@@ -67,44 +78,6 @@ void LnkModel::load()
 	}
 
 	qDebug() << "lnk count:" << pdata_.size();
-}
-
-QStringList LnkModel::getAllLnk() const
-{
-	// 扫描的目录
-	QStringList desktopList = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
-	QStringList startMenuList = QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation);
-	QString programDataDir = QDir::rootPath() + "/ProgramData/Microsoft/Windows/Start Menu/Programs";
-	
-	const QString programData = "ProgramData";
-	QStringList tempList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
-	for (auto iter = tempList.begin(); iter != tempList.end(); ++iter) {
-		int pos = iter->indexOf(programData, Qt::CaseInsensitive);
-		if (pos > 0) {
-			QString temp = iter->mid(0, pos + programData.size()) + "/Microsoft/Windows/Start Menu/Programs";
-			if (QDir(temp).exists()) {
-				programDataDir = temp;
-				break;
-			}
-		}
-	}
-
-	// 打印所有扫描目录
-	QStringList logStr;
-	logStr << desktopList << startMenuList << programDataDir;
-	qDebug() << logStr;
-
-	// 获取目录中的链接
-	QStringList result;
-	for (auto iter = desktopList.begin(); iter != desktopList.end(); ++iter) {
-		result.append(Util::getFiles(*iter, false)); // 桌面不递归子目录
-	}
-	for (auto iter = startMenuList.begin(); iter != startMenuList.end(); ++iter) {
-		result.append(Util::getFiles(*iter));
-	}
-	result.append(Util::getFiles(programDataDir));
-
-	return result;
 }
 
 void LnkModel::filter(const QString &text)
