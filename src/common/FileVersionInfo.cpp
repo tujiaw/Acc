@@ -99,73 +99,73 @@ DWORD CFileVersionInfo::GetFileSubtype() const
 	return m_FileInfo.dwFileSubtype;
 }
 
-stlString CFileVersionInfo::GetCompanyName() const
+std::wstring CFileVersionInfo::GetCompanyName() const
 {
 	return m_strCompanyName;
 }
 
 
-stlString CFileVersionInfo::GetFileDescription() const
+std::wstring CFileVersionInfo::GetFileDescription() const
 {
 	return m_strFileDescription;
 }
 
 
-stlString CFileVersionInfo::GetFileVersion() const
+std::wstring CFileVersionInfo::GetFileVersion() const
 {
 	return m_strFileVersion;
 }
 
 
-stlString CFileVersionInfo::GetInternalName() const
+std::wstring CFileVersionInfo::GetInternalName() const
 {
 	return m_strInternalName;
 }
 
 
-stlString CFileVersionInfo::GetLegalCopyright() const
+std::wstring CFileVersionInfo::GetLegalCopyright() const
 {
 	return m_strLegalCopyright;
 }
 
 
-stlString CFileVersionInfo::GetOriginalFileName() const
+std::wstring CFileVersionInfo::GetOriginalFileName() const
 {
 	return m_strOriginalFileName;
 }
 
 
-stlString CFileVersionInfo::GetProductName() const
+std::wstring CFileVersionInfo::GetProductName() const
 {
 	return m_strProductName;
 }
 
 
-stlString CFileVersionInfo::GetProductVersion() const
+std::wstring CFileVersionInfo::GetProductVersion() const
 {
 	return m_strProductVersion;
 }
 
 
-stlString CFileVersionInfo::GetComments() const
+std::wstring CFileVersionInfo::GetComments() const
 {
 	return m_strComments;
 }
 
 
-stlString CFileVersionInfo::GetLegalTrademarks() const
+std::wstring CFileVersionInfo::GetLegalTrademarks() const
 {
 	return m_strLegalTrademarks;
 }
 
 
-stlString CFileVersionInfo::GetPrivateBuild() const
+std::wstring CFileVersionInfo::GetPrivateBuild() const
 {
 	return m_strPrivateBuild;
 }
 
 
-stlString CFileVersionInfo::GetSpecialBuild() const
+std::wstring CFileVersionInfo::GetSpecialBuild() const
 {
 	return m_strSpecialBuild;
 }
@@ -234,95 +234,95 @@ BOOL CFileVersionInfo::Create(LPCTSTR lpszFileName)
 		}
 
 
-		stlString	strSubBlock;
+		std::wstring	strSubBlock;
 		TCHAR buf[1024];
 		wsprintf(buf, L"\\StringFileInfo\\%04X%04X\\", dwLangCode & 0x0000FFFF, (dwLangCode & 0xFFFF0000) >> 16);
 		strSubBlock = buf;
 
 
 		// catch string table
-		stlString sBuf;
+		std::wstring sBuf;
 
 		sBuf = strSubBlock;
 		sBuf += L"CompanyName";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strCompanyName = stlString((LPCTSTR)lpInfo);
+			m_strCompanyName = std::wstring((LPCTSTR)lpInfo);
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"FileDescription";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strFileDescription = stlString((LPCTSTR)lpInfo);
+			m_strFileDescription = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"FileVersion";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strFileVersion = stlString((LPCTSTR)lpInfo);
+			m_strFileVersion = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"InternalName";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strInternalName = stlString((LPCTSTR)lpInfo);
+			m_strInternalName = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"LegalCopyright";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strLegalCopyright = stlString((LPCTSTR)lpInfo);
+			m_strLegalCopyright = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"OriginalFileName";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strOriginalFileName = stlString((LPCTSTR)lpInfo);
+			m_strOriginalFileName = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"ProductName";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strProductName = stlString((LPCTSTR)lpInfo);
+			m_strProductName = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"ProductVersion";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strProductVersion = stlString((LPCTSTR)lpInfo);
+			m_strProductVersion = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"Comments";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strComments = stlString((LPCTSTR)lpInfo);
+			m_strComments = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"LegalTrademarks";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strLegalTrademarks = stlString((LPCTSTR)lpInfo);
+			m_strLegalTrademarks = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"PrivateBuild";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strPrivateBuild = stlString((LPCTSTR)lpInfo);
+			m_strPrivateBuild = std::wstring((LPCTSTR)lpInfo);
 
 
 		sBuf.clear();
 		sBuf = strSubBlock;
 		sBuf += L"SpecialBuild";
 		if (VerQueryValue(lpData, sBuf.c_str(), &lpInfo, &unInfoLen))
-			m_strSpecialBuild = stlString((LPCTSTR)lpInfo);
+			m_strSpecialBuild = std::wstring((LPCTSTR)lpInfo);
 
 		delete[] lpData;
 	}

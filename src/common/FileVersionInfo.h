@@ -2,9 +2,8 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #include <windows.h>
 #include <string>
-
 #include <winver.h>
-typedef std::basic_string <TCHAR> stlString;
+
 class CFileVersionInfo
 {
 
@@ -28,18 +27,18 @@ public:
 	DWORD GetFileType() const;
 	DWORD GetFileSubtype() const;
 
-	stlString GetCompanyName() const;
-	stlString GetFileDescription() const;
-	stlString GetFileVersion() const;
-	stlString GetInternalName() const;
-	stlString GetLegalCopyright() const;
-	stlString GetOriginalFileName() const;
-	stlString GetProductName() const;
-	stlString GetProductVersion() const;
-	stlString GetComments() const;
-	stlString GetLegalTrademarks() const;
-	stlString GetPrivateBuild() const;
-	stlString GetSpecialBuild() const;
+	std::wstring GetCompanyName() const;
+	std::wstring GetFileDescription() const;
+	std::wstring GetFileVersion() const;
+	std::wstring GetInternalName() const;
+	std::wstring GetLegalCopyright() const;
+	std::wstring GetOriginalFileName() const;
+	std::wstring GetProductName() const;
+	std::wstring GetProductVersion() const;
+	std::wstring GetComments() const;
+	std::wstring GetLegalTrademarks() const;
+	std::wstring GetPrivateBuild() const;
+	std::wstring GetSpecialBuild() const;
 
 	// implementation helpers
 protected:
@@ -50,16 +49,16 @@ protected:
 private:
 	VS_FIXEDFILEINFO m_FileInfo;
 
-	stlString m_strCompanyName;
-	stlString m_strFileDescription;
-	stlString m_strFileVersion;
-	stlString m_strInternalName;
-	stlString m_strLegalCopyright;
-	stlString m_strOriginalFileName;
-	stlString m_strProductName;
-	stlString m_strProductVersion;
-	stlString m_strComments;
-	stlString m_strLegalTrademarks;
-	stlString m_strPrivateBuild;
-	stlString m_strSpecialBuild;
+	std::wstring m_strCompanyName;
+	std::wstring m_strFileDescription;
+	std::wstring m_strFileVersion;
+	std::wstring m_strInternalName;
+	std::wstring m_strLegalCopyright;
+	std::wstring m_strOriginalFileName;
+	std::wstring m_strProductName;
+	std::wstring m_strProductVersion;
+	std::wstring m_strComments;
+	std::wstring m_strLegalTrademarks;
+	std::wstring m_strPrivateBuild;
+	std::wstring m_strSpecialBuild;
 };

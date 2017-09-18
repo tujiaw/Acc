@@ -29,7 +29,7 @@ RunGuard::RunGuard(const QString& key)
 {
 	memLock.acquire();
 	{
-		QSharedMemory fix(sharedmemKey);    // Fix for *nix: http://habrahabr.ru/post/173281/
+		QSharedMemory fix(sharedmemKey);
 		fix.attach();
 	}
 	memLock.release();
