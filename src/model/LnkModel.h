@@ -39,7 +39,7 @@ public:
 	WorkerThread(QObject *parent = 0);
 
 signals :
-	void resultReady(const QList<QSharedDataPointer<LnkData>> &data);
+	void resultReady(const QList<QSharedPointer<LnkData>> &data);
 
 protected:
 	void run();
@@ -63,9 +63,9 @@ protected:
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 private:
-	void handleResult(const QList<QSharedDataPointer<LnkData>> &data);
+	void handleResult(const QList<QSharedPointer<LnkData>> &data);
 
 private:
-	QList<QSharedDataPointer<LnkData>> pdata_;
-	QList<QSharedDataPointer<LnkData>> pfilterdata_;
+	QList<QSharedPointer<LnkData>> pdata_;
+	QList<QSharedPointer<LnkData>> pfilterdata_;
 };

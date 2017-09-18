@@ -10,12 +10,12 @@
 WorkerThread::WorkerThread(QObject *parent) 
 	: QThread(parent)
 {
-	qRegisterMetaType<QList<QSharedDataPointer<LnkData>>>("QList<QSharedDataPointer<LnkData>>");
+	qRegisterMetaType<QList<QSharedPointer<LnkData>>>("QList<QSharedPointer<LnkData>>");
 }
 
 void WorkerThread::run()
 {
-	QList<QSharedDataPointer<LnkData>> dataList;
+	QList<QSharedPointer<LnkData>> dataList;
 	QFileInfo info;
 	QFileIconProvider iconProvider;
 	QStringList strList = Util::getAllLnk();
@@ -36,7 +36,7 @@ void WorkerThread::run()
 			continue;
 		}
 
-		QSharedDataPointer<LnkData> p(new LnkData());
+		QSharedPointer<LnkData> p(new LnkData());
 		// 链接名
 		p->lnkName = info.fileName().remove(".lnk", Qt::CaseInsensitive);
 		// 链接路径
@@ -132,7 +132,7 @@ void LnkModel::filter(const QString &text)
 			}
 		}
 		qSort(pfilterdata_.begin(), pfilterdata_.end(), 
-			[](const QSharedDataPointer<LnkData> &left, const QSharedDataPointer<LnkData> &right) -> bool {
+			[](const QSharedPointer<LnkData> &left, const QSharedPointer<LnkData> &right) -> bool {
 			int leftHits = Acc::instance()->getHitsModel()->hits(left->lnkName, left->targetPath);
 			int rightHits = Acc::instance()->getHitsModel()->hits(right->lnkName, right->targetPath);
 			return leftHits > rightHits;
@@ -176,7 +176,7 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-void LnkModel::handleResult(const QList<QSharedDataPointer<LnkData>> &data)
+void LnkModel::handleResult(const QList<QSharedPointer<LnkData>> &data)
 {
 	pdata_ = data;
 }
