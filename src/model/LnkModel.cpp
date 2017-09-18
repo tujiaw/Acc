@@ -3,32 +3,32 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <QImageReader>
-#include "common/Util.h"
 #include "controller/Acc.h"
+#include "common/Util.h"
 #include "common/FileVersionInfo.h"
 
-LnkModel::LnkModel(QObject *parent)
-	: QAbstractListModel(parent)
+WorkerThread::WorkerThread(QObject *parent) 
+	: QThread(parent)
 {
-	load();
+	qRegisterMetaType<QList<QSharedDataPointer<LnkData>>>("QList<QSharedDataPointer<LnkData>>");
 }
 
-LnkModel::~LnkModel()
+void WorkerThread::run()
 {
-}
-
-void LnkModel::load()
-{
+	QList<QSharedDataPointer<LnkData>> dataList;
 	QFileInfo info;
-	for (int i = pdata_.size() - 1; i >= 0; i--) {
-		info.setFile(pdata_[i]->lnkPath);
-		if (!info.exists()) {
-			pdata_.removeAt(i);
-		}
-	}
-
 	QFileIconProvider iconProvider;
 	QStringList strList = Util::getAllLnk();
+
+	auto isExist = [&](const QString &key) -> bool {
+		for (int i = 0; i < dataList.size(); i++) {
+			if (dataList[i]->key() == key) {
+				return true;
+			}
+		}
+		return false;
+	};
+
 	for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
 		info.setFile(*iter);
 		QString target = info.isSymLink() ? info.symLinkTarget() : info.filePath();
@@ -64,20 +64,47 @@ void LnkModel::load()
 
 		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->lnkName.trimmed());
 		p->pinyin = pinyin.first;
-		p->jianpin = pinyin.second; 
+		p->jianpin = pinyin.second;
 
 		p->icon = iconProvider.icon(QFileInfo(target));
 		if (p->icon.isNull()) {
 			p->icon = iconProvider.icon(QFileIconProvider::File);
 		}
 
-		pdata_.append(p);
+		dataList.append(p);
 		if (p->pinyin.isEmpty() || p->jianpin.isEmpty()) {
 			qDebug() << "hanzi2pinyin empty, text:" << p->lnkName;
 		}
 	}
 
-	qDebug() << "lnk count:" << pdata_.size();
+	emit resultReady(dataList);
+}
+
+//////////////////////////////////////////////////////////////////////////
+LnkModel::LnkModel(QObject *parent)
+	: QAbstractListModel(parent)
+{
+	load();
+}
+
+LnkModel::~LnkModel()
+{
+}
+
+void LnkModel::load()
+{
+	QFileInfo info;
+	for (int i = pdata_.size() - 1; i >= 0; i--) {
+		info.setFile(pdata_[i]->lnkPath);
+		if (!info.exists()) {
+			pdata_.removeAt(i);
+		}
+	}
+
+	WorkerThread *workerThread = new WorkerThread(this);
+	connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult);
+	connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
+	workerThread->start();
 }
 
 void LnkModel::filter(const QString &text)
@@ -147,4 +174,9 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 		return pfilterdata_[row]->toVariant();
 	}
 	return QVariant();
+}
+
+void LnkModel::handleResult(const QList<QSharedDataPointer<LnkData>> &data)
+{
+	pdata_ = data;
 }

@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
 	}
 
 	QApplication a(argc, argv);
-
 	a.setWindowIcon(QIcon(":/images/Acc.ico"));
 
 	QString family = Acc::instance()->getSettingModel()->fontFamily();

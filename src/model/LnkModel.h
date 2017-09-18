@@ -4,11 +4,11 @@
 #include <QSharedDataPointer>
 #include <QPixmap>
 #include <QIcon>
+#include <QThread>
+
 class LnkData : public QSharedData
 {
 public:
-	LnkData(){}
-
 	QVariant toVariant() const
 	{
 		QVariantMap result;
@@ -32,6 +32,19 @@ public:
 	QIcon icon;
 };
 
+class WorkerThread : public QThread
+{
+	Q_OBJECT
+public:
+	WorkerThread(QObject *parent = 0);
+
+signals :
+	void resultReady(const QList<QSharedDataPointer<LnkData>> &data);
+
+protected:
+	void run();
+};
+
 class LnkModel : public QAbstractListModel
 {
 	Q_OBJECT
@@ -48,6 +61,9 @@ public:
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+private:
+	void handleResult(const QList<QSharedDataPointer<LnkData>> &data);
 
 private:
 	QList<QSharedDataPointer<LnkData>> pdata_;
