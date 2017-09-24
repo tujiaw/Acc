@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QIcon>
 #include <QThread>
+#include <QString>
 
 class LnkData : public QSharedData
 {

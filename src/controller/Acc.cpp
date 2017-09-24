@@ -51,13 +51,15 @@ void Acc::openWidget(const QString &id)
 	if (widgets_.contains(id)) {
 		widgets_[id]->showNormal();
 	} else {
+		bool isShow = true;
 		FramelessWidget *widget = new FramelessWidget();
 		if (id == WidgetID::MAIN) {
+			isShow = false;
 			MainWidget *content = new MainWidget(widget);
 			widget->setContent(content);
 
 			int width = 650;
-			widget->resize(width, content->height());
+			widget->resize(650, content->height());
 			QRect mainRect = qApp->desktop()->screenGeometry(qApp->desktop()->primaryScreen());
 			QPoint movePoin((mainRect.width() - width) / 2, mainRect.height() / 4);
 			widget->move(movePoin);
@@ -68,10 +70,13 @@ void Acc::openWidget(const QString &id)
 			SettingWidget *content = new SettingWidget(widget);
 			widget->setTitle(title);
 			widget->setContent(content);
+			widget->resize(650, 450);
 		}
 
 		widgets_[id] = widget;
-		return widget->show();
+		if (isShow) {
+			widget->show();
+		}
 	}
 }
 

@@ -9,8 +9,8 @@
 #include "controller/Acc.h"
 
 const int TOP_HEIGHT = 70;
-const QString OPEN_URL_PREFIX = "<";
-const QString SEARCH_ENGINE_PREFIX = ">";
+const QChar OPEN_URL_PREFIX = '<';
+const QChar SEARCH_ENGINE_PREFIX = '>';
 MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
