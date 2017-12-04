@@ -14,6 +14,61 @@
 #include <ShlObj.h>
 #pragma comment(lib, "Shell32.lib")
 
+/*
+* DWORD EnumerateFileInDirectory(LPSTR szPath)
+* 功能：遍历目录下的文件和子目录，将显示文件和文件夹隐藏、加密的属性
+*
+* 参数：LPSTR szPath，为需遍历的路径
+*
+* 返回值：0代表执行完成，1代表发送错误
+*/
+
+void EnumerateFileInDirectory(const QString &dir, bool containsSubDir, QStringList &result)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hListFile;
+	WCHAR szFilePath[MAX_PATH];
+
+	// 构造代表子目录和文件夹路径的字符串，使用通配符"*"
+	lstrcpy(szFilePath, dir.toStdWString().c_str());
+	// 注释的代码可以用于查找所有以“.txt”结尾的文件
+	// lstrcat(szFilePath, "\\*.txt");
+	lstrcat(szFilePath, L"\\*");
+
+	// 查找第一个文件/目录，获得查找句柄
+	hListFile = FindFirstFile(szFilePath, &FindFileData);
+	// 判断句柄
+	if (hListFile == INVALID_HANDLE_VALUE) {
+		qDebug() << "error:" << GetLastError();
+	} else {
+		do {
+			if(lstrcmp(FindFileData.cFileName, TEXT(".")) == 0 || lstrcmp(FindFileData.cFileName, TEXT("..")) == 0) {
+				continue;
+			}
+			
+			// 判断文件属性，是否为加密文件或者文件夹
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_ENCRYPTED) {
+				continue;
+			}
+			// 判断文件属性，是否为隐藏文件或文件夹
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) {
+				continue;
+			}
+
+			QString path = dir + "\\" + QString::fromStdWString(FindFileData.cFileName);
+			// 判断文件属性，是否为目录
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				if (containsSubDir) {
+					EnumerateFileInDirectory(path, containsSubDir, result);
+				}
+				continue;
+			}
+			// 读者可根据文件属性表中的内容自行添加、判断文件属性
+			result.push_back(path);
+		} while (FindNextFile(hListFile, &FindFileData));
+	}
+}
+
 namespace Util
 {
 
@@ -200,6 +255,10 @@ namespace Util
 		result.append(getFiles(desktop, false));
 		result.append(getFiles(commonPrograms));
 		result.append(getFiles(programs));
+
+		//EnumerateFileInDirectory(desktop, false, result);
+		//EnumerateFileInDirectory(commonPrograms, true, result);
+		//EnumerateFileInDirectory(programs, true, result);
 
 		return result;
 	}
