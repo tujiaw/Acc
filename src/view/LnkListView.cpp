@@ -15,9 +15,13 @@ LnkListView::LnkListView(QWidget *parent)
 	this->setSelectionMode(QAbstractItemView::SingleSelection);
 
 	folderOpenBtn_ = new ImageButton(this);
-	folderOpenBtn_->setImages(Util::img("folder_open"), Util::img("folder_open_hover"), Util::img("folder_open_hover"));
-	setFolderOpenBtnVisible(false);
+    folderOpenBtn_->setImages(Util::img("folder_open"), Util::img("folder_open_hover"), Util::img("folder_open_hover"));
+    shieldBtn_ = new ImageButton(this);
+    shieldBtn_->setImages(Util::img("shield"), Util::img("shield_hover"), Util::img("shield_hover"));
+    setFolderOpenBtnVisible(false);
+
 	connect(folderOpenBtn_, &QPushButton::clicked, this, &LnkListView::slotFolerOpen);
+    connect(shieldBtn_, &QPushButton::clicked, this, &LnkListView::slotShieldOpen);
 	connect(this, &QListView::clicked, this, &LnkListView::slotItemClicked);
 	connect(this->verticalScrollBar(), &QScrollBar::sliderPressed, [this] { setFolderOpenBtnVisible(false); });
 }
@@ -113,13 +117,17 @@ void LnkListView::selectionChanged(const QItemSelection &selected, const QItemSe
 		if (index.isValid()) {
 			folderOpenBtn_->setProperty("index", index);
 			folderOpenBtn_->show();
+            shieldBtn_->setProperty("index", index);
+            shieldBtn_->show();
 
 			QScrollBar *scrollbar = this->verticalScrollBar();
 			int x = this->rect().width() - 40 - (scrollbar->isVisible() ? scrollbar->width() : 0);
 			folderOpenBtn_->move(x, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
+            shieldBtn_->move(x - 30, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
 		}
 		else {
 			folderOpenBtn_->hide();
+            shieldBtn_->hide();
 		}
 	}
 }
@@ -128,18 +136,29 @@ void LnkListView::setFolderOpenBtnVisible(bool visible)
 {
 	folderOpenBtn_->setProperty("enableVisible", visible);
 	folderOpenBtn_->setVisible(visible);
+    shieldBtn_->setVisible(visible);
+}
+
+QString LnkListView::getPathFromIndex(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        QString targetPath = this->model()->data(index).toMap()["targetPath"].toString();
+        QFileInfo info(targetPath);
+        if (info.exists()) {
+            return targetPath;
+        }
+    }
+    return "";
 }
 
 void LnkListView::slotFolerOpen()
 {
-	QModelIndex index = this->sender()->property("index").toModelIndex();
-	if (index.isValid()) {
-		QString targetPath = this->model()->data(index).toMap()["targetPath"].toString();
-		QFileInfo info(targetPath);
-		if (info.exists()) {
-			Util::locateFile(targetPath);
-		}
-	}
+    Util::locateFile(getPathFromIndex(this->sender()->property("index").toModelIndex()));
+}
+
+void LnkListView::slotShieldOpen()
+{
+    Util::shellExecute(getPathFromIndex(this->sender()->property("index").toModelIndex()), "runas");
 }
 
 void LnkListView::slotItemClicked(const QModelIndex &index)

@@ -9,6 +9,7 @@ namespace Util {
 	QString getPinyin(const QString &text);
 	QPair<QString, QString> getPinyinAndJianpin(const QString &text);
 	bool shellExecute(const QString &path);
+    bool shellExecute(const QString &path, const QString &operation);
 	bool locateFile(const QString &dir);
 	void setForegroundWindow(QWidget *widget);
 	void showWndTopMost(QWidget *widget);

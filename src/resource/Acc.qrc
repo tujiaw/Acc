@@ -7,5 +7,7 @@
         <file>images/icon_window_restore.png</file>
         <file>images/folder_open.png</file>
         <file>images/folder_open_hover.png</file>
+        <file>images/shield.png</file>
+        <file>images/shield_hover.png</file>
     </qresource>
 </RCC>

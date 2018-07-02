@@ -134,24 +134,34 @@ namespace Util
 
 	bool shellExecute(const QString &path)
 	{
-		if (path.isEmpty()) {
-			return false;
-		}
-
-		HINSTANCE hinst = ::ShellExecute(nullptr, L"open", path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
-		LONG64 result = (LONG64)hinst;
-		if (result <= 32) {
-			qDebug() << "shellExecute failed, code:" << result;
-			return false;
-		}
-		return true;
+        return shellExecute(path, "open");
 	}
+
+    bool shellExecute(const QString &path, const QString &operation)
+    {
+        if (path.isEmpty()) {
+            return false;
+        }
+
+        HINSTANCE hinst = ShellExecute(NULL, operation.toStdWString().c_str(), path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
+        LONG64 result = (LONG64)hinst;
+        if (result <= 32) {
+            qDebug() << "shellExecute failed, code:" << result;
+            return false;
+        }
+        return true;
+    }
 
 	bool locateFile(const QString &dir)
 	{
+        if (dir.isEmpty()) {
+            return false;
+        }
+
 		QString newDir = dir;
 		QString cmd = QString("/select, \"%1\"").arg(newDir.replace("/", "\\"));
 		qDebug() << cmd;
+
 		HINSTANCE hinst = ::ShellExecute(NULL, L"open", L"explorer.exe", cmd.toStdWString().c_str(), NULL, SW_SHOW);
 		LONG64 result = (LONG64)hinst;
 		if (result <= 32) {
@@ -251,10 +261,12 @@ namespace Util
 		QString desktop = getSystemDir(CSIDL_DESKTOP);
 		QString commonPrograms = getSystemDir(CSIDL_COMMON_PROGRAMS);
 		QString programs = getSystemDir(CSIDL_PROGRAMS);
+        QString commonDesktop = getSystemDir(CSIDL_COMMON_DESKTOPDIRECTORY);
 
 		result.append(getFiles(desktop, false));
 		result.append(getFiles(commonPrograms));
 		result.append(getFiles(programs));
+        result.append(getFiles(commonDesktop));
 
 		//EnumerateFileInDirectory(desktop, false, result);
 		//EnumerateFileInDirectory(commonPrograms, true, result);

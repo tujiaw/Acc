@@ -16,6 +16,7 @@ public:
 	QModelIndex currentIndex();
 	void openIndex(const QModelIndex &index);
 	void setFolderOpenBtnVisible(bool visible);
+    QString getPathFromIndex(const QModelIndex &index) const;
 
 protected:
 	void mouseMoveEvent(QMouseEvent *e);
@@ -26,8 +27,10 @@ protected slots:
 
 private slots :
 	void slotFolerOpen();
+    void slotShieldOpen();
 	void slotItemClicked(const QModelIndex &index);
 
 private:
 	ImageButton *folderOpenBtn_;
+    ImageButton *shieldBtn_;
 };

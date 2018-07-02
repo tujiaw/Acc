@@ -16,7 +16,7 @@ WorkerThread::WorkerThread(QObject *parent)
 void WorkerThread::run()
 {
 	QList<QSharedPointer<LnkData>> dataList;
-	QFileInfo info;
+	QFileInfo info, tempInfo;
 	QFileIconProvider iconProvider;
 	QStringList strList = Util::getAllLnk();
 
@@ -31,7 +31,12 @@ void WorkerThread::run()
 
 	for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
 		info.setFile(*iter);
-		QString target = info.isSymLink() ? info.symLinkTarget() : info.filePath();
+        QString target = info.filePath();
+        QString linkTarget = info.symLinkTarget();
+        // 排除链接目标是：C:/Windows/Installer中的文件
+        if (info.isSymLink() && !linkTarget.contains("installer", Qt::CaseInsensitive)) {
+            target = info.symLinkTarget();
+        }
 		if (target.isEmpty()) {
 			continue;
 		}
@@ -66,7 +71,8 @@ void WorkerThread::run()
 		p->pinyin = pinyin.first;
 		p->jianpin = pinyin.second;
 
-		p->icon = iconProvider.icon(QFileInfo(target));
+        // 使用链接的目标文件获取图标更清晰
+        p->icon = iconProvider.icon(QFileInfo(!linkTarget.isEmpty() ? linkTarget : target));
 		if (p->icon.isNull()) {
 			p->icon = iconProvider.icon(QFileIconProvider::File);
 		}
