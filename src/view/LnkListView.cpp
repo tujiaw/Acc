@@ -8,7 +8,7 @@
 #include "controller/Acc.h"
 
 LnkListView::LnkListView(QWidget *parent)
-	: QListView(parent)
+    : QListView(parent), shieldBtn_(nullptr)
 {
 	this->setAlternatingRowColors(true);
 	this->setMouseTracking(true); // 否则mouse over样式不起作用
@@ -16,14 +16,17 @@ LnkListView::LnkListView(QWidget *parent)
 
 	folderOpenBtn_ = new ImageButton(this);
     folderOpenBtn_->setImages(Util::img("folder_open"), Util::img("folder_open_hover"), Util::img("folder_open_hover"));
-    shieldBtn_ = new ImageButton(this);
-    shieldBtn_->setImages(Util::img("shield"), Util::img("shield_hover"), Util::img("shield_hover"));
-    setFolderOpenBtnVisible(false);
+    connect(folderOpenBtn_, &QPushButton::clicked, this, &LnkListView::slotFolerOpen);
 
-	connect(folderOpenBtn_, &QPushButton::clicked, this, &LnkListView::slotFolerOpen);
-    connect(shieldBtn_, &QPushButton::clicked, this, &LnkListView::slotShieldOpen);
+    if (QSysInfo::windowsVersion() >= QSysInfo::WV_VISTA) {
+        shieldBtn_ = new ImageButton(this);
+        shieldBtn_->setImages(Util::img("shield"), Util::img("shield_hover"), Util::img("shield_hover"));
+        connect(shieldBtn_, &QPushButton::clicked, this, &LnkListView::slotShieldOpen);
+    }
+
+    setEnableButtonsVisible(false);
 	connect(this, &QListView::clicked, this, &LnkListView::slotItemClicked);
-	connect(this->verticalScrollBar(), &QScrollBar::sliderPressed, [this] { setFolderOpenBtnVisible(false); });
+	connect(this->verticalScrollBar(), &QScrollBar::sliderPressed, [this] { setEnableButtonsVisible(false); });
 }
 
 LnkListView::~LnkListView()
@@ -52,7 +55,7 @@ void LnkListView::selectPrev()
 
 void LnkListView::setSelect(int row)
 {
-	setFolderOpenBtnVisible(false);
+	setEnableButtonsVisible(false);
 	QModelIndex index = this->model()->index(row, 0);
 	if (index.isValid()) {
 		this->selectionModel()->clear();
@@ -89,12 +92,12 @@ void LnkListView::mouseMoveEvent(QMouseEvent *e)
 	QListView::mouseMoveEvent(e);
 	QModelIndex index = this->indexAt(e->pos());
 	if (index.isValid()) {
-		setFolderOpenBtnVisible(true);
+		setEnableButtonsVisible(true);
 		this->selectionModel()->clear();
 		this->selectionModel()->select(index, QItemSelectionModel::Select);
 	}
 	else {
-		setFolderOpenBtnVisible(false);
+		setEnableButtonsVisible(false);
 	}
 }
 
@@ -112,31 +115,42 @@ void LnkListView::selectionChanged(const QItemSelection &selected, const QItemSe
 {
 	QListView::selectionChanged(selected, deselected);
 	QModelIndexList indexList = selected.indexes();
-	if (indexList.size() > 0 && folderOpenBtn_->property("enableVisible").toBool()) {
+    if (indexList.size() > 0 && enableButtonsVisible()) {
 		QModelIndex index = indexList[0];
 		if (index.isValid()) {
 			folderOpenBtn_->setProperty("index", index);
 			folderOpenBtn_->show();
-            shieldBtn_->setProperty("index", index);
-            shieldBtn_->show();
-
 			QScrollBar *scrollbar = this->verticalScrollBar();
 			int x = this->rect().width() - 40 - (scrollbar->isVisible() ? scrollbar->width() : 0);
 			folderOpenBtn_->move(x, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
-            shieldBtn_->move(x - 30, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
+
+            if (shieldBtn_) {
+                shieldBtn_->setProperty("index", index);
+                shieldBtn_->show();
+                shieldBtn_->move(x - 30, (index.row() - scrollbar->value()) * ROW_HEIGHT + 5);
+            }
 		}
 		else {
 			folderOpenBtn_->hide();
-            shieldBtn_->hide();
+            if (shieldBtn_) {
+                shieldBtn_->hide();
+            }
 		}
 	}
 }
 
-void LnkListView::setFolderOpenBtnVisible(bool visible)
+void LnkListView::setEnableButtonsVisible(bool visible)
 {
 	folderOpenBtn_->setProperty("enableVisible", visible);
 	folderOpenBtn_->setVisible(visible);
-    shieldBtn_->setVisible(visible);
+    if (shieldBtn_) {
+        shieldBtn_->setVisible(visible);
+    }
+}
+
+bool LnkListView::enableButtonsVisible() const
+{
+    return folderOpenBtn_->property("enableVisible").toBool();
 }
 
 QString LnkListView::getPathFromIndex(const QModelIndex &index) const

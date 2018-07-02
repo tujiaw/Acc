@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>596</width>
-    <height>458</height>
+    <height>582</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -82,7 +82,7 @@
           <x>0</x>
           <y>0</y>
           <width>419</width>
-          <height>417</height>
+          <height>541</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -95,7 +95,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="labelHotKey">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -148,7 +148,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="labelStart">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -178,7 +178,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="labelShown">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -301,7 +301,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
-            <widget class="QLabel" name="label_7">
+            <widget class="QLabel" name="labelFeatures">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -413,7 +413,7 @@ color: rgb(105, 105, 105);</string>
        <number>10</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>10</number>
       </property>
       <property name="bottomMargin">
        <number>9</number>
@@ -424,7 +424,7 @@ color: rgb(105, 105, 105);</string>
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://3inns.cn/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:rgb(42,120,218);&quot;&gt;Revert to defaults&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://ningto.com/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:rgb(42,120,218);&quot;&gt;Revert to defaults&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="openExternalLinks">
          <bool>false</bool>
@@ -446,6 +446,22 @@ color: rgb(105, 105, 105);</string>
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelMyBlog">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://ningto.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:rgb(42,120,218);&quot;&gt;My blog&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="openExternalLinks">
+         <bool>false</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -15,7 +15,8 @@ public:
 	void setSelect(int row);
 	QModelIndex currentIndex();
 	void openIndex(const QModelIndex &index);
-	void setFolderOpenBtnVisible(bool visible);
+	void setEnableButtonsVisible(bool visible);
+    bool enableButtonsVisible() const;
     QString getPathFromIndex(const QModelIndex &index) const;
 
 protected:

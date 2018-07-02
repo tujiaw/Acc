@@ -7,6 +7,7 @@
 #include "controller/Acc.h"
 #include "view/MainWidget.h"
 #include "common/DarkStyle.h"
+#include "common/Util.h"
 
 SettingWidget::SettingWidget(QWidget *parent)
 	: QWidget(parent)
@@ -25,6 +26,7 @@ SettingWidget::SettingWidget(QWidget *parent)
 	connect(ui.fcbFont, SIGNAL(activated(int)), this, SLOT(slotCurrentFontChanged(int)));
 	connect(ui.cbBold, &QCheckBox::clicked, [this]() { this->writeData(ui.cbBold); });
 	connect(ui.labelDefault, &QLabel::linkActivated, this, &SettingWidget::slotDefaultActivated);
+    connect(ui.labelMyBlog, &QLabel::linkActivated, this, &SettingWidget::slotMyBlog);
 	connect(ui.cbSearchEngine, SIGNAL(activated(QString)), this, SLOT(slotSearchEngineActivated(QString)));
 	connect(ui.cbOpenUrlOn, &QCheckBox::clicked, [this](){ this->writeData(ui.cbOpenUrlOn); });
 	connect(ui.cbSearchEngineOn, &QCheckBox::clicked, [this]() { this->writeData(ui.cbSearchEngineOn); });
@@ -33,6 +35,7 @@ SettingWidget::SettingWidget(QWidget *parent)
 	for (int i = 0; i < menuList.size(); i++) {
 		ui.listWidget->addItem(menuList[i]);
 	}
+    connect(ui.listWidget, &QListWidget::currentItemChanged, this, &SettingWidget::slotCurrentItemChanged);
 
 	QStringList searchEngineList = QStringList() << tr("Baidu") << tr("Bing") << tr("Google");
 	ui.cbSearchEngine->addItems(searchEngineList);
@@ -134,7 +137,32 @@ void SettingWidget::slotDefaultActivated(const QString &link)
 	writeData();
 }
 
+void SettingWidget::slotMyBlog(const QString &link)
+{
+    Util::shellExecute(link);
+}
+
 void SettingWidget::slotSearchEngineActivated(const QString &text)
 {
 	writeData(sender());
+}
+
+void SettingWidget::slotCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    static int lastY = 0;
+    int y = 0;
+    QString text = current->text();
+    if (text == "Hot Key") {
+        y = ui.labelHotKey->pos().y();
+    } else if (text == "Start") {
+        y = ui.labelStart->pos().y();
+    } else if (text == "Shown") {
+        y = ui.labelShown->pos().y();
+    }
+
+    if (lastY != 0) {
+        ui.scrollArea->scroll(0, lastY);
+    }
+    ui.scrollArea->scroll(0, -1 * y);
+    lastY = y;
 }

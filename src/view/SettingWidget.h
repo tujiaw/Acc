@@ -18,7 +18,9 @@ private slots:
 	void slotOpacityChanged();
 	void slotCurrentFontChanged(int index);
 	void slotDefaultActivated(const QString &link);
+    void slotMyBlog(const QString &link);
 	void slotSearchEngineActivated(const QString &text);
+    void slotCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
 
 private:
 	Ui::SettingWidget ui;
