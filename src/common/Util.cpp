@@ -315,4 +315,25 @@ namespace Util
 		QJsonDocument jDoc(jArr);
 		return QString(jDoc.toJson(QJsonDocument::Indented));
 	}
+
+    uint toKey(const QString & str) 
+    {
+        QKeySequence seq(str);
+        uint keyCode;
+
+        // We should only working with a single key here
+        if (seq.count() == 1) {
+            keyCode = seq[0];
+        } else {
+            // Should be here only if a modifier key (e.g. Ctrl, Alt) is pressed.
+
+            // Add a non-modifier key "A" to the picture because QKeySequence
+            // seems to need that to acknowledge the modifier. We know that A has
+            // a keyCode of 65 (or 0x41 in hex)
+            seq = QKeySequence(str + "+A");
+            keyCode = seq[0] - 65;
+        }
+
+        return keyCode;
+    }
 }

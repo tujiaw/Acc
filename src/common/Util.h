@@ -24,4 +24,5 @@ namespace Util {
 	QString map2json(const QVariantMap &val);
 	QVariantList json2list(const QByteArray &val);
 	QString list2json(const QVariantList &val);
+    uint toKey(const QString& str);
 }

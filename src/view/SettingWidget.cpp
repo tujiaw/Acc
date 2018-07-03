@@ -77,10 +77,16 @@ void SettingWidget::writeData(QObject *sender)
 	}
 
 	// 热键
-	if (!sender || ui.leHotkey == sender) {
+	if (!sender || ui.pbHotkeyConfirm == sender) {
 		QString text = ui.leHotkey->text().trimmed();
-		text.remove(" ");
-		emit Acc::instance()->sigSetMainShortcut(text);
+        text.remove(" ");
+        uint keyCode = Util::toKey(text);
+        text = QKeySequence(keyCode).toString();
+        if (text.isEmpty()) {
+            QMessageBox::warning(nullptr, tr("Warning"), tr("Shortcut key Format error"));
+        } else {
+            emit Acc::instance()->sigSetMainShortcut(text);
+        }
 	}
 
 	// 开机重启
