@@ -79,11 +79,11 @@ void LnkListView::openIndex(const QModelIndex &index)
 	Acc::instance()->hideWidget(WidgetID::MAIN);
 	QVariantMap vm = this->model()->data(index).toMap();
 	QString path = vm["targetPath"].toString();
-	if (!path.isEmpty() && Util::shellExecute(path)) {
+    bool ok = Util::shellExecute(path);
+	if (ok) {
 		QString title = vm["lnkName"].toString();
 		QString subtitle = vm["targetPath"].toString();
-		Acc::instance()->getHitsModel()->increase(title, subtitle);
-		Acc::instance()->getHitsModel()->unload();
+		Acc::instance()->getHitsModel()->increase(T_LNK, title, subtitle);
 	}
 }
 

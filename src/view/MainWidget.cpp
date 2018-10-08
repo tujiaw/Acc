@@ -11,6 +11,7 @@
 const int TOP_HEIGHT = 70;
 const QChar OPEN_URL_PREFIX = '<';
 const QChar SEARCH_ENGINE_PREFIX = '>';
+
 MainWidget::MainWidget(QWidget *parent)
 	: QFrame(parent)
 {
@@ -69,30 +70,27 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 		if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
 			slotReturnPressed();
 			return true;
-		} else if (object == m_lineEdit) {
-			if (keyEvent->key() == Qt::Key_Down) {
-				m_lnkListView->selectNext();
-			} else if (keyEvent->key() == Qt::Key_Up) {
-				m_lnkListView->selectPrev();
-			}
-		}
-		else if (keyEvent->key() == Qt::Key_Escape) {
+		} else if (keyEvent->key() == Qt::Key_Escape) {
 			this->parentWidget()->hide();
-		}
-		else if (keyEvent->modifiers() == Qt::ControlModifier) {
+		} else if (keyEvent->modifiers() == Qt::ControlModifier) {
 			if (keyEvent->key() == Qt::Key_N) {
 				m_lnkListView->selectNext();
-			}
-			else if (keyEvent->key() == Qt::Key_P) {
+                return true;
+			} else if (keyEvent->key() == Qt::Key_P) {
 				m_lnkListView->selectPrev();
+                return true;
 			}
-			return true;
-		}
-	}
-	else if (this == object && event->type() == QEvent::Show) {
+        } else if (object == m_lineEdit) {
+            if (keyEvent->key() == Qt::Key_Down) {
+                m_lnkListView->selectNext();
+            } else if (keyEvent->key() == Qt::Key_Up) {
+                m_lnkListView->selectPrev();
+            }
+        }
+	} else if (this == object && event->type() == QEvent::Show) {
 		m_lineEdit->selectAll();
 		m_lineEdit->setFocus();
-	}
+    }
 
 	return false;
 }
@@ -159,20 +157,22 @@ void MainWidget::slotSearchTimer()
 {
 	m_searchTimer->stop();
 	QString text = m_lineEdit->text().trimmed();
-	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
-	model->filter(text.trimmed());
-	m_lnkListView->setSelect(0);
+    LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
+    if (model) {
+        model->filter(text.trimmed());
+        m_lnkListView->setSelect(0);
 
-	if (model->showCount() > 0) {
-		if (m_lnkListView->isHidden()) {
-			m_lnkListView->show();
-		}
-		int maxResult = Acc::instance()->getSettingModel()->maxResult();
-		this->parentWidget()->setFixedHeight(qMin(maxResult, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
-	} else {
-		m_lnkListView->hide();
-		this->parentWidget()->setFixedHeight(TOP_HEIGHT);
-	}
+        if (model->showCount() > 0) {
+            if (m_lnkListView->isHidden()) {
+                m_lnkListView->show();
+            }
+            int maxResult = Acc::instance()->getSettingModel()->maxResult();
+            this->parentWidget()->setFixedHeight(qMin(maxResult, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
+        } else {
+            m_lnkListView->hide();
+            this->parentWidget()->setFixedHeight(TOP_HEIGHT);
+        }
+    }
 }
 
 void MainWidget::slotTextChanged(const QString &text)
@@ -192,8 +192,7 @@ void MainWidget::slotReturnPressed()
 	QPair<QString, QString> search = getPrefixAndText();
 	if (search.first == OPEN_URL_PREFIX && Acc::instance()->getSettingModel()->enableOpenUrl()) {
 		Util::shellExecute(getUrl());
-	}
-	else if (search.first == SEARCH_ENGINE_PREFIX && Acc::instance()->getSettingModel()->searchEngine().first) {
+	} else if (search.first == SEARCH_ENGINE_PREFIX && Acc::instance()->getSettingModel()->searchEngine().first) {
 		QString searchEngine = Acc::instance()->getSettingModel()->searchEngine().second.toLower();
 		if (!searchEngine.isEmpty()) {
 			QString searchUrl;
@@ -209,11 +208,12 @@ void MainWidget::slotReturnPressed()
 				Util::shellExecute(searchUrl);
 			}
 		}
-	}
-	else if (m_lnkListView->isVisible()) {
+    } else if (search.second.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
+
+    }
+    else if (m_lnkListView->isVisible()) {
 		m_lnkListView->openIndex(m_lnkListView->currentIndex());
-	}
-	else {
+	} else {
 		Util::shellExecute(search.second);
 	}
 }

@@ -139,8 +139,8 @@ void LnkModel::filter(const QString &text)
 		}
 		qSort(pfilterdata_.begin(), pfilterdata_.end(), 
 			[](const QSharedPointer<LnkData> &left, const QSharedPointer<LnkData> &right) -> bool {
-			int leftHits = Acc::instance()->getHitsModel()->hits(left->lnkName, left->targetPath);
-			int rightHits = Acc::instance()->getHitsModel()->hits(right->lnkName, right->targetPath);
+			int leftHits = Acc::instance()->getHitsModel()->hits(T_LNK, left->lnkName, left->targetPath);
+			int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->lnkName, right->targetPath);
 			return leftHits > rightHits;
 		});
 	}

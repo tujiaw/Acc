@@ -304,7 +304,9 @@ namespace Util
 				QJsonArray jArr = jDoc.array();
 				return jArr.toVariantList();
 			}
-		}
+        } else {
+            qDebug() << jError.errorString();
+        }
 		QVariantList ret;
 		return ret;
 	}

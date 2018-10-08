@@ -10,6 +10,7 @@ Acc::Acc()
 	, settingModel_(nullptr)
 	, hitsModel_(nullptr)
 {
+    getHitsModel();
 }
 
 Acc::~Acc()
