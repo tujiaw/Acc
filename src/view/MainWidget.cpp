@@ -208,13 +208,23 @@ void MainWidget::slotReturnPressed()
 				Util::shellExecute(searchUrl);
 			}
 		}
-    } else if (search.second.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
-
-    }
-    else if (m_lnkListView->isVisible()) {
+    } else if (m_lnkListView->isVisible()) {
 		m_lnkListView->openIndex(m_lnkListView->currentIndex());
 	} else {
-		Util::shellExecute(search.second);
+        if (Util::shellExecute(search.second)) {
+            if (search.second.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
+                QFileInfo f(search.second);
+                if (f.isFile()) {
+                    Acc::instance()->getHitsModel()->increase(T_FILE, f.fileName(), f.absoluteFilePath());
+                } else if (f.isDir()) {
+                    Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
+                }
+                LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
+                if (model) {
+                    model->asyncAddNotExist(f.absoluteFilePath());
+                }
+            }
+        }
 	}
 }
 

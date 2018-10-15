@@ -13,12 +13,26 @@ WorkerThread::WorkerThread(QObject *parent)
 	qRegisterMetaType<QList<QSharedPointer<LnkData>>>("QList<QSharedPointer<LnkData>>");
 }
 
+WorkerThread::~WorkerThread()
+{
+    qDebug() << "worker thread exit";
+}
+
+void WorkerThread::go(const QStringList &pathList)
+{
+    pathList_ = pathList;
+    start();
+}
+
 void WorkerThread::run()
 {
+    if (pathList_.isEmpty()) {
+        return;
+    }
+
 	QList<QSharedPointer<LnkData>> dataList;
 	QFileInfo info, tempInfo;
 	QFileIconProvider iconProvider;
-	QStringList strList = Util::getAllLnk();
 
 	auto isExist = [&](const QString &key) -> bool {
 		for (int i = 0; i < dataList.size(); i++) {
@@ -29,7 +43,7 @@ void WorkerThread::run()
 		return false;
 	};
 
-	for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
+    for (auto iter = pathList_.begin(); iter != pathList_.end(); ++iter) {
 		info.setFile(*iter);
         QString target = info.filePath();
         QString linkTarget = info.symLinkTarget();
@@ -106,18 +120,33 @@ void LnkModel::load()
 			pdata_.removeAt(i);
 		}
 	}
+    asyncAdd(Util::getAllLnk());
+}
 
-	WorkerThread *workerThread = new WorkerThread(this);
-	connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult);
-	connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
-	workerThread->start();
+void LnkModel::asyncAddNotExist(const QString &path)
+{
+    for (int i = 0; i < pdata_.size(); i++) {
+        if (pdata_[i]->lnkPath == path || pdata_[i]->targetPath == path) {
+            return;
+        }
+    }
+    asyncAdd(QStringList() << path);
+}
+
+void LnkModel::asyncAdd(const QStringList &pathList)
+{
+    WorkerThread *workerThread = new WorkerThread(this);
+    connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult);
+    connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
+    workerThread->go(pathList);
 }
 
 void LnkModel::filter(const QString &text)
 {
 	const int MAX_RESULT = 50;
-	pfilterdata_.clear();
+	pfilterdata_.clear(); 
 	if (!text.isEmpty()) {
+        bool isPath = (text.indexOf(QRegExp("[a-z|A-Z]:")) == 0);
 		for (auto iter = pdata_.begin(); iter != pdata_.end(); ++iter) {
 			if (pfilterdata_.size() >= MAX_RESULT) {
 				break;
@@ -126,16 +155,15 @@ void LnkModel::filter(const QString &text)
 			const LnkData *p = (*iter).data();
 			if (p->lnkName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
-			}
-			else if (p->targetName.contains(text, Qt::CaseInsensitive)) {
+			} else if (p->targetName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
-			}
-			else if (p->jianpin.contains(text, Qt::CaseInsensitive)) {
+			} else if (p->jianpin.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
-			}
-			else if (p->pinyin.contains(text, Qt::CaseInsensitive)) {
+			} else if (p->pinyin.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
-			}
+            } else if (isPath && p->targetPath.contains(text, Qt::CaseInsensitive)) {
+                pfilterdata_.append(*iter);
+            }
 		}
 		qSort(pfilterdata_.begin(), pfilterdata_.end(), 
 			[](const QSharedPointer<LnkData> &left, const QSharedPointer<LnkData> &right) -> bool {
@@ -184,5 +212,5 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 
 void LnkModel::handleResult(const QList<QSharedPointer<LnkData>> &data)
 {
-	pdata_ = data;
+	pdata_.append(data);
 }

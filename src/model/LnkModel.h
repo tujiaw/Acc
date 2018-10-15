@@ -38,12 +38,17 @@ class WorkerThread : public QThread
 	Q_OBJECT
 public:
 	WorkerThread(QObject *parent = 0);
+    ~WorkerThread();
+    void go(const QStringList &pathList);
 
-signals :
+signals:
 	void resultReady(const QList<QSharedPointer<LnkData>> &data);
 
 protected:
 	void run();
+
+private:
+    QStringList pathList_;
 };
 
 class LnkModel : public QAbstractListModel
@@ -54,6 +59,8 @@ public:
 	LnkModel(QObject *parent);
 	~LnkModel();
 	void load();
+    void asyncAddNotExist(const QString &path);
+    void asyncAdd(const QStringList &pathList);
 	void filter(const QString &text);
 	int totalCount() const;
 	int showCount() const;
