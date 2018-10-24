@@ -3,7 +3,6 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QDebug>
-#include "hanzi2pinyin.h"
 #include <QWidget>
 #include <QApplication>
 #include <QJsonObject>
@@ -88,48 +87,6 @@ namespace Util
 		}
 
 		return result;
-	}
-
-	QString getPinyin(const QString &text)
-	{
-		std::wstring result = L"";
-		std::wstring wstr = text.toStdWString();
-		for (auto iter = wstr.begin(); iter != wstr.end(); ++iter) {
-			result += retrievePinyin(*iter);
-		}
-		return QString::fromStdWString(result);
-	}
-
-	QPair<QString, QString> getPinyinAndJianpin(const QString &text)
-	{
-		static const QStringList s_dyz1 = QStringList()
-			<< QStringLiteral("°® Ææ ÒÕ")
-			<< QStringLiteral("Òô ÀÖ")
-			<< QStringLiteral("Ïº Ã×");
-		static const QStringList s_dyz2 = QStringList()
-			<< "ai qi yi"
-			<< "yin yue"
-			<< "xia mi";
-		Q_ASSERT(s_dyz1.size() == s_dyz2.size());
-
-		QStringList strList = text.split("", QString::SkipEmptyParts);
-		QString spaceText = strList.join(" ");
-		for (int i = 0; i < s_dyz1.size(); i++) {
-			if (spaceText.contains(s_dyz1[i])) {
-				spaceText.replace(s_dyz1[i], s_dyz2[i]);
-			}
-		}
-
-		strList = spaceText.split(" ", QString::SkipEmptyParts);
-		QString pinyin, jianpin;
-		for (auto iter = strList.begin(); iter != strList.end(); ++iter) {
-			QString tmp = getPinyin(*iter);
-			if (tmp.size() > 0) {
-				pinyin += tmp;
-				jianpin += tmp[0];
-			}
-		}
-		return qMakePair(pinyin, jianpin);
 	}
 
 	bool shellExecute(const QString &path)
@@ -337,5 +294,40 @@ namespace Util
         }
 
         return keyCode;
+    }
+
+    std::string gbk2utf8(const std::string &gbkStr)
+    {
+        std::string outUtf8 = "";
+        int n = MultiByteToWideChar(CP_ACP, 0, gbkStr.c_str(), -1, NULL, 0);
+        WCHAR *str1 = new WCHAR[n];
+        MultiByteToWideChar(CP_ACP, 0, gbkStr.c_str(), -1, str1, n);
+        n = WideCharToMultiByte(CP_UTF8, 0, str1, -1, NULL, 0, NULL, NULL);
+        char *str2 = new char[n];
+        WideCharToMultiByte(CP_UTF8, 0, str1, -1, str2, n, NULL, NULL);
+        outUtf8 = str2;
+        delete[]str1;
+        str1 = NULL;
+        delete[]str2;
+        str2 = NULL;
+        return outUtf8;
+    }
+
+
+    std::string utf82gbk(const std::string &utf8Str)
+    {
+        std::string outGBK = "";
+        int n = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, NULL, 0);
+        WCHAR *str1 = new WCHAR[n];
+        MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, str1, n);
+        n = WideCharToMultiByte(CP_ACP, 0, str1, -1, NULL, 0, NULL, NULL);
+        char *str2 = new char[n];
+        WideCharToMultiByte(CP_ACP, 0, str1, -1, str2, n, NULL, NULL);
+        outGBK = str2;
+        delete[] str1;
+        str1 = NULL;
+        delete[] str2;
+        str2 = NULL;
+        return outGBK;
     }
 }

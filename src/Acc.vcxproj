@@ -312,7 +312,7 @@
     <ClInclude Include="common\DarkStyle.h" />
     <ClInclude Include="common\FileVersionInfo.h" />
     <ClInclude Include="common\ForegroundWindowGuard.h" />
-    <ClInclude Include="common\hanzi2pinyin.h" />
+    <ClInclude Include="common\pinyin.h" />
     <ClInclude Include="common\RunGuard.h" />
     <ClInclude Include="common\Util.h" />
     <ClInclude Include="component\qxtglobalshortcut\qxtglobal.h" />
@@ -574,7 +574,7 @@
   <ItemGroup>
     <ClCompile Include="common\FileVersionInfo.cpp" />
     <ClCompile Include="common\ForegroundWindowGuard.cpp" />
-    <ClCompile Include="common\hanzi2pinyin.cpp" />
+    <ClCompile Include="common\pinyin.cpp" />
     <ClCompile Include="common\RunGuard.cpp" />
     <ClCompile Include="common\Util.cpp" />
     <ClCompile Include="component\FramelessWidget.cpp" />

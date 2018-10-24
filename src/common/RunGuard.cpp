@@ -19,6 +19,14 @@ namespace
 
 }
 
+class MemLockGuard {
+public:
+    MemLockGuard(QSystemSemaphore &lock) : lock_(lock) { lock_.acquire(); }
+    ~MemLockGuard() { lock_.release(); }
+
+private:
+    QSystemSemaphore &lock_;
+};
 
 RunGuard::RunGuard(const QString& key)
 	: key(key)
@@ -27,12 +35,11 @@ RunGuard::RunGuard(const QString& key)
 	, sharedMem(sharedmemKey)
 	, memLock(memLockKey, 1)
 {
-	memLock.acquire();
+    MemLockGuard lock(memLock);
 	{
 		QSharedMemory fix(sharedmemKey);
 		fix.attach();
 	}
-	memLock.release();
 }
 
 RunGuard::~RunGuard()
@@ -42,39 +49,42 @@ RunGuard::~RunGuard()
 
 bool RunGuard::isAnotherRunning()
 {
-	if (sharedMem.isAttached())
-		return false;
+    if (sharedMem.isAttached()) {
+        return false;
+    }
 
-	memLock.acquire();
-	const bool isRunning = sharedMem.attach();
-	if (isRunning)
-		sharedMem.detach();
-	memLock.release();
+    MemLockGuard lock(memLock);
+    const bool isRunning = sharedMem.attach();
+    if (isRunning) {
+        sharedMem.detach();
+    }
 
 	return isRunning;
 }
 
 bool RunGuard::tryToRun()
 {
-	if (isAnotherRunning())   // Extra check
-		return false;
+    // Extra check
+    if (isAnotherRunning()) {
+        return false;
+    }
 
-	memLock.acquire();
-	const bool result = sharedMem.create(sizeof(quint64));
-	memLock.release();
-	if (!result)
-	{
+    bool result = false;
+    {
+        MemLockGuard lock(memLock);
+        result = sharedMem.create(sizeof(quint64));
+    }
+	
+	if (!result) {
 		release();
-		return false;
 	}
-
-	return true;
+    return result;
 }
 
 void RunGuard::release()
 {
-	memLock.acquire();
-	if (sharedMem.isAttached())
-		sharedMem.detach();
-	memLock.release();
+    MemLockGuard lock(memLock);
+    if (sharedMem.isAttached()) {
+        sharedMem.detach();
+    }
 }

@@ -156,9 +156,6 @@
     <ClInclude Include="common\ForegroundWindowGuard.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="common\hanzi2pinyin.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="common\RunGuard.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -177,12 +174,12 @@
     <ClInclude Include="common\FileVersionInfo.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="common\pinyin.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="common\hanzi2pinyin.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="common\RunGuard.cpp">
@@ -333,6 +330,9 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="common\FileVersionInfo.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\pinyin.cpp">
       <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>

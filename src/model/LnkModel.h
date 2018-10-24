@@ -29,7 +29,6 @@ public:
 	QString targetName;
 	QString targetPath;
 	QString pinyin;
-	QString jianpin;
 	QIcon icon;
 };
 
@@ -60,6 +59,7 @@ public:
 	~LnkModel();
 	void load();
     void asyncAddNotExist(const QString &path);
+    void asyncAddNotExist(const QStringList &pathList);
     void asyncAdd(const QStringList &pathList);
 	void filter(const QString &text);
 	int totalCount() const;

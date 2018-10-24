@@ -1,13 +1,12 @@
 #pragma once
 
 #include <QObject>
+#include <string>
 #include "Constants.h"
 
 class QWidget;
 namespace Util {
 	QStringList getFiles(QString path, bool containsSubDir = true);
-	QString getPinyin(const QString &text);
-	QPair<QString, QString> getPinyinAndJianpin(const QString &text);
 	bool shellExecute(const QString &path);
     bool shellExecute(const QString &path, const QString &operation);
 	bool locateFile(const QString &dir);
@@ -25,4 +24,6 @@ namespace Util {
 	QVariantList json2list(const QByteArray &val);
 	QString list2json(const QVariantList &val);
     uint toKey(const QString& str);
+    std::string gbk2utf8(const std::string &gbkStr);
+    std::string utf82gbk(const std::string &utf8Str);
 }

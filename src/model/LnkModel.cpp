@@ -6,6 +6,7 @@
 #include "controller/Acc.h"
 #include "common/Util.h"
 #include "common/FileVersionInfo.h"
+#include "common/pinyin.h"
 
 WorkerThread::WorkerThread(QObject *parent) 
 	: QThread(parent)
@@ -81,10 +82,7 @@ void WorkerThread::run()
 			continue;
 		}
 
-		QPair<QString, QString> pinyin = Util::getPinyinAndJianpin(p->lnkName.trimmed());
-		p->pinyin = pinyin.first;
-		p->jianpin = pinyin.second;
-
+        p->pinyin = QString::fromStdString(getFullAndInitialWithSeperator(p->lnkName.trimmed().toStdString()));
         // 使用链接的目标文件获取图标更清晰
         p->icon = iconProvider.icon(QFileInfo(!linkTarget.isEmpty() ? linkTarget : target));
 		if (p->icon.isNull()) {
@@ -92,9 +90,6 @@ void WorkerThread::run()
 		}
 
 		dataList.append(p);
-		if (p->pinyin.isEmpty() || p->jianpin.isEmpty()) {
-			qDebug() << "hanzi2pinyin empty, text:" << p->lnkName;
-		}
 	}
 
 	emit resultReady(dataList);
@@ -133,8 +128,29 @@ void LnkModel::asyncAddNotExist(const QString &path)
     asyncAdd(QStringList() << path);
 }
 
+void LnkModel::asyncAddNotExist(const QStringList &pathList)
+{
+    QStringList notExistList;
+    for (const auto &path : pathList) {
+        bool isFind = false;
+        for (int i = 0; i < pdata_.size(); i++) {
+            if (pdata_[i]->lnkPath == path || pdata_[i]->targetPath == path) {
+                isFind = true;
+                break;
+            }
+        }
+        if (!isFind) {
+            notExistList.push_back(path);
+        }
+    }
+    asyncAdd(notExistList);
+}
+
 void LnkModel::asyncAdd(const QStringList &pathList)
 {
+    if (pathList.empty()) {
+        return;
+    }
     WorkerThread *workerThread = new WorkerThread(this);
     connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult);
     connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
@@ -156,8 +172,6 @@ void LnkModel::filter(const QString &text)
 			if (p->lnkName.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
 			} else if (p->targetName.contains(text, Qt::CaseInsensitive)) {
-				pfilterdata_.append(*iter);
-			} else if (p->jianpin.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
 			} else if (p->pinyin.contains(text, Qt::CaseInsensitive)) {
 				pfilterdata_.append(*iter);
