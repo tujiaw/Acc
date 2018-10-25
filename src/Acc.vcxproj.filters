@@ -177,6 +177,9 @@
     <ClInclude Include="common\pinyin.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="common\LogHandler.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
@@ -335,6 +338,18 @@
     <ClCompile Include="common\pinyin.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="common\HttpRequest.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HttpRequest.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HttpRequest.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="common\LogHandler.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -387,6 +402,9 @@
     </CustomBuild>
     <CustomBuild Include="model\ControlPanelModel.h">
       <Filter>model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="common\HttpRequest.h">
+      <Filter>common</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -169,17 +169,26 @@ namespace Util
 
 	QString getConfigDir()
 	{
-		QDir configDir(getRunDir() + "/config");
-		if (!configDir.exists()) {
+		QDir configDir(getRunDir());
+		if (!configDir.exists("config")) {
 			configDir.mkdir("config");
 		}
-		return configDir.absolutePath();
+		return configDir.absolutePath() + "/config";
 	}
 
 	QString getConfigPath()
 	{
 		return getConfigDir() + "/base.ini";
 	}
+
+    QString getImagesDir()
+    {
+        QDir dir(getRunDir());
+        if (!dir.exists("images")) {
+            dir.mkdir("images");
+        }
+        return dir.absolutePath() + "/images";
+    }
 
 	QString getSystemDir(int csidl)
 	{
@@ -329,5 +338,24 @@ namespace Util
         delete[] str2;
         str2 = NULL;
         return outGBK;
+    }
+
+    void setWallpaper(const QString &imagePath)
+    {
+        int start = imagePath.lastIndexOf(".");
+        std::string format = imagePath.mid(start + 1).toUpper().toStdString();
+        if (format.empty()) {
+            return;
+        }
+
+        QString newPath = imagePath.mid(0, start + 1) + "bmp";
+        QPixmap pixmap(imagePath, format.c_str());
+        pixmap.save(newPath, "BMP");
+
+        std::wstring wstr = newPath.toStdWString();
+        const wchar_t *p = wstr.c_str();
+        if (!SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)p, SPIF_UPDATEINIFILE + SPIF_SENDWININICHANGE)) {
+            qDebug() << "set wallpaper failed, " << imagePath;
+        }
     }
 }

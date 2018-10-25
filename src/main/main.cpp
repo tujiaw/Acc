@@ -3,6 +3,7 @@
 #include "common/DarkStyle.h"
 #include "common/RunGuard.h"
 #include "common/Util.h"
+#include "common/LogHandler.h"
 
 int main(int argc, char *argv[])
 {	
@@ -11,6 +12,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+    qInstallMessageHandler(myMessageOutput);
 	QApplication a(argc, argv);
 	a.setWindowIcon(QIcon(":/images/Acc.ico"));
 
@@ -24,5 +26,6 @@ int main(int argc, char *argv[])
 	Acc::instance()->openWidget(WidgetID::MAIN);
 	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
 
+    qDebug() << "app running";
 	return a.exec();
 }

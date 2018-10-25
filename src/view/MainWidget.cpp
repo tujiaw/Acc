@@ -6,6 +6,7 @@
 #include "LnkItemDelegate.h"
 #include "common/Util.h"
 #include "common/ForegroundWindowGuard.h"
+#include "common/HttpRequest.h"
 #include "controller/Acc.h"
 
 const int TOP_HEIGHT = 70;
@@ -13,7 +14,7 @@ const QChar OPEN_URL_PREFIX = '<';
 const QChar SEARCH_ENGINE_PREFIX = '>';
 
 MainWidget::MainWidget(QWidget *parent)
-	: QFrame(parent)
+    : QFrame(parent)
 {
 	tray_ = new SystemTray(this);
 	connect(tray_, &SystemTray::sigReload, this, &MainWidget::slotReload);
@@ -23,11 +24,19 @@ MainWidget::MainWidget(QWidget *parent)
 	m_searchTimer = new QTimer(this);
 	m_searchTimer->setInterval(200);
 	connect(m_searchTimer, &QTimer::timeout, this, &MainWidget::slotSearchTimer);
+    
+    m_wallpaperTimer = new QTimer(this);
+    m_wallpaperTimer->setInterval(3600 * 1000);
+    connect(m_wallpaperTimer, &QTimer::timeout, this, &MainWidget::slotWallpaper);
+    m_wallpaperTimer->start();
 
 	mainShortcut_ = new QxtGlobalShortcut(this);
 	connect(mainShortcut_, &QxtGlobalShortcut::activated, this, &MainWidget::slotMainShortcut);
 	connect(Acc::instance(), &Acc::sigSetMainShortcut, this, &MainWidget::slotMainShortcutChanged);
 	connect(Acc::instance(), &Acc::sigClearResult, this, &MainWidget::slotClearResult);
+
+    m_http = new HttpRequest(this);
+    connect(m_http, &HttpRequest::sigHttpResponse, this, &MainWidget::slotHttpResponse);
 
 	// 从配置文件获取热键，如果不存在或注册失败则依次使用默认热键
 	QString mainShortcutText = Acc::instance()->getSettingModel()->mainShortcutText();
@@ -153,6 +162,43 @@ void MainWidget::slotClearResult()
 	m_lineEdit->clear();
 }
 
+void MainWidget::slotHttpResponse(int err, const QByteArray &data)
+{
+    if (m_http->type() == "GetAddress") {
+        QString url;
+        QVariantMap vm = Util::json2map(data);
+        QList<QVariant> ls = vm["images"].toList();
+        for (const auto &item : ls) {
+            url = item.toMap()["url"].toString();
+            if (!url.isEmpty()) {
+                break;
+            }
+        }
+
+        int start = url.lastIndexOf("/");
+        QString filename = url.mid(start + 1);
+        QDir dir(Util::getImagesDir());
+        if (!filename.isEmpty() && !dir.exists(filename)) {
+            if (!url.startsWith("http")) {
+                url = "https://cn.bing.com" + url;
+            }
+            m_http->get(url, "DownloadImage");
+        }
+    } else if (m_http->type() == "DownloadImage") {
+        int start = m_http->url().lastIndexOf("/");
+        QString filename = m_http->url().mid(start + 1);
+        QString filepath = Util::getImagesDir() + "/" + filename;
+        if (!filename.isEmpty()) {
+            QFile f(filepath);
+            f.open(QIODevice::WriteOnly);
+            QDataStream out(&f);
+            out.writeRawData(data.constData(), data.size());
+            f.flush();
+            Util::setWallpaper(filepath);
+        }
+    }
+}
+
 void MainWidget::slotSearchTimer()
 {
 	m_searchTimer->stop();
@@ -173,6 +219,11 @@ void MainWidget::slotSearchTimer()
             this->parentWidget()->setFixedHeight(TOP_HEIGHT);
         }
     }
+}
+
+void MainWidget::slotWallpaper()
+{
+    m_http->get("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN", "GetAddress");
 }
 
 void MainWidget::slotTextChanged(const QString &text)
