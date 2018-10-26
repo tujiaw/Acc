@@ -223,7 +223,10 @@ void MainWidget::slotSearchTimer()
 
 void MainWidget::slotWallpaper()
 {
-    m_http->get("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN", "GetAddress");
+    auto data = Acc::instance()->getSettingModel()->bindWallpaperUrl();
+    if (data.first) {
+        m_http->get(data.second, "GetAddress");
+    }
 }
 
 void MainWidget::slotTextChanged(const QString &text)

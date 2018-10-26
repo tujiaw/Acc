@@ -34,6 +34,10 @@ public:
 	void setSearchEngine(bool enable, const QString &text);
 	QPair<bool , QString> searchEngine() const;
 
+    void setBindWallpaperEnable(bool enable);
+    void setBindWallpaperUrl(bool enable, const QString &url);
+    QPair<bool, QString> bindWallpaperUrl() const;
+
 private:
 	QSettings settings_;
 };

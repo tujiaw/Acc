@@ -30,6 +30,7 @@ SettingWidget::SettingWidget(QWidget *parent)
 	connect(ui.cbSearchEngine, SIGNAL(activated(QString)), this, SLOT(slotSearchEngineActivated(QString)));
 	connect(ui.cbOpenUrlOn, &QCheckBox::clicked, [this](){ this->writeData(ui.cbOpenUrlOn); });
 	connect(ui.cbSearchEngineOn, &QCheckBox::clicked, [this]() { this->writeData(ui.cbSearchEngineOn); });
+    connect(ui.cbUseBing, &QCheckBox::clicked, [this]() { this->writeData(ui.cbUseBing); });
 
 	QStringList menuList = QStringList() << tr("Hot Key") << tr("Start") << tr("Shown");
 	for (int i = 0; i < menuList.size(); i++) {
@@ -60,6 +61,7 @@ void SettingWidget::readData()
 	ui.cbOpenUrlOn->setChecked(settingModel->enableOpenUrl());
 	ui.cbSearchEngineOn->setChecked(settingModel->searchEngine().first);
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
+    ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
 }
 
 void SettingWidget::writeData(QObject *sender)
@@ -118,6 +120,10 @@ void SettingWidget::writeData(QObject *sender)
 	if (!sender || (ui.cbSearchEngineOn == sender || ui.cbSearchEngine == sender)) {
 		Acc::instance()->getSettingModel()->setSearchEngine(ui.cbSearchEngineOn->isChecked(), ui.cbSearchEngine->currentText());
 	}
+    // bing±ÚÖ½
+    if (!sender || ui.cbUseBing == sender) {
+        Acc::instance()->getSettingModel()->setBindWallpaperEnable(ui.cbUseBing->isChecked());
+    }
 }
 
 void SettingWidget::slotMaxResultChanged(const QString &text)

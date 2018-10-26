@@ -324,6 +324,9 @@
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_2">
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
              <item>
               <widget class="QCheckBox" name="cbOpenUrlOn">
                <property name="text">
@@ -336,6 +339,9 @@
                <property name="spacing">
                 <number>15</number>
                </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
                <item>
                 <widget class="QCheckBox" name="cbSearchEngineOn">
                  <property name="text">
@@ -347,6 +353,13 @@
                 <widget class="QComboBox" name="cbSearchEngine"/>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="cbUseBing">
+               <property name="text">
+                <string>Use bing wallpaper</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
