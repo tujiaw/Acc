@@ -61,8 +61,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         QDir dir(QApplication::applicationDirPath());
         if (!dir.exists("logs")) {
             dir.mkdir("logs");
-            dir.cd("logs");
         }
+        dir.cd("logs");
         s_logWrap.level = "debug";
         s_logWrap.date = QDate::currentDate().toString("yyyyMMdd");
         s_logWrap.file = new QFile(QString("%1/log%2.log").arg(dir.absolutePath()).arg(s_logWrap.date));
