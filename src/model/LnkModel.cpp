@@ -108,6 +108,8 @@ LnkModel::~LnkModel()
 
 void LnkModel::load()
 {
+    pdata_.clear();
+
 	QFileInfo info;
 	for (int i = pdata_.size() - 1; i >= 0; i--) {
 		info.setFile(pdata_[i]->lnkPath);
