@@ -164,6 +164,24 @@ void MainWidget::slotClearResult()
 
 void MainWidget::slotHttpResponse(int err, const QByteArray &data)
 {
+    qDebug() << "http response, err:" << err << ", data:" << data;
+    auto getFileName = [](const QString &url) -> QString {
+        QString filename;
+        QString lower = url.toLower();
+        int rfStart = lower.lastIndexOf("rf=");
+        if (rfStart >= 0) {
+            int last = lower.indexOf("&", rfStart);
+            if (last > rfStart) {
+                filename = url.mid(rfStart + 3, last - rfStart - 3);
+            } else {
+                filename = url.mid(rfStart + 3);
+            }
+        } else {
+            filename = url.mid(lower.lastIndexOf('/') + 1);
+        }
+        return filename;
+    };
+
     if (m_http->type() == "GetAddress") {
         QString url;
         QVariantMap vm = Util::json2map(data);
@@ -175,18 +193,18 @@ void MainWidget::slotHttpResponse(int err, const QByteArray &data)
             }
         }
 
-        int start = url.lastIndexOf("/");
-        QString filename = url.mid(start + 1);
-        QDir dir(Util::getImagesDir());
-        if (!filename.isEmpty() && !dir.exists(filename)) {
+        QString filename = getFileName(url);
+        if (!filename.isEmpty()) {
             if (!url.startsWith("http")) {
                 url = "https://cn.bing.com" + url;
+            }        
+            QDir dir(Util::getImagesDir());
+            if (!dir.exists(filename)) {
+                m_http->get(url, "DownloadImage");
             }
-            m_http->get(url, "DownloadImage");
         }
     } else if (m_http->type() == "DownloadImage") {
-        int start = m_http->url().lastIndexOf("/");
-        QString filename = m_http->url().mid(start + 1);
+        QString filename = getFileName(m_http->url());
         QString filepath = Util::getImagesDir() + "/" + filename;
         if (!filename.isEmpty()) {
             QFile f(filepath);

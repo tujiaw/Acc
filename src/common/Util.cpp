@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QCryptographicHash>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -346,6 +347,7 @@ namespace Util
 
     void setWallpaper(const QString &imagePath)
     {
+        qDebug() << "setWallpaper:" << imagePath;
         int start = imagePath.lastIndexOf(".");
         std::string format = imagePath.mid(start + 1).toUpper().toStdString();
         if (format.empty()) {
@@ -361,5 +363,11 @@ namespace Util
         if (!SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)p, SPIF_UPDATEINIFILE + SPIF_SENDWININICHANGE)) {
             qDebug() << "set wallpaper failed, " << imagePath;
         }
+    }
+
+    QString md5(const QString &str)
+    {
+        QByteArray byteArray = QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5);
+        return byteArray.toHex();
     }
 }

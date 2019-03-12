@@ -28,4 +28,5 @@ namespace Util {
     std::string gbk2utf8(const std::string &gbkStr);
     std::string utf82gbk(const std::string &utf8Str);
     void setWallpaper(const QString &imagePath);
+    QString md5(const QString &str);
 }
