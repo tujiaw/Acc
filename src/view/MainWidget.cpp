@@ -168,7 +168,7 @@ void MainWidget::slotHttpResponse(int err, const QByteArray &data)
     auto getFileName = [](const QString &url) -> QString {
         QString filename;
         QString lower = url.toLower();
-        int rfStart = lower.lastIndexOf("rf=");
+        int rfStart = lower.lastIndexOf("id=");
         if (rfStart >= 0) {
             int last = lower.indexOf("&", rfStart);
             if (last > rfStart) {
@@ -201,6 +201,8 @@ void MainWidget::slotHttpResponse(int err, const QByteArray &data)
             QDir dir(Util::getImagesDir());
             if (!dir.exists(filename)) {
                 m_http->get(url, "DownloadImage");
+            } else {
+                qDebug() << "filename is exist:" << filename;
             }
         }
     } else if (m_http->type() == "DownloadImage") {
