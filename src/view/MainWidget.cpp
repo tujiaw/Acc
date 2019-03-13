@@ -164,7 +164,7 @@ void MainWidget::slotClearResult()
 
 void MainWidget::slotHttpResponse(int err, const QByteArray &data)
 {
-    qDebug() << "http response, err:" << err << ", data:" << data;
+    qDebug() << "http response, err:" << err << ", data:" << data.mid(0, 1024);
     auto getFileName = [](const QString &url) -> QString {
         QString filename;
         QString lower = url.toLower();

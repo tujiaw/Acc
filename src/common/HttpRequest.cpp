@@ -16,6 +16,7 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::get(const QString &url, const QString &type)
 {
+    qDebug() << "type:" << type << ",url:" << url;
     type_ = type;
     url_ = url;
     QNetworkRequest request;
