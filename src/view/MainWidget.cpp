@@ -167,18 +167,19 @@ void MainWidget::slotHttpResponse(int err, const QByteArray &data)
     qDebug() << "http response, err:" << err << ", data:" << data.mid(0, 1024);
     auto getFileName = [](const QString &url) -> QString {
         QString filename;
-        QString lower = url.toLower();
-        int rfStart = lower.lastIndexOf("id=");
-        if (rfStart >= 0) {
-            int last = lower.indexOf("&", rfStart);
-            if (last > rfStart) {
-                filename = url.mid(rfStart + 3, last - rfStart - 3);
-            } else {
-                filename = url.mid(rfStart + 3);
+        QStringList strList = url.split('&', QString::SkipEmptyParts);
+        for (int i = 0; i < strList.size(); i++) {
+            QStringList tempList = strList.at(i).split('=', QString::SkipEmptyParts);
+            if (tempList.size() > 1 && tempList[0].toLower() == "id") {
+                filename = tempList[1];
+                break;
             }
-        } else {
-            filename = url.mid(lower.lastIndexOf('/') + 1);
         }
+
+        if (filename.isEmpty()) {
+            filename = url.mid(url.lastIndexOf('/') + 1);
+        }
+
         return filename;
     };
 
