@@ -12,7 +12,7 @@ static const QString OPEN_URL_ON = "OpenUrlOn";
 static const QString SEARCH_ENGINE_ON = "SearchEngineOn";
 static const QString SEARCH_ENGINE = "SearchEngine";
 static const QString BIND_WALLPAPER_ON = "BindWallpaperOn";
-static const QString BIND_WALLPAPER_URL = "BindWallpaperUrl";
+static const QString BIND_WALLPAPER_INDEX = "BindWallpaperIndex";
 
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
@@ -134,21 +134,15 @@ QPair<bool, QString> SettingModel::searchEngine() const
 	return qMakePair(enable, name);
 }
 
-void SettingModel::setBindWallpaperEnable(bool enable)
+void SettingModel::setBindWallpaper(bool enable, int index)
 {
     settings_.setValue(BIND_WALLPAPER_ON, enable);
+    settings_.setValue(BIND_WALLPAPER_INDEX, index);
 }
 
-void SettingModel::setBindWallpaperUrl(bool enable, const QString &url)
+QPair<bool, int> SettingModel::bindWallpaperUrl() const
 {
-    settings_.setValue(BIND_WALLPAPER_ON, enable);
-    settings_.setValue(BIND_WALLPAPER_URL, url);
-}
-
-QPair<bool, QString> SettingModel::bindWallpaperUrl() const
-{
-    const QString defaultUrl = "https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN";
     bool enable = settings_.value(BIND_WALLPAPER_ON, true).toBool();
-    QString url = settings_.value(BIND_WALLPAPER_URL, defaultUrl).toString();
-    return qMakePair(enable, url);
+    int index = settings_.value(BIND_WALLPAPER_INDEX, 0).toInt();
+    return qMakePair(enable, index);
 }

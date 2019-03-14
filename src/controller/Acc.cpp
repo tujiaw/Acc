@@ -4,6 +4,8 @@
 #include "component/FramelessWidget.h"
 #include "view/MainWidget.h"
 #include "view/SettingWidget.h"
+#include "common/Util.h"
+#include "common/HttpRequest.h"
 
 Acc::Acc()
 	: lnkModel_(nullptr)
@@ -134,4 +136,69 @@ void Acc::setWindowOpacity(const QString &id, int level)
 	if (widgets_.contains(id)) {
 		widgets_[id]->setWindowOpacity(level * 0.1);
 	}
+}
+
+void Acc::setBindWallpaper(int index)
+{
+    index = qMin(index, 10);
+    index = qMax(index, 0);
+    QString url = QString("https://bing.biturl.top/?index=%1").arg(index);
+
+    auto getFileName = [](const QString &url) -> QString {
+        QStringList strList = url.split(QRegExp("[?, &]"), QString::SkipEmptyParts);
+        foreach(const QString &str, strList) {
+            QStringList tempList = str.split('=', QString::SkipEmptyParts);
+            if (tempList.size() > 1 && tempList[0].toLower() == "id") {
+                return tempList[1];
+            }
+        }
+        return "";
+    };
+
+    auto getLocalPath = [](QString &name) -> QString {
+        QString bmpName = name;
+        int pos = name.lastIndexOf('.');
+        if (pos > 0) {
+            bmpName = name.mid(0, pos) + ".BMP";
+        }
+        QDir dir(Util::getImagesDir());
+        if (dir.exists(bmpName)) {
+            return dir.absoluteFilePath(bmpName);
+        }
+        return "";
+    };
+
+    auto downloadImageResponse = [=](int err, const QString &url, const QByteArray &data) {
+        if (err == 0) {
+            QString name = getFileName(url);
+            if (!name.isEmpty()) {
+                QString filepath = Util::getImagesDir() + "/" + name;
+                QFile f(filepath);
+                f.open(QIODevice::WriteOnly);
+                QDataStream out(&f);
+                out.writeRawData(data.constData(), data.size());
+                f.flush();
+                Util::setWallpaper(filepath);
+            }
+        }
+    };
+
+    auto imageUrlResponse = [=](int err, const QString &url, const QByteArray &data) {
+        if (err == 0) {
+            QVariantMap vm = Util::json2map(data);
+            QString imageUrl = vm["url"].toString();
+            if (!imageUrl.isEmpty()) {
+                QString name = getFileName(imageUrl);
+                QString path = getLocalPath(name);
+                if (!path.isEmpty()) {
+                    Util::setWallpaperBMP(path);
+                } else {
+                    HttpRequestCenter::instance()->get(imageUrl, downloadImageResponse);
+                }
+            }
+        }
+        qDebug() << data;
+    };
+
+    HttpRequestCenter::instance()->get(url, imageUrlResponse);
 }

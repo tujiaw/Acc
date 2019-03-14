@@ -55,4 +55,5 @@ void HttpRequest::replyFinished(QNetworkReply *reply)
 void HttpRequest::slotError(QNetworkReply::NetworkError err)
 {
     qDebug() << "http request reply error:" << err;
+    emit sigHttpResponse(err, QByteArray());
 }

@@ -358,7 +358,12 @@ namespace Util
         QPixmap pixmap(imagePath, format.c_str());
         pixmap.save(newPath, "BMP");
 
-        std::wstring wstr = newPath.toStdWString();
+        setWallpaperBMP(newPath);
+    }
+
+    void setWallpaperBMP(const QString &imagePath)
+    {
+        std::wstring wstr = imagePath.toStdWString();
         const wchar_t *p = wstr.c_str();
         if (!SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)p, SPIF_UPDATEINIFILE + SPIF_SENDWININICHANGE)) {
             qDebug() << "set wallpaper failed, " << imagePath;

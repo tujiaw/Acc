@@ -21,6 +21,7 @@ private slots:
     void slotMyBlog(const QString &link);
 	void slotSearchEngineActivated(const QString &text);
     void slotCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void slotWallpaperIndex(int index);
 
 private:
 	Ui::SettingWidget ui;

@@ -35,9 +35,6 @@ MainWidget::MainWidget(QWidget *parent)
 	connect(Acc::instance(), &Acc::sigSetMainShortcut, this, &MainWidget::slotMainShortcutChanged);
 	connect(Acc::instance(), &Acc::sigClearResult, this, &MainWidget::slotClearResult);
 
-    m_http = new HttpRequest(this);
-    connect(m_http, &HttpRequest::sigHttpResponse, this, &MainWidget::slotHttpResponse);
-
 	// 从配置文件获取热键，如果不存在或注册失败则依次使用默认热键
 	QString mainShortcutText = Acc::instance()->getSettingModel()->mainShortcutText();
 	slotMainShortcutChanged(mainShortcutText);
@@ -162,64 +159,6 @@ void MainWidget::slotClearResult()
 	m_lineEdit->clear();
 }
 
-void MainWidget::slotHttpResponse(int err, const QByteArray &data)
-{
-    qDebug() << "http response, err:" << err << ", data:" << data.mid(0, 1024);
-    auto getFileName = [](const QString &url) -> QString {
-        QString filename;
-        QStringList strList = url.split('&', QString::SkipEmptyParts);
-        for (int i = 0; i < strList.size(); i++) {
-            QStringList tempList = strList.at(i).split('=', QString::SkipEmptyParts);
-            if (tempList.size() > 1 && tempList[0].toLower() == "id") {
-                filename = tempList[1];
-                break;
-            }
-        }
-
-        if (filename.isEmpty()) {
-            filename = url.mid(url.lastIndexOf('/') + 1);
-        }
-
-        return filename;
-    };
-
-    if (m_http->type() == "GetAddress") {
-        QString url;
-        QVariantMap vm = Util::json2map(data);
-        QList<QVariant> ls = vm["images"].toList();
-        for (const auto &item : ls) {
-            url = item.toMap()["url"].toString();
-            if (!url.isEmpty()) {
-                break;
-            }
-        }
-
-        QString filename = getFileName(url);
-        if (!filename.isEmpty()) {
-            if (!url.startsWith("http")) {
-                url = "https://cn.bing.com" + url;
-            }        
-            QDir dir(Util::getImagesDir());
-            if (!dir.exists(filename)) {
-                m_http->get(url, "DownloadImage");
-            } else {
-                qDebug() << "filename is exist:" << filename;
-            }
-        }
-    } else if (m_http->type() == "DownloadImage") {
-        QString filename = getFileName(m_http->url());
-        QString filepath = Util::getImagesDir() + "/" + filename;
-        if (!filename.isEmpty()) {
-            QFile f(filepath);
-            f.open(QIODevice::WriteOnly);
-            QDataStream out(&f);
-            out.writeRawData(data.constData(), data.size());
-            f.flush();
-            Util::setWallpaper(filepath);
-        }
-    }
-}
-
 void MainWidget::slotSearchTimer()
 {
 	m_searchTimer->stop();
@@ -239,14 +178,6 @@ void MainWidget::slotSearchTimer()
             m_lnkListView->hide();
             this->parentWidget()->setFixedHeight(TOP_HEIGHT);
         }
-    }
-}
-
-void MainWidget::slotWallpaper()
-{
-    auto data = Acc::instance()->getSettingModel()->bindWallpaperUrl();
-    if (data.first) {
-        m_http->get(data.second, "GetAddress");
     }
 }
 
@@ -323,6 +254,14 @@ void MainWidget::slotReturnPressed()
             }
         }
 	}
+}
+
+void MainWidget::slotWallpaper()
+{
+    auto data = Acc::instance()->getSettingModel()->bindWallpaperUrl();
+    if (data.first) {
+        Acc::instance()->setBindWallpaper(data.second);
+    }
 }
 
 QString MainWidget::getUrl() const

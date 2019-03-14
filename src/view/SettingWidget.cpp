@@ -32,6 +32,11 @@ SettingWidget::SettingWidget(QWidget *parent)
 	connect(ui.cbSearchEngineOn, &QCheckBox::clicked, [this]() { this->writeData(ui.cbSearchEngineOn); });
     connect(ui.cbUseBing, &QCheckBox::clicked, [this]() { this->writeData(ui.cbUseBing); });
 
+    for (int i = 0; i <= 7; i++) {
+        ui.cbWallpaperIndex->addItem(QString::number(i));
+    }
+    connect(ui.cbWallpaperIndex, SIGNAL(activated(int)), this, SLOT(slotWallpaperIndex(int)));
+
 	QStringList menuList = QStringList() << tr("Hot Key") << tr("Start") << tr("Shown");
 	for (int i = 0; i < menuList.size(); i++) {
 		ui.listWidget->addItem(menuList[i]);
@@ -62,6 +67,7 @@ void SettingWidget::readData()
 	ui.cbSearchEngineOn->setChecked(settingModel->searchEngine().first);
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
+    ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
 }
 
 void SettingWidget::writeData(QObject *sender)
@@ -121,8 +127,8 @@ void SettingWidget::writeData(QObject *sender)
 		Acc::instance()->getSettingModel()->setSearchEngine(ui.cbSearchEngineOn->isChecked(), ui.cbSearchEngine->currentText());
 	}
     // bing±ÚÖ½
-    if (!sender || ui.cbUseBing == sender) {
-        Acc::instance()->getSettingModel()->setBindWallpaperEnable(ui.cbUseBing->isChecked());
+    if (!sender || ui.cbUseBing == sender || ui.cbWallpaperIndex == sender) {
+        Acc::instance()->getSettingModel()->setBindWallpaper(ui.cbUseBing->isChecked(), ui.cbWallpaperIndex->currentIndex());
     }
 }
 
@@ -177,4 +183,10 @@ void SettingWidget::slotCurrentItemChanged(QListWidgetItem *current, QListWidget
     }
     ui.scrollArea->scroll(0, -1 * y);
     lastY = y;
+}
+
+void SettingWidget::slotWallpaperIndex(int index)
+{
+    writeData(sender());
+    Acc::instance()->setBindWallpaper(index);
 }

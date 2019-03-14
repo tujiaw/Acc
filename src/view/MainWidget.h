@@ -6,7 +6,7 @@
 class QxtGlobalShortcut;
 class LnkListView;
 class QLineEdit;
-class HttpRequest;
+
 class MainWidget : public QFrame
 {
 	Q_OBJECT
@@ -24,11 +24,10 @@ private slots:
 	void slotMainShortcut();
 	void slotMainShortcutChanged(const QString &textKey);
 	void slotClearResult();
-    void slotHttpResponse(int err, const QByteArray &data);
 	void slotSearchTimer();
-    void slotWallpaper();
 	void slotTextChanged(const QString &text);
 	void slotReturnPressed();
+    void slotWallpaper();
 
 private:
 	QString getUrl() const;
@@ -41,5 +40,4 @@ private:
 	LnkListView *m_lnkListView;
 	QTimer *m_searchTimer;
     QTimer *m_wallpaperTimer;
-    HttpRequest *m_http;
 };
