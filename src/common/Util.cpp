@@ -375,4 +375,10 @@ namespace Util
         QByteArray byteArray = QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5);
         return byteArray.toHex();
     }
+
+    QString md5(const QByteArray &data)
+    {
+        QByteArray byteArray = QCryptographicHash::hash(data, QCryptographicHash::Md5);
+        return byteArray.toHex();
+    }
 }
