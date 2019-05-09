@@ -26,7 +26,7 @@ private:
     Type type_;
     QVariant data_;
     QLabel *image_;
-    ElidedLabel *content_;
+    QLabel *content_;
     QLabel *time_;
 };
 

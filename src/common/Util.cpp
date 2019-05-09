@@ -394,4 +394,33 @@ namespace Util
         QByteArray byteArray = QCryptographicHash::hash(data, QCryptographicHash::Md5);
         return byteArray.toHex();
     }
+
+    QString getTimeInterval(quint64 msInterval)
+    {
+        int minutes = msInterval / (1000 * 60);
+        // 服务端时间与客户端时间如果差距大可能为负的
+        if (minutes <= 0) {
+            return QStringLiteral("现在");
+        } else if (minutes < 60) {
+            return QString::number(minutes) + QStringLiteral("分钟前");
+        }
+
+        int hours = minutes / 60;
+        if (hours < 24) {
+            return QString::number(hours) + QStringLiteral("小时前");
+        }
+
+        int days = hours / 24;
+        if (days < 30) {
+            return QString::number(days) + QStringLiteral("天前");
+        }
+
+        int months = days / 30;
+        if (months < 12) {
+            return QString::number(months) + QStringLiteral("个月前");
+        }
+
+        int year = months / 12;
+        return QString::number(year) + QStringLiteral("年前");
+    }
 }

@@ -16,8 +16,11 @@ ClipboardRowWidget::ClipboardRowWidget(QWidget *parent)
 {
     setObjectName("ClipboardRowWidget");
     image_ = new QLabel(this);
-    content_ = new ElidedLabel(this);
+    content_ = new QLabel(this);
     time_ = new QLabel(this);
+    content_->setWordWrap(true);
+    content_->setMaximumHeight(35);
+    content_->setObjectName("ContentLabel");
     time_->setObjectName("TimeLabel");
     image_->setFixedSize(40, 40);
     time_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
@@ -41,7 +44,8 @@ ClipboardRowWidget::ClipboardRowWidget(QWidget *parent)
 
     this->setFixedHeight(70);
     QStringList style = QStringList() << "#ClipboardRowWidget{border-bottom: 1px solid #fff;}"
-        << "#TimeLabel{color:#aaa}";
+        << "#TimeLabel{color:#aaa; font-size:11px;}"
+        << "#ContentLabel{font-size:14px;}";
     this->setStyleSheet(style.join(""));
 }
 

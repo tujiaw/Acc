@@ -31,4 +31,5 @@ namespace Util {
     void setWallpaper(const QString &imagePath);
     void setWallpaperBMP(const QString &imagePath);
     QString md5(const QString &str);
+    QString getTimeInterval(quint64 msInterval);
 }
