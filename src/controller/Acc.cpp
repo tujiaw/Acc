@@ -3,6 +3,7 @@
 #include "component/TitleWidget.h"
 #include "component/FramelessWidget.h"
 #include "view/MainWidget.h"
+#include "view/ClipboardWidget.h"
 #include "view/SettingWidget.h"
 #include "common/Util.h"
 #include "common/HttpRequest.h"
@@ -74,7 +75,20 @@ void Acc::openWidget(const QString &id)
 			widget->setTitle(title);
 			widget->setContent(content);
 			widget->resize(650, 450);
-		}
+        } else if (id == WidgetID::CLIPBOARD) {
+            TitleWidget *title = new TitleWidget(widget);
+            title->setTitle(tr("Clipboard"));
+            title->setMinimizeVisible(true);
+            Qt::WindowFlags flags = widget->windowFlags();
+            flags |= Qt::WindowStaysOnTopHint;
+            widget->setWindowFlags(flags);
+            connect(title, &TitleWidget::sigClose, [this] { closeWidget(WidgetID::CLIPBOARD); });
+            connect(title, &TitleWidget::sigMinimize, [this] { minimizeWidget(WidgetID::CLIPBOARD); });
+            ClipboardWidget *content = new ClipboardWidget(widget);
+            widget->setTitle(title);
+            widget->setContent(content);
+            widget->resize(400, 600);
+        }
 
 		widgets_[id] = widget;
 		if (isShow) {
@@ -96,6 +110,20 @@ void Acc::hideWidget(const QString &id)
 	if (widgets_.contains(id)) {
 		widgets_[id]->hide();
 	}
+}
+
+void Acc::minimizeWidget(const QString &id)
+{
+    if (widgets_.contains(id)) {
+        widgets_[id]->showMinimized();
+    }
+}
+
+void Acc::restoreWidget(const QString &id)
+{
+    if (widgets_.contains(id)) {
+        widgets_[id]->showNormal();
+    }
 }
 
 LnkModel* Acc::getLnkModel()

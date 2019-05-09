@@ -9,5 +9,9 @@
         <file>images/folder_open_hover.png</file>
         <file>images/shield.png</file>
         <file>images/shield_hover.png</file>
+        <file>images/icon_html.png</file>
+        <file>images/icon_image.png</file>
+        <file>images/icon_link.png</file>
+        <file>images/icon_text.png</file>
     </qresource>
 </RCC>

@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QDate>
 #include <QApplication>
+#include "Util.h"
 #ifdef DEBUG
 #include <windows.h>
 #endif
@@ -61,7 +62,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
     if (!s_logWrap.isInit) {
         s_logWrap.isInit = true;
-        QDir dir(QApplication::applicationDirPath());
+        QDir dir(Util::getWritebaleDir());
         if (!dir.exists("logs")) {
             dir.mkdir("logs");
         }

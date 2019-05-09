@@ -15,6 +15,7 @@ namespace Util {
 	void cancelTopMost(QWidget *widget);
 	QPixmap img(const QString &name);
 	QString getRunDir();
+    QString getWritebaleDir();
 	QString getConfigDir();
 	QString getConfigPath();
     QString getImagesDir();

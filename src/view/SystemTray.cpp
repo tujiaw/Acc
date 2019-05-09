@@ -10,6 +10,7 @@ SystemTray::SystemTray(QWidget *parent)
 	connect(menu_, &QMenu::triggered, this, &SystemTray::slotTriggered);
 	menu_->addAction(tr("Open"));
 	menu_->addAction(tr("Setting"));
+    menu_->addAction(tr("Clipboard"));
 	menu_->addAction(tr("Reload"));
 	menu_->addAction(tr("Exit"));
 	this->setContextMenu(menu_);
@@ -26,7 +27,9 @@ void SystemTray::slotTriggered(QAction *action)
 		Acc::instance()->openWidget(WidgetID::MAIN);
 	} else if (text == tr("Setting")) {
 		Acc::instance()->openWidget(WidgetID::SETTING);
-	}
+    } else if (text == tr("Clipboard")) {
+        Acc::instance()->openWidget(WidgetID::CLIPBOARD);
+    }
 	else if (text == tr("Reload")) {
 		emit sigReload();
 	}

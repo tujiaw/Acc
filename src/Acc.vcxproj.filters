@@ -190,6 +190,9 @@
     <ClInclude Include="common\LogHandler.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ClipboardWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
@@ -369,6 +372,33 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ImageListDlg.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ClipboardWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ClipboardWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\ClipboardWidget.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="component\ElidedLabel.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ElidedLabel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ElidedLabel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Cleaner.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Cleaner.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Cleaner.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -427,6 +457,18 @@
     </CustomBuild>
     <CustomBuild Include="view\ImageListDlg.h">
       <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\ClipboardWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\ClipboardWidget.h">
+      <Filter>view</Filter>
+    </CustomBuild>
+    <CustomBuild Include="component\ElidedLabel.h">
+      <Filter>component</Filter>
+    </CustomBuild>
+    <CustomBuild Include="common\Cleaner.h">
+      <Filter>common</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

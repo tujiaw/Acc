@@ -11,11 +11,14 @@ class TitleWidget : public QFrame
 public:
 	TitleWidget(QWidget *parent = Q_NULLPTR);
 	void setTitle(const QString &title);
+    void setMinimizeVisible(bool yes);
 
 signals:
 	void sigClose();
+    void sigMinimize();
 
 private:
 	QLabel *labelTitle_;
 	QPushButton *pbClose_;
+    QPushButton *pbMinimize_;
 };

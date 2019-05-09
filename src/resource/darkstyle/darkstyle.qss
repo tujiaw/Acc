@@ -355,6 +355,14 @@ QPushButton#closeButton {
 QPushButton#closeButton:hover {
 	background: #f00;
 }
+QPushButton#minimizeButton {
+	border-image:url(:/images/icon_window_minimize.png);
+	width: 24px;
+	height: 24px;
+}
+QPushButton#minimizeButton:hover {
+	background: grey;
+}
 
 QListView {
 	border: 0px;

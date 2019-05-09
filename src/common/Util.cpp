@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QCryptographicHash>
+#include <QStandardPaths>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -168,13 +169,25 @@ namespace Util
 		return QApplication::applicationDirPath();
 	}
 
+    QString getWritebaleDir()
+    {
+        QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+        if (!dir.exists()) {
+            dir.mkpath(dir.absolutePath());
+        }
+        if (!dir.exists()) {
+            dir = QDir(getRunDir());
+        }
+        return dir.absolutePath();
+    }
+
 	QString getConfigDir()
 	{
-		QDir configDir(getRunDir());
-		if (!configDir.exists("config")) {
-			configDir.mkdir("config");
+        QDir dir(getWritebaleDir());
+        if (!dir.exists("config")) {
+            dir.mkdir("config");
 		}
-		return configDir.absolutePath() + "/config";
+        return dir.absolutePath() + "/config";
 	}
 
 	QString getConfigPath()
@@ -184,7 +197,7 @@ namespace Util
 
     QString getImagesDir()
     {
-        QDir dir(getRunDir());
+        QDir dir(getWritebaleDir());
         if (!dir.exists("images")) {
             dir.mkdir("images");
         }
