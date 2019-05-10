@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 
 TitleWidget::TitleWidget(QWidget *parent)
     : QFrame(parent)
@@ -37,4 +38,12 @@ void TitleWidget::setTitle(const QString &title)
 void TitleWidget::setMinimizeVisible(bool yes)
 {
     pbMinimize_->setVisible(yes);
+}
+
+void TitleWidget::keyPressEvent(QKeyEvent *event)
+{
+    QFrame::keyPressEvent(event);
+    if (event->key() == Qt::Key_Escape) {
+        emit sigMinimize();
+    }
 }

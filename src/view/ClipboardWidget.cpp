@@ -6,24 +6,31 @@
 #include <QHBoxLayout>
 #include <QDebug>
 #include <QDateTime>
+#include <QKeyEvent>
+#include <QTimer>
 #include "common/Util.h"
 #include "component/ElidedLabel.h"
 
 const int MAX_CONTENT_LENGTH = 128;
 const int MAX_ROW_COUNT = 100;
+const QString TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
+
 ClipboardRowWidget::ClipboardRowWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), millisecond_(0)
 {
     setObjectName("ClipboardRowWidget");
     image_ = new QLabel(this);
     content_ = new QLabel(this);
     time_ = new QLabel(this);
+    timeInterval_ = new QLabel(this);
+
+    image_->setFixedSize(40, 40);
     content_->setWordWrap(true);
     content_->setMaximumHeight(35);
     content_->setObjectName("ContentLabel");
     time_->setObjectName("TimeLabel");
-    image_->setFixedSize(40, 40);
-    time_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    timeInterval_->setObjectName("TimeLabel");
+    
 
     QHBoxLayout *mLayout = new QHBoxLayout();
     mLayout->setContentsMargins(0, 0, 0, 0);
@@ -33,9 +40,15 @@ ClipboardRowWidget::ClipboardRowWidget(QWidget *parent)
     rightLayout->setContentsMargins(0, 0, 0, 0);
     rightLayout->setSpacing(5);
 
+    QHBoxLayout *timeLayout = new QHBoxLayout();
+    timeLayout->setContentsMargins(0, 0, 10, 0);
+    timeLayout->addWidget(time_);
+    timeLayout->addStretch();
+    timeLayout->addWidget(timeInterval_);
+
     rightLayout->addStretch();
     rightLayout->addWidget(content_);
-    rightLayout->addWidget(time_);
+    rightLayout->addLayout(timeLayout);
     rightLayout->addStretch();
 
     mLayout->addWidget(image_);
@@ -58,7 +71,8 @@ void ClipboardRowWidget::setData(QMimeData *data)
 {
     QPixmap pixmap;
     QString showText;
-    QString timeText = QDateTime::currentDateTime().toString("yyyy/MM/dd HH:mm:ss");
+    millisecond_ = QDateTime::currentMSecsSinceEpoch();
+    QString timeText = QDateTime::currentDateTime().toString(TIME_FORMAT);
 
     qDebug() << "formats:" << data->formats();
     if (data->hasText()) {
@@ -96,6 +110,7 @@ void ClipboardRowWidget::setData(QMimeData *data)
     image_->setPixmap(pixmap);
     content_->setText(showText.trimmed());
     time_->setText(timeText);
+    timeInterval_->setText("(" + Util::getTimeInterval(0) + ")");
 }
 
 QMimeData* ClipboardRowWidget::getData() const
@@ -119,11 +134,28 @@ QMimeData* ClipboardRowWidget::getData() const
     return result;
 }
 
+void ClipboardRowWidget::updateTime()
+{
+    if (millisecond_ <= 0) {
+        return;
+    }
+    qint64 newTime = QDateTime::currentMSecsSinceEpoch();
+    QString newText = "(" + Util::getTimeInterval(newTime - millisecond_) + ")";
+    if (newText != timeInterval_->text()) {
+        timeInterval_->setText(newText);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////
 ClipboardWidget::ClipboardWidget(QWidget *parent)
     : QFrame(parent), isSelf_(false)
 {
     ui.setupUi(this);
+    timer_ = new QTimer(this);
+    timer_->setInterval(10 * 1000);
+    connect(timer_, &QTimer::timeout, this, &ClipboardWidget::onTimer);
+    timer_->start();
+
     QClipboard *clipboard = QGuiApplication::clipboard();
     connect(clipboard, &QClipboard::dataChanged, this, &ClipboardWidget::onDataChanged);
     connect(ui.listWidget, &QListWidget::itemClicked, this, &ClipboardWidget::onItemClicked);
@@ -136,6 +168,14 @@ ClipboardWidget::ClipboardWidget(QWidget *parent)
 
 ClipboardWidget::~ClipboardWidget()
 {
+}
+
+void ClipboardWidget::keyPressEvent(QKeyEvent *event)
+{
+    QFrame::keyPressEvent(event);
+    if (event->key() == Qt::Key_Escape) {
+        emit sigHide();
+    }
 }
 
 void ClipboardWidget::onDataChanged()
@@ -185,4 +225,16 @@ void ClipboardWidget::onItemClicked(QListWidgetItem *item)
         clipboard->setMimeData(row->getData());
     }
 }
+
+void ClipboardWidget::onTimer()
+{
+    for (int i = 0; i < ui.listWidget->count(); i++) {
+        auto item = ui.listWidget->item(i);
+        ClipboardRowWidget *row = static_cast<ClipboardRowWidget*>(ui.listWidget->itemWidget(item));
+        if (row) {
+            row->updateTime();
+        }
+    }
+}
+
 

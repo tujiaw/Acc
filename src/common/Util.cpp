@@ -400,7 +400,7 @@ namespace Util
         int minutes = msInterval / (1000 * 60);
         // 服务端时间与客户端时间如果差距大可能为负的
         if (minutes <= 0) {
-            return QStringLiteral("现在");
+            return QStringLiteral("刚刚");
         } else if (minutes < 60) {
             return QString::number(minutes) + QStringLiteral("分钟前");
         }

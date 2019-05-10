@@ -17,6 +17,9 @@ signals:
 	void sigClose();
     void sigMinimize();
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 private:
 	QLabel *labelTitle_;
 	QPushButton *pbClose_;

@@ -85,6 +85,7 @@ void Acc::openWidget(const QString &id)
             connect(title, &TitleWidget::sigClose, [this] { closeWidget(WidgetID::CLIPBOARD); });
             connect(title, &TitleWidget::sigMinimize, [this] { minimizeWidget(WidgetID::CLIPBOARD); });
             ClipboardWidget *content = new ClipboardWidget(widget);
+            connect(content, &ClipboardWidget::sigHide, [this] { minimizeWidget(WidgetID::CLIPBOARD); });
             widget->setTitle(title);
             widget->setContent(content);
             widget->resize(400, 600);

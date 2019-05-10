@@ -21,13 +21,16 @@ public:
     ~ClipboardRowWidget();
     void setData(QMimeData *data);
     QMimeData* getData() const;
+    void updateTime();
 
 private:
     Type type_;
     QVariant data_;
     QLabel *image_;
     QLabel *content_;
+    qint64 millisecond_;
     QLabel *time_;
+    QLabel *timeInterval_;
 };
 
 class ClipboardWidget : public QFrame
@@ -38,11 +41,19 @@ public:
     ClipboardWidget(QWidget *parent = Q_NULLPTR);
     ~ClipboardWidget();
 
+signals:
+    void sigHide();
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 private slots:
     void onDataChanged();
     void onItemClicked(QListWidgetItem *item);
+    void onTimer();
 
 private:
     Ui::ClipboardWidget ui;
     bool isSelf_;
+    QTimer *timer_;
 };
