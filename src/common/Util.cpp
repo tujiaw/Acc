@@ -423,4 +423,26 @@ namespace Util
         int year = months / 12;
         return QString::number(year) + QStringLiteral("年前");
     }
+
+    bool ImproveProcPriv()
+    {
+        HANDLE token;
+        //提升权限
+        if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token))
+        {
+            MessageBoxA(NULL, "Open process token error", "error", MB_ICONSTOP);
+            return false;
+        }
+        TOKEN_PRIVILEGES tkp;
+        tkp.PrivilegeCount = 1;
+        ::LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tkp.Privileges[0].Luid);
+        tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+        if (!AdjustTokenPrivileges(token, FALSE, &tkp, sizeof(tkp), NULL, NULL))
+        {
+            MessageBoxA(NULL, "Adjust token privileges error", "error", MB_ICONSTOP);
+            return false;
+        }
+        CloseHandle(token);
+        return true;
+    }
 }
