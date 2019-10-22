@@ -1,5 +1,6 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS 1
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
 #include <winver.h>

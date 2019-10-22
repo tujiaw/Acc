@@ -184,28 +184,6 @@ void MainWidget::slotSearchTimer()
 void MainWidget::slotTextChanged(const QString &text)
 {
 	LnkItemDelegate::setSearchText(text.trimmed());
-    //if (text.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
-    //    QFileInfo f(text);
-    //    if (f.isDir()) {
-    //        QDir dir = f.absoluteDir();
-    //        QStringList nameList = dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Time);
-    //        LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
-    //        if (model) {
-    //            QStringList pathList;
-    //            for (auto &name : nameList) {
-    //                pathList.push_back(dir.absoluteFilePath(name));
-    //            }
-    //            qDebug() << "------------------------";
-    //            qDebug() << pathList;
-    //            model->asyncAddNotExist(pathList);
-    //        }
-    //    }
-    //    LnkItemDelegate::setSearchText(f.baseName());
-    //    m_searchTimer->stop();
-    //    m_searchTimer->start();
-    //    return;
-    //}
-
 	if (getPrefixAndText().first.isEmpty()) {
 		m_searchTimer->stop();
 		m_searchTimer->start();
@@ -247,10 +225,6 @@ void MainWidget::slotReturnPressed()
                 } else if (f.isDir()) {
                     Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
                 }
-                //LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
-                //if (model) {
-                //    model->asyncAddNotExist(f.absoluteFilePath());
-                //}
             }
         }
 	}

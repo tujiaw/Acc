@@ -28,7 +28,6 @@
 **
 ** <http://libqxt.org>  <foundation@libqxt.org>
 *****************************************************************************/
-
 #include <qt_windows.h>
 
 

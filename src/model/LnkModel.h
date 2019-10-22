@@ -38,15 +38,16 @@ class WorkerThread : public QThread
 public:
 	WorkerThread(QObject *parent = 0);
     ~WorkerThread();
-    void go(const QStringList &pathList);
+    void go(const QString &indexDir, const QStringList &pathList);
 
 signals:
-	void resultReady(const QList<QSharedPointer<LnkData>> &data);
+	void resultReady(const QString &indexDir);
 
 protected:
 	void run();
 
 private:
+    QString indexDir_;
     QStringList pathList_;
 };
 
@@ -58,22 +59,17 @@ public:
 	LnkModel(QObject *parent);
 	~LnkModel();
 	void load();
-    void asyncAddNotExist(const QString &path);
-    void asyncAddNotExist(const QStringList &pathList);
-    void asyncAdd(const QStringList &pathList);
+    void loadDir(const QString &dir);
 	void filter(const QString &text);
-	int totalCount() const;
 	int showCount() const;
-	bool isExist(const QString &key);
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 private:
-	void handleResult(const QList<QSharedPointer<LnkData>> &data);
+	void handleResult(const QString &indexDir);
 
 private:
-	QList<QSharedPointer<LnkData>> pdata_;
 	QList<QSharedPointer<LnkData>> pfilterdata_;
 };

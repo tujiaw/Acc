@@ -18,6 +18,7 @@ namespace Util {
     QString getWritebaleDir();
 	QString getConfigDir();
 	QString getConfigPath();
+    QString getIndexDir(const QString &name = "default");
     QString getImagesDir();
 	QString getSystemDir(int csidl);
 	QStringList getAllLnk();

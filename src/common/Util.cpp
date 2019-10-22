@@ -195,6 +195,20 @@ namespace Util
 		return getConfigDir() + "/base.ini";
 	}
 
+    QString getIndexDir(const QString &name)
+    {
+        const QString indexDir = "indexfiles";
+        QDir dir(getWritebaleDir());
+        if (!dir.exists(indexDir)) {
+            dir.mkdir(indexDir);
+        }
+        dir.cd(indexDir);
+        if (!dir.exists(name)) {
+            dir.mkdir(name);
+        }
+        return dir.absolutePath() + "/" + name;
+    }
+
     QString getImagesDir()
     {
         QDir dir(getWritebaleDir());
@@ -247,10 +261,6 @@ namespace Util
 		result.append(getFiles(commonPrograms));
 		result.append(getFiles(programs));
         result.append(getFiles(commonDesktop));
-
-		//EnumerateFileInDirectory(desktop, false, result);
-		//EnumerateFileInDirectory(commonPrograms, true, result);
-		//EnumerateFileInDirectory(programs, true, result);
 
 		return result;
 	}

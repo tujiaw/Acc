@@ -7,6 +7,7 @@
 #include <QApplication>
 #include "Util.h"
 #ifdef DEBUG
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
