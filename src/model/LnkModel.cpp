@@ -111,13 +111,12 @@ void WorkerThread::run()
 
 	emit resultReady(indexDir_);
 }
-#include <QTimer>
+
 //////////////////////////////////////////////////////////////////////////
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
 {
 	load();
-    loadDir("E:\\11111111");
 }
 
 LnkModel::~LnkModel()

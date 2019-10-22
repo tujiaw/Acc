@@ -74,7 +74,7 @@ void Acc::openWidget(const QString &id)
 			SettingWidget *content = new SettingWidget(widget);
 			widget->setTitle(title);
 			widget->setContent(content);
-			widget->resize(650, 450);
+			widget->resize(500, 400);
         } else if (id == WidgetID::CLIPBOARD) {
             TitleWidget *title = new TitleWidget(widget);
             title->setTitle(tr("Clipboard"));

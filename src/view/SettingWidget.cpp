@@ -42,14 +42,11 @@ SettingWidget::SettingWidget(QWidget *parent)
     }
     connect(ui.cbWallpaperIndex, SIGNAL(activated(int)), this, SLOT(slotWallpaperIndex(int)));
 
-	QStringList menuList = QStringList() << tr("Hot Key") << tr("Start") << tr("Shown");
-	for (int i = 0; i < menuList.size(); i++) {
-		ui.listWidget->addItem(menuList[i]);
-	}
-    connect(ui.listWidget, &QListWidget::currentItemChanged, this, &SettingWidget::slotCurrentItemChanged);
-
 	QStringList searchEngineList = QStringList() << tr("Baidu") << tr("Bing") << tr("Google");
 	ui.cbSearchEngine->addItems(searchEngineList);
+
+    ui.indexListWidget->addItem(tr("Default"));
+    ui.tabWidget->setCurrentIndex(0);
 
 	readData();
 }
@@ -60,7 +57,6 @@ SettingWidget::~SettingWidget()
 
 void SettingWidget::readData()
 {
-	ui.listWidget->setCurrentRow(0);
 	SettingModel *settingModel = Acc::instance()->getSettingModel();
 	ui.cbMaxResult->setCurrentText(QString::number(settingModel->maxResult()));
 	ui.leHotkey->setText(settingModel->mainShortcutText());
@@ -168,26 +164,6 @@ void SettingWidget::slotMyBlog(const QString &link)
 void SettingWidget::slotSearchEngineActivated(const QString &text)
 {
 	writeData(sender());
-}
-
-void SettingWidget::slotCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
-{
-    static int lastY = 0;
-    int y = 0;
-    QString text = current->text();
-    if (text == "Hot Key") {
-        y = ui.labelHotKey->pos().y();
-    } else if (text == "Start") {
-        y = ui.labelStart->pos().y();
-    } else if (text == "Shown") {
-        y = ui.labelShown->pos().y();
-    }
-
-    if (lastY != 0) {
-        ui.scrollArea->scroll(0, lastY);
-    }
-    ui.scrollArea->scroll(0, -1 * y);
-    lastY = y;
 }
 
 void SettingWidget::slotWallpaperIndex(int index)
