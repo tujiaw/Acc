@@ -6,7 +6,7 @@
 
 class QWidget;
 namespace Util {
-	QStringList getFiles(QString path, bool containsSubDir = true, int maxLimit = -1);
+	QStringList getFiles(QString path, bool containsSubDir = true, int maxLimit = -1, const QStringList &filterSuffix = QStringList());
 	bool shellExecute(const QString &path);
     bool shellExecute(const QString &path, const QString &operation);
 	bool locateFile(const QString &dir);

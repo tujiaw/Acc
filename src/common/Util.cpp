@@ -73,32 +73,32 @@ void EnumerateFileInDirectory(const QString &dir, bool containsSubDir, QStringLi
 namespace Util
 {
 
-    QStringList getFiles(QString path, bool containsSubDir, int maxLimit)
+    QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
 	{
-		QStringList result;
+        QStringList result;
         if (path.isEmpty()) {
             return result;
         }
-
-		QDirIterator curit(path, QStringList(), QDir::Files);
-		while (curit.hasNext()) {
-			result.push_back(curit.next());
-            if (maxLimit > 0 && result.size() >= maxLimit) {
-                break;
-            }
-		}
-
-		if (containsSubDir) {
-			QDirIterator subit(path, QStringList(), QDir::Files, QDirIterator::Subdirectories);
-			while (subit.hasNext()) {
-				result.push_back(subit.next());
-                if (maxLimit > 0 && result.size() >= maxLimit) {
-                    break;
+        QDirIterator iter(path, QStringList(), QDir::Files, containsSubDir ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags);
+        while (iter.hasNext()) {
+            if (filterSuffix.isEmpty()) {
+                result.push_back(iter.next());
+            } else {
+                QString suffix = iter.fileInfo().suffix();
+                if (suffix.isEmpty()) {
+                    result.push_back(iter.next());
+                } else if (!filterSuffix.contains(suffix, Qt::CaseInsensitive)) {
+                    result.push_back(iter.next());
+                } else {
+                    iter.next();
                 }
-			}
-		}
+            }
 
-		return result;
+            if (maxLimit > 0 && result.size() >= maxLimit) {
+                return result;
+            }
+        }
+        return result;
 	}
 
 	bool shellExecute(const QString &path)

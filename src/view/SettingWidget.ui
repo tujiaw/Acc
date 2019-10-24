@@ -402,12 +402,12 @@
                 </size>
                </property>
                <property name="text">
-                <string>过滤目录</string>
+                <string>过滤后缀</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit"/>
+              <widget class="QLineEdit" name="leFilterSuffix"/>
              </item>
              <item>
               <widget class="QLabel" name="label_3">
@@ -444,13 +444,6 @@
                </property>
               </widget>
              </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
             </layout>
            </item>
           </layout>

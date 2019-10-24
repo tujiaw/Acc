@@ -43,6 +43,10 @@ public:
     void setDirMaxLimit(int limit);
     int getDirMaxLimit() const;
 
+    void setFilterSuffix(const QString &suffix);
+    QString getFilterSuffix() const;
+    QStringList filterSuffix() const;
+
 private:
 	QSettings settings_;
 };

@@ -47,6 +47,8 @@ SettingWidget::SettingWidget(QWidget *parent)
 	ui.cbSearchEngine->addItems(searchEngineList);
 
     // index tab
+    connect(ui.leFilterSuffix, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leFilterSuffix); });
+
     ui.leDirMaxLimit->setValidator(new QRegExpValidator(QRegExp("[0-9]*"), ui.leDirMaxLimit));
     ui.leDirMaxLimit->setMaxLength(7);
     connect(ui.leDirMaxLimit, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leDirMaxLimit); });
@@ -78,6 +80,7 @@ void SettingWidget::readData()
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
     ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
     ui.leDirMaxLimit->setText(QString::number(settingModel->getDirMaxLimit()));
+    ui.leFilterSuffix->setText(settingModel->getFilterSuffix());
     addIndexItemList(settingModel->getIndexList());
 }
 
@@ -151,6 +154,9 @@ void SettingWidget::writeData(QObject *sender)
     }
     if (!sender || ui.leDirMaxLimit == sender) {
         Acc::instance()->getSettingModel()->setDirMaxLimit(ui.leDirMaxLimit->text().toInt());
+    }
+    if (!sender || ui.leFilterSuffix == sender) {
+        Acc::instance()->getSettingModel()->setFilterSuffix(ui.leFilterSuffix->text().trimmed());
     }
 }
 

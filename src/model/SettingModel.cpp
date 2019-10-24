@@ -15,6 +15,7 @@ static const QString BIND_WALLPAPER_ON = "BindWallpaperOn";
 static const QString BIND_WALLPAPER_INDEX = "BindWallpaperIndex";
 static const QString INDEX_LIST = "IndexList";
 static const QString DIR_MAX_LIMIT = "DirMaxLimit";
+static const QString FILTER_SUFFIX = "FilterSuffix";
 
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
@@ -168,3 +169,20 @@ int SettingModel::getDirMaxLimit() const
 {
     return settings_.value(DIR_MAX_LIMIT, 10000).toInt();
 }
+
+
+void SettingModel::setFilterSuffix(const QString &suffix)
+{
+    settings_.setValue(FILTER_SUFFIX, suffix);
+}
+
+QString SettingModel::getFilterSuffix() const
+{
+    return settings_.value(FILTER_SUFFIX).toString();
+}
+
+QStringList SettingModel::filterSuffix() const
+{
+    return getFilterSuffix().split(";", QString::SkipEmptyParts);
+}
+

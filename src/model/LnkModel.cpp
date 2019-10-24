@@ -50,7 +50,8 @@ void WorkerThread::run()
         pathList = Util::getAllLnk();
         indexName = DEFAULT_INDEX;
     } else {
-        pathList = Util::getFiles(indexDir_, true, maxLimit_);
+        QStringList filterSuffix = Acc::instance()->getSettingModel()->filterSuffix();
+        pathList = Util::getFiles(indexDir_, true, maxLimit_, filterSuffix);
         indexName = Util::md5(indexDir_);
     }
 
@@ -181,8 +182,6 @@ void LnkModel::filter(const QString &text)
                 TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
                 searcher->search(query, collector);
                 Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
-                int32_t totalHits = collector->getTotalHits();
-                qDebug() << "index:" << queryIndex++ << ", total hits:" << totalHits << ", hit size:" << hits.size();
                 for (int i = 0; i < hits.size(); i++) {
                     if (pfilterdata_.size() >= MAX_RESULT) {
                         break;
@@ -223,7 +222,6 @@ void LnkModel::filter(const QString &text)
             int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->lnkName, right->targetPath);
             return leftHits > rightHits;
         });
-        qDebug() << "result count:" << pfilterdata_.size();
 	}
 	int count = pfilterdata_.size();
 	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));
