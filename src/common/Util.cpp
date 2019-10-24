@@ -73,18 +73,28 @@ void EnumerateFileInDirectory(const QString &dir, bool containsSubDir, QStringLi
 namespace Util
 {
 
-	QStringList getFiles(QString path, bool containsSubDir)
+    QStringList getFiles(QString path, bool containsSubDir, int maxLimit)
 	{
 		QStringList result;
+        if (path.isEmpty()) {
+            return result;
+        }
+
 		QDirIterator curit(path, QStringList(), QDir::Files);
 		while (curit.hasNext()) {
 			result.push_back(curit.next());
+            if (maxLimit > 0 && result.size() >= maxLimit) {
+                break;
+            }
 		}
 
 		if (containsSubDir) {
 			QDirIterator subit(path, QStringList(), QDir::Files, QDirIterator::Subdirectories);
 			while (subit.hasNext()) {
 				result.push_back(subit.next());
+                if (maxLimit > 0 && result.size() >= maxLimit) {
+                    break;
+                }
 			}
 		}
 
@@ -203,10 +213,34 @@ namespace Util
             dir.mkdir(indexDir);
         }
         dir.cd(indexDir);
-        if (!dir.exists(name)) {
-            dir.mkdir(name);
+        if (name.isEmpty()) {
+            return dir.absolutePath();
+        } else {
+            if (!dir.exists(name)) {
+                dir.mkdir(name);
+            }
+            return dir.absolutePath() + "/" + name;
         }
-        return dir.absolutePath() + "/" + name;
+    }
+
+    bool removeDir(const QString &path, bool containSubDir)
+    {
+        QDir dir(path);
+        QFileInfoList fileList = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+        for (int i = 0; i < fileList.size(); i++) {
+            if (fileList[i].isDir() && containSubDir) {
+                if (!removeDir(fileList[i].absoluteFilePath(), containSubDir)) {
+                    return false;
+                }
+            } else {
+                dir.remove(fileList[i].fileName());
+            }
+        }
+        QString dirName = dir.dirName();
+        if (dir.cdUp()) {
+            return dir.rmdir(dirName);
+        }
+        return false;
     }
 
     QString getImagesDir()

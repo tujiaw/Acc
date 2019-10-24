@@ -12,8 +12,9 @@
 #include "lucene/FileUtils.h"
 using namespace Lucene;
 
+const QString DEFAULT_INDEX = "Default";
 struct SearcherInfo {
-    QString indexDir;
+    QString indexName;
     Lucene::IndexReaderPtr reader;
     Lucene::SearcherPtr searcher;
     Lucene::AnalyzerPtr analyzer;
@@ -24,7 +25,7 @@ QFileIconProvider g_iconProvider;
 QList<SearcherInfo> g_searcherList;
 
 WorkerThread::WorkerThread(QObject *parent) 
-	: QThread(parent)
+    : QThread(parent), maxLimit_(-1)
 {
 	qRegisterMetaType<QList<QSharedPointer<LnkData>>>("QList<QSharedPointer<LnkData>>");
 }
@@ -34,15 +35,30 @@ WorkerThread::~WorkerThread()
     qDebug() << "worker thread exit";
 }
 
-void WorkerThread::go(const QString &indexDir, const QStringList &pathList)
+void WorkerThread::go(const QString &indexDir, int maxLimit)
 {
     indexDir_ = indexDir;
-    pathList_ = pathList;
+    maxLimit_ = maxLimit;
     start();
 }
 
 void WorkerThread::run()
 {
+    QStringList pathList;
+    QString indexName;
+    if (indexDir_ == Util::getIndexDir(DEFAULT_INDEX)) {
+        pathList = Util::getAllLnk();
+        indexName = DEFAULT_INDEX;
+    } else {
+        pathList = Util::getFiles(indexDir_, true, maxLimit_);
+        indexName = Util::md5(indexDir_);
+    }
+
+    if (pathList.isEmpty()) {
+        emit resultReady("Directory is empty", indexName);
+        return;
+    }
+
     auto addDocument = [](const QSharedPointer<LnkData> &data) -> DocumentPtr {
         DocumentPtr doc = newLucene<Document>();
         String name = data->lnkName.toStdWString();
@@ -56,12 +72,12 @@ void WorkerThread::run()
         return doc;
     };
 
-    Lucene::String indexDir = indexDir_.toStdWString();
-    IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(indexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
+    Lucene::String localIndexDir = Util::getIndexDir(indexName).toStdWString();
+    IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
 
 	QFileInfo info;
     QSet<QString> repeat;
-    for (auto iter = pathList_.begin(); iter != pathList_.end(); ++iter) {
+    for (auto iter = pathList.begin(); iter != pathList.end(); ++iter) {
 		info.setFile(*iter);
         QString target = info.filePath();
         QString linkTarget = info.symLinkTarget();
@@ -109,7 +125,7 @@ void WorkerThread::run()
     writer->optimize();
     writer->close();
 
-	emit resultReady(indexDir_);
+    emit resultReady("", indexName);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -117,26 +133,32 @@ LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
 {
 	load();
+    QStringList successList;
+    auto indexList = Acc::instance()->getSettingModel()->getIndexList();
+    for (auto iter = indexList.begin(); iter != indexList.end(); ++iter) {
+        if (addSearcher(Util::md5(*iter))) {
+            successList.push_back(*iter);
+        }
+    }
+    if (successList != indexList) {
+        Acc::instance()->getSettingModel()->setIndexList(successList);
+    }
 }
 
 LnkModel::~LnkModel()
 {
 }
 
-void LnkModel::load()
+void LnkModel::load(const QString &dir)
 {
+    QString realDir = dir;
+    if (dir.isEmpty()) {
+        realDir = Util::getIndexDir(DEFAULT_INDEX);
+    }
     WorkerThread *workerThread = new WorkerThread(this);
     connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult, Qt::QueuedConnection);
     connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
-    workerThread->go(Util::getIndexDir(), Util::getAllLnk());
-}
-
-void LnkModel::loadDir(const QString &dir)
-{
-    WorkerThread *workerThread = new WorkerThread(this);
-    connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult, Qt::QueuedConnection);
-    connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
-    workerThread->go(Util::getIndexDir(Util::md5(dir)), Util::getFiles(dir));
+    workerThread->go(realDir, Acc::instance()->getSettingModel()->getDirMaxLimit());
 }
 
 void LnkModel::filter(const QString &text)
@@ -212,6 +234,64 @@ int LnkModel::showCount() const
 	return pfilterdata_.size();
 }
 
+bool LnkModel::removeSearcher(const QString &name)
+{
+    for (int i = 0; i < g_searcherList.size(); i++) {
+        if (g_searcherList[i].indexName == name) {
+            if (!Util::removeDir(Util::getIndexDir(name))) {
+                return false;
+            }
+            g_searcherList.removeAt(i);
+        }
+    }
+    return true;
+}
+
+bool LnkModel::addSearcher(const QString &name)
+{
+    try {
+        SearcherInfo info;
+        info.indexName = name;
+        info.reader = IndexReader::open(FSDirectory::open(Util::getIndexDir(name).toStdWString()), true);
+        info.searcher = newLucene<IndexSearcher>(info.reader);
+        info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
+        info.nameParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
+        info.nameParser->setAllowLeadingWildcard(true);
+        info.contentParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"contents", info.analyzer);
+        info.contentParser->setAllowLeadingWildcard(true);
+
+        bool isExist = false;
+        for (int i = 0; i < g_searcherList.size(); i++) {
+            if (g_searcherList[i].indexName == name) {
+                g_searcherList[i] = info;
+                isExist = true;
+            }
+        }
+        if (!isExist) {
+            g_searcherList.push_back(info);
+        }
+
+        sortSearcher();
+        return true;
+    }
+    catch (LuceneException& e) {
+        qDebug() << "Exception: " << QString::fromStdWString(e.getError()) << L"\n";
+    }
+    return false;
+}
+
+void LnkModel::sortSearcher()
+{
+    QStringList indexList = Acc::instance()->getSettingModel()->getIndexList();
+    QMap<QString, int> indexMap;
+    for (int i = 0; i < indexList.size(); i++) {
+        indexMap[Util::md5(indexList[i])] = i + 1;
+    }
+    qSort(g_searcherList.begin(), g_searcherList.end(), [&indexMap](const SearcherInfo &left, const SearcherInfo &right) -> bool {
+        return indexMap[left.indexName] < indexMap[right.indexName];
+    });
+}
+
 int LnkModel::rowCount(const QModelIndex &parent) const
 {
 	return pfilterdata_.count();
@@ -226,30 +306,12 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-void LnkModel::handleResult(const QString &indexDir)
+void LnkModel::handleResult(const QString &err, const QString &indexName)
 {
-    try {
-        SearcherInfo info;
-        info.indexDir = indexDir;
-        info.reader = IndexReader::open(FSDirectory::open(indexDir.toStdWString()), true);
-        info.searcher = newLucene<IndexSearcher>(info.reader);
-        info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
-        info.nameParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
-        info.nameParser->setAllowLeadingWildcard(true);
-        info.contentParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"contents", info.analyzer);
-        info.contentParser->setAllowLeadingWildcard(true);
-
-        bool isExist = false;
-        for (int i = 0; i < g_searcherList.size(); i++) {
-            if (g_searcherList[i].indexDir == indexDir) {
-                g_searcherList[i] = info;
-                isExist = true;
-            }
-        }
-        if (!isExist) {
-            g_searcherList.push_back(info);
-        }
-    } catch (LuceneException& e) {
-        qDebug() << "Exception: " << QString::fromStdWString(e.getError()) << L"\n";
+    if (!err.isEmpty()) {
+        qDebug() << "ERROR:" << err;
+        return;
     }
+
+    addSearcher(indexName);
 }

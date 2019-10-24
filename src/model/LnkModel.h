@@ -38,17 +38,17 @@ class WorkerThread : public QThread
 public:
 	WorkerThread(QObject *parent = 0);
     ~WorkerThread();
-    void go(const QString &indexDir, const QStringList &pathList);
+    void go(const QString &indexDir, int maxLimit);
 
 signals:
-	void resultReady(const QString &indexDir);
+	void resultReady(const QString &err, const QString &indexDir);
 
 protected:
 	void run();
 
 private:
     QString indexDir_;
-    QStringList pathList_;
+    int maxLimit_;
 };
 
 class LnkModel : public QAbstractListModel
@@ -58,17 +58,19 @@ class LnkModel : public QAbstractListModel
 public:
 	LnkModel(QObject *parent);
 	~LnkModel();
-	void load();
-    void loadDir(const QString &dir);
+	void load(const QString &dir = "");
 	void filter(const QString &text);
 	int showCount() const;
+    bool removeSearcher(const QString &name);
+    bool addSearcher(const QString &name);
+    void sortSearcher();
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 private:
-	void handleResult(const QString &indexDir);
+	void handleResult(const QString &err, const QString &indexName);
 
 private:
 	QList<QSharedPointer<LnkData>> pfilterdata_;

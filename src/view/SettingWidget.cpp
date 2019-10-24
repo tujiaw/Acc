@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QFileDialog>
 #include "controller/Acc.h"
 #include "view/MainWidget.h"
 #include "common/DarkStyle.h"
@@ -45,8 +46,15 @@ SettingWidget::SettingWidget(QWidget *parent)
 	QStringList searchEngineList = QStringList() << tr("Baidu") << tr("Bing") << tr("Google");
 	ui.cbSearchEngine->addItems(searchEngineList);
 
-    ui.indexListWidget->addItem(tr("Default"));
-    ui.tabWidget->setCurrentIndex(0);
+    // index tab
+    ui.leDirMaxLimit->setValidator(new QRegExpValidator(QRegExp("[0-9]*"), ui.leDirMaxLimit));
+    ui.leDirMaxLimit->setMaxLength(7);
+    connect(ui.leDirMaxLimit, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leDirMaxLimit); });
+
+    connect(ui.pbIndexAdd, &QPushButton::clicked, this, &SettingWidget::slotIndexAdd);
+    connect(ui.pbIndexRemove, &QPushButton::clicked, this, &SettingWidget::slotIndexRemove);
+    connect(ui.pbIndexUp, &QPushButton::clicked, this, &SettingWidget::slotIndexUp);
+    connect(ui.pbIndexDown, &QPushButton::clicked, this, &SettingWidget::slotIndexDown);
 
 	readData();
 }
@@ -69,6 +77,8 @@ void SettingWidget::readData()
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
     ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
+    ui.leDirMaxLimit->setText(QString::number(settingModel->getDirMaxLimit()));
+    addIndexItemList(settingModel->getIndexList());
 }
 
 void SettingWidget::writeData(QObject *sender)
@@ -131,6 +141,17 @@ void SettingWidget::writeData(QObject *sender)
     if (!sender || ui.cbUseBing == sender || ui.cbWallpaperIndex == sender) {
         Acc::instance()->getSettingModel()->setBindWallpaper(ui.cbUseBing->isChecked(), ui.cbWallpaperIndex->currentIndex());
     }
+    // ÉèÖÃË÷Òý
+    if (!sender || ui.indexListWidget == sender) {
+        QStringList indexList;
+        for (int i = 0; i < ui.indexListWidget->count(); i++) {
+            indexList.push_back(ui.indexListWidget->item(i)->text());
+        }
+        Acc::instance()->getSettingModel()->setIndexList(indexList);
+    }
+    if (!sender || ui.leDirMaxLimit == sender) {
+        Acc::instance()->getSettingModel()->setDirMaxLimit(ui.leDirMaxLimit->text().toInt());
+    }
 }
 
 void SettingWidget::slotMaxResultChanged(const QString &text)
@@ -170,4 +191,94 @@ void SettingWidget::slotWallpaperIndex(int index)
 {
     writeData(sender());
     Acc::instance()->setBindWallpaper(index);
+}
+
+void SettingWidget::slotIndexAdd()
+{
+    QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Select index directory"));
+    addIndexItem(dir);
+    writeData(ui.indexListWidget);
+
+    Acc::instance()->getLnkModel()->load(dir);
+}
+
+void SettingWidget::slotIndexRemove()
+{
+    auto items = ui.indexListWidget->selectedItems();
+    if (items.size() != 1) {
+        return;
+    }
+
+    QString removeText = items[0]->text();
+    if (Acc::instance()->getLnkModel()->removeSearcher(Util::md5(removeText))) {
+        auto removeItem = ui.indexListWidget->takeItem(ui.indexListWidget->row(items[0]));
+        ui.indexListWidget->removeItemWidget(removeItem);
+        writeData(ui.indexListWidget);
+    }    
+}
+
+void SettingWidget::slotIndexUp()
+{
+    auto items = ui.indexListWidget->selectedItems();
+    if (items.size() != 1) {
+        return;
+    }
+
+    int row = ui.indexListWidget->row(items[0]);
+    if (row <= 0) {
+        return;
+    }
+
+    auto text = items[0]->text();
+    auto upItem = ui.indexListWidget->item(row - 1);
+    items[0]->setText(upItem->text());
+    upItem->setText(text);
+    
+    ui.indexListWidget->setCurrentItem(upItem);
+    writeData(ui.indexListWidget);
+
+    Acc::instance()->getLnkModel()->sortSearcher();
+}
+
+void SettingWidget::slotIndexDown()
+{
+    auto items = ui.indexListWidget->selectedItems();
+    if (items.size() != 1) {
+        return;
+    }
+
+    int row = ui.indexListWidget->row(items[0]);
+    if (ui.indexListWidget->count() - 1 == row) {
+        return;
+    }
+
+    auto text = items[0]->text();
+    auto downItem = ui.indexListWidget->item(row + 1);
+    items[0]->setText(downItem->text());
+    downItem->setText(text);
+
+    ui.indexListWidget->setCurrentItem(downItem);
+    writeData(ui.indexListWidget);
+
+    Acc::instance()->getLnkModel()->sortSearcher();
+}
+
+void SettingWidget::addIndexItem(const QString &name)
+{
+    for (int i = 0; i < ui.indexListWidget->count(); i++) {
+        if (ui.indexListWidget->item(i)->text() == name) {
+            return;
+        }
+    }
+
+    auto item = new QListWidgetItem(name);
+    item->setSizeHint(QSize(item->sizeHint().width(), 30));
+    ui.indexListWidget->addItem(item);
+}
+
+void SettingWidget::addIndexItemList(const QStringList &nameList)
+{
+    for (int i = 0; i < nameList.size(); i++) {
+        addIndexItem(nameList[i]);
+    }
 }

@@ -22,6 +22,15 @@ private slots:
 	void slotSearchEngineActivated(const QString &text);
     void slotWallpaperIndex(int index);
 
+    void slotIndexAdd();
+    void slotIndexRemove();
+    void slotIndexUp();
+    void slotIndexDown();
+
+private:
+    void addIndexItem(const QString &name);
+    void addIndexItemList(const QStringList &nameList);
+
 private:
 	Ui::SettingWidget ui;
 };

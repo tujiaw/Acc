@@ -13,6 +13,8 @@ static const QString SEARCH_ENGINE_ON = "SearchEngineOn";
 static const QString SEARCH_ENGINE = "SearchEngine";
 static const QString BIND_WALLPAPER_ON = "BindWallpaperOn";
 static const QString BIND_WALLPAPER_INDEX = "BindWallpaperIndex";
+static const QString INDEX_LIST = "IndexList";
+static const QString DIR_MAX_LIMIT = "DirMaxLimit";
 
 SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
@@ -145,4 +147,24 @@ QPair<bool, int> SettingModel::bindWallpaperUrl() const
     bool enable = settings_.value(BIND_WALLPAPER_ON, true).toBool();
     int index = settings_.value(BIND_WALLPAPER_INDEX, 0).toInt();
     return qMakePair(enable, index);
+}
+
+void SettingModel::setIndexList(const QStringList &indexList)
+{
+    settings_.setValue(INDEX_LIST, indexList.join(";"));
+}
+
+QStringList SettingModel::getIndexList() const
+{
+    return settings_.value(INDEX_LIST).toString().split(";", QString::SkipEmptyParts);
+}
+
+void SettingModel::setDirMaxLimit(int limit)
+{
+    settings_.setValue(DIR_MAX_LIMIT, limit);
+}
+
+int SettingModel::getDirMaxLimit() const
+{
+    return settings_.value(DIR_MAX_LIMIT, 10000).toInt();
 }

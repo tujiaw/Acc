@@ -6,7 +6,7 @@
 
 class QWidget;
 namespace Util {
-	QStringList getFiles(QString path, bool containsSubDir = true);
+	QStringList getFiles(QString path, bool containsSubDir = true, int maxLimit = -1);
 	bool shellExecute(const QString &path);
     bool shellExecute(const QString &path, const QString &operation);
 	bool locateFile(const QString &dir);
@@ -18,7 +18,8 @@ namespace Util {
     QString getWritebaleDir();
 	QString getConfigDir();
 	QString getConfigPath();
-    QString getIndexDir(const QString &name = "default");
+    QString getIndexDir(const QString &name = "");
+    bool removeDir(const QString &dir, bool containSubDir = true);
     QString getImagesDir();
 	QString getSystemDir(int csidl);
 	QStringList getAllLnk();

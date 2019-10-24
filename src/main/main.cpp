@@ -27,5 +27,6 @@ int main(int argc, char *argv[])
 	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
 
     qDebug() << "app running";
+    qDebug() << "config dir:" << Util::getConfigDir();
 	return a.exec();
 }

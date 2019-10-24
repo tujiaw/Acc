@@ -37,6 +37,12 @@ public:
     void setBindWallpaper(bool enable, int index);
     QPair<bool, int> bindWallpaperUrl() const;
 
+    void setIndexList(const QStringList &indexList);
+    QStringList getIndexList() const;
+
+    void setDirMaxLimit(int limit);
+    int getDirMaxLimit() const;
+
 private:
 	QSettings settings_;
 };

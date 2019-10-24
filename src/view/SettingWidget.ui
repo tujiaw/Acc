@@ -375,6 +375,87 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>过滤目录</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>目录最大文件数</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="leDirMaxLimit">
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QListWidget" name="indexListWidget">
@@ -384,33 +465,39 @@
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
              </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="resizeMode">
+              <enum>QListView::Fixed</enum>
+             </property>
             </widget>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pbIndexAdd">
                <property name="text">
                 <string>Add</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="pbIndexRemove">
                <property name="text">
                 <string>Remove</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="pbIndexUp">
                <property name="text">
                 <string>Up</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_4">
+              <widget class="QPushButton" name="pbIndexDown">
                <property name="text">
                 <string>Down</string>
                </property>
