@@ -26,10 +26,12 @@ private slots:
     void slotIndexRemove();
     void slotIndexUp();
     void slotIndexDown();
+    void slotIndexResult(const QString &err, const QString &indexName);
 
 private:
-    void addIndexItem(const QString &name);
+    QListWidgetItem* addIndexItem(const QString &name);
     void addIndexItemList(const QStringList &nameList);
+    void updateIndexStatus();
 
 private:
 	Ui::SettingWidget ui;

@@ -64,6 +64,7 @@ public:
     bool removeSearcher(const QString &name);
     bool addSearcher(const QString &name);
     void sortSearcher();
+    QString getSearcherStatus(const QString &name) const;
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;

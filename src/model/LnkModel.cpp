@@ -290,6 +290,16 @@ void LnkModel::sortSearcher()
     });
 }
 
+QString LnkModel::getSearcherStatus(const QString &name) const
+{
+    for (int i = 0; i < g_searcherList.size(); i++) {
+        if (g_searcherList[i].indexName == name) {
+            return "Ok";
+        }
+    }
+    return "Wait";
+}
+
 int LnkModel::rowCount(const QModelIndex &parent) const
 {
 	return pfilterdata_.count();
@@ -306,10 +316,10 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 
 void LnkModel::handleResult(const QString &err, const QString &indexName)
 {
-    if (!err.isEmpty()) {
+    if (err.isEmpty()) {
+        addSearcher(indexName);
+    } else {
         qDebug() << "ERROR:" << err;
-        return;
     }
-
-    addSearcher(indexName);
+    emit Acc::instance()->sigIndexResult(err, indexName);
 }

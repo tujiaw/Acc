@@ -30,6 +30,7 @@ public:
 signals:
 	void sigSetMainShortcut(const QString &textKey);
 	void sigClearResult();
+    void sigIndexResult(const QString &err, const QString &indexName);
 
 private:
 	Acc();

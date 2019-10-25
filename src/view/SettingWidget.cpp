@@ -47,6 +47,9 @@ SettingWidget::SettingWidget(QWidget *parent)
 	ui.cbSearchEngine->addItems(searchEngineList);
 
     // index tab
+    ui.indexListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
+    ui.indexStatusListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
+    ui.indexListWidget->setAutoFillBackground(true);
     connect(ui.leFilterSuffix, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leFilterSuffix); });
 
     ui.leDirMaxLimit->setValidator(new QRegExpValidator(QRegExp("[0-9]*"), ui.leDirMaxLimit));
@@ -57,6 +60,7 @@ SettingWidget::SettingWidget(QWidget *parent)
     connect(ui.pbIndexRemove, &QPushButton::clicked, this, &SettingWidget::slotIndexRemove);
     connect(ui.pbIndexUp, &QPushButton::clicked, this, &SettingWidget::slotIndexUp);
     connect(ui.pbIndexDown, &QPushButton::clicked, this, &SettingWidget::slotIndexDown);
+    connect(Acc::instance(), &Acc::sigIndexResult, this, &SettingWidget::slotIndexResult);
 
 	readData();
 }
@@ -202,10 +206,11 @@ void SettingWidget::slotWallpaperIndex(int index)
 void SettingWidget::slotIndexAdd()
 {
     QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Select index directory"));
-    addIndexItem(dir);
+    auto newItem = addIndexItem(dir);
     writeData(ui.indexListWidget);
 
     Acc::instance()->getLnkModel()->load(dir);
+    updateIndexStatus();
 }
 
 void SettingWidget::slotIndexRemove()
@@ -217,9 +222,11 @@ void SettingWidget::slotIndexRemove()
 
     QString removeText = items[0]->text();
     if (Acc::instance()->getLnkModel()->removeSearcher(Util::md5(removeText))) {
-        auto removeItem = ui.indexListWidget->takeItem(ui.indexListWidget->row(items[0]));
+        int delRow = ui.indexListWidget->row(items[0]);
+        auto removeItem = ui.indexListWidget->takeItem(delRow);
         ui.indexListWidget->removeItemWidget(removeItem);
         writeData(ui.indexListWidget);
+        updateIndexStatus();
     }    
 }
 
@@ -244,6 +251,7 @@ void SettingWidget::slotIndexUp()
     writeData(ui.indexListWidget);
 
     Acc::instance()->getLnkModel()->sortSearcher();
+    updateIndexStatus();
 }
 
 void SettingWidget::slotIndexDown()
@@ -267,19 +275,21 @@ void SettingWidget::slotIndexDown()
     writeData(ui.indexListWidget);
 
     Acc::instance()->getLnkModel()->sortSearcher();
+    updateIndexStatus();
 }
 
-void SettingWidget::addIndexItem(const QString &name)
+QListWidgetItem* SettingWidget::addIndexItem(const QString &name)
 {
     for (int i = 0; i < ui.indexListWidget->count(); i++) {
         if (ui.indexListWidget->item(i)->text() == name) {
-            return;
+            return nullptr;
         }
     }
 
     auto item = new QListWidgetItem(name);
-    item->setSizeHint(QSize(item->sizeHint().width(), 30));
+    item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
     ui.indexListWidget->addItem(item);
+    return item;
 }
 
 void SettingWidget::addIndexItemList(const QStringList &nameList)
@@ -287,4 +297,22 @@ void SettingWidget::addIndexItemList(const QStringList &nameList)
     for (int i = 0; i < nameList.size(); i++) {
         addIndexItem(nameList[i]);
     }
+    updateIndexStatus();
+}
+
+void SettingWidget::updateIndexStatus()
+{
+    ui.indexStatusListWidget->clear();
+    for (int i = 0; i < ui.indexListWidget->count(); i++) {
+        QString text = ui.indexListWidget->item(i)->text();
+        QString status = Acc::instance()->getLnkModel()->getSearcherStatus(Util::md5(text));
+        QListWidgetItem *item = new QListWidgetItem(status);
+        item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
+        ui.indexStatusListWidget->addItem(item);
+    }
+}
+
+void SettingWidget::slotIndexResult(const QString &err, const QString &indexName)
+{
+    updateIndexStatus();
 }

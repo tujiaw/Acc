@@ -13,5 +13,6 @@
         <file>images/icon_image.png</file>
         <file>images/icon_link.png</file>
         <file>images/icon_text.png</file>
+        <file>images/icon_wait.png</file>
     </qresource>
 </RCC>
