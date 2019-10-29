@@ -64,7 +64,8 @@ void WorkerThread::run()
         DocumentPtr doc = newLucene<Document>();
         String name = data->lnkName.toStdWString();
         String path = data->targetPath.toStdWString();
-        String contents = (data->targetPath + " " + data->lnkPath + " " + data->pinyin).toStdWString();
+        QString tmpContents = data->targetPath + " " + data->lnkPath + " " + data->pinyin;
+        String contents = tmpContents.replace("/", " ").toStdWString();
         doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
         doc->add(newLucene<Field>(L"modified", DateTools::timeToString(FileUtils::fileModified(path), DateTools::RESOLUTION_MINUTE),
             Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
@@ -177,7 +178,7 @@ void LnkModel::filter(const QString &text)
 
             QList<QSharedPointer<LnkData>> result;
             try {
-                QueryPtr query = parser->parse(("*" + text + "*").toStdWString());
+                QueryPtr query = parser->parse(( text + "*").toStdWString());
                 const int hitsPerPage = 10;
                 TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
                 searcher->search(query, collector);
@@ -254,9 +255,9 @@ bool LnkModel::addSearcher(const QString &name)
         info.searcher = newLucene<IndexSearcher>(info.reader);
         info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
         info.nameParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
-        info.nameParser->setAllowLeadingWildcard(true);
+        //info.nameParser->setAllowLeadingWildcard(true);
         info.contentParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"contents", info.analyzer);
-        info.contentParser->setAllowLeadingWildcard(true);
+        //info.contentParser->setAllowLeadingWildcard(true);
 
         bool isExist = false;
         for (int i = 0; i < g_searcherList.size(); i++) {
@@ -293,8 +294,11 @@ void LnkModel::sortSearcher()
 QString LnkModel::getSearcherStatus(const QString &name) const
 {
     for (int i = 0; i < g_searcherList.size(); i++) {
-        if (g_searcherList[i].indexName == name) {
-            return "Ok";
+        SearcherInfo &searcher = g_searcherList[i];
+        if (searcher.indexName == name) {
+            if (searcher.reader->isOptimized()) {
+                return "Ok";
+            }
         }
     }
     return "Wait";

@@ -52,7 +52,7 @@ std::string getFullAndInitialWithSeperator(const std::string& inbuf)
     std::string pinyinInitial = getPinYin(inbuf, true, true);
     std::string ret = pinyinFull;
     if (pinyinFull != pinyinInitial)
-        ret = pinyinFull + pinyinInitial;
+        ret = pinyinFull + " " + pinyinInitial;
 
     return ret;
 }

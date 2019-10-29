@@ -75,7 +75,7 @@ void SettingWidget::readData()
 	ui.cbMaxResult->setCurrentText(QString::number(settingModel->maxResult()));
 	ui.leHotkey->setText(settingModel->mainShortcutText());
 	ui.cbAutoStart->setChecked(settingModel->autoStart());
-	ui.hsOpacity->setValue(ui.hsOpacity->maximum() - settingModel->mainOpacity());
+    ui.hsOpacity->setValue(MAX_OPACITY - settingModel->mainOpacity());
 	ui.fcbFont->setCurrentText(settingModel->fontFamily());
 	ui.cbBold->setChecked(settingModel->isBold());
 	ui.cbOpenUrlOn->setChecked(settingModel->enableOpenUrl());
@@ -123,7 +123,7 @@ void SettingWidget::writeData(QObject *sender)
 
 	// Í¸Ã÷¶È
 	if (!sender || ui.hsOpacity == sender) {
-		int opacity = ui.hsOpacity->maximum() - ui.hsOpacity->value();
+        int opacity = MAX_OPACITY - ui.hsOpacity->value();
 		Acc::instance()->setWindowOpacity(WidgetID::MAIN, opacity);
 		Acc::instance()->getSettingModel()->setMainOpacity(opacity);
 	}

@@ -105,6 +105,11 @@ void MainWidget::slotReload()
 {
 	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
 	model->load();
+
+    auto indexList = Acc::instance()->getSettingModel()->getIndexList();
+    for (auto iter = indexList.begin(); iter != indexList.end(); ++iter) {
+        Acc::instance()->getLnkModel()->load(*iter);
+    }
 }
 
 void MainWidget::slotTrayActivated(QSystemTrayIcon::ActivationReason reason)
