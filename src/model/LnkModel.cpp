@@ -178,7 +178,7 @@ void LnkModel::filter(const QString &text)
 
             QList<QSharedPointer<LnkData>> result;
             try {
-                QueryPtr query = parser->parse(( text + "*").toStdWString());
+                QueryPtr query = parser->parse(text.toStdWString());
                 const int hitsPerPage = 10;
                 TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
                 searcher->search(query, collector);
@@ -209,8 +209,8 @@ void LnkModel::filter(const QString &text)
         };
 
         auto search = [&query](const SearcherInfo &info, const QString &text) {
-            query(info.searcher, info.nameParser, text);
-            query(info.searcher, info.contentParser, text);
+            query(info.searcher, info.nameParser, text + "*");
+            query(info.searcher, info.contentParser, text + "*");
         };
 
         for (int i = 0; i < g_searcherList.size(); i++) {
