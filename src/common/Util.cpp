@@ -223,6 +223,15 @@ namespace Util
         }
     }
 
+    QString getLogsDir()
+    {
+        QDir dir(getWritebaleDir());
+        if (!dir.exists("logs")) {
+            dir.mkdir("logs");
+        }
+        return dir.absolutePath() + "/logs";
+    }
+
     bool removeDir(const QString &path, bool containSubDir)
     {
         QDir dir(path);

@@ -390,13 +390,13 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ElidedLabel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Cleaner.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_CronTask.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Cleaner.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_CronTask.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="common\Cleaner.cpp">
+    <ClCompile Include="common\CronTask.cpp">
       <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -467,7 +467,7 @@
     <CustomBuild Include="component\ElidedLabel.h">
       <Filter>component</Filter>
     </CustomBuild>
-    <CustomBuild Include="common\Cleaner.h">
+    <CustomBuild Include="common\CronTask.h">
       <Filter>common</Filter>
     </CustomBuild>
   </ItemGroup>

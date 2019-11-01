@@ -7,6 +7,7 @@
 #include "view/SettingWidget.h"
 #include "common/Util.h"
 #include "common/HttpRequest.h"
+#include "common/CronTask.h"
 
 Acc::Acc()
 	: lnkModel_(nullptr)

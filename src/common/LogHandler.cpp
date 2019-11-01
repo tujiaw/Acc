@@ -63,13 +63,19 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
     if (!s_logWrap.isInit) {
         s_logWrap.isInit = true;
-        QDir dir(Util::getWritebaleDir());
-        if (!dir.exists("logs")) {
-            dir.mkdir("logs");
-        }
-        dir.cd("logs");
+        QDir dir(Util::getLogsDir());
         s_logWrap.level = "debug";
         s_logWrap.date = QDate::currentDate().toString("yyyyMMdd");
+
+        // 清理一个月之前的日志
+        QString deleteDate = QString("%1/log%2.log").arg(dir.absolutePath()).arg((QDate::currentDate().addDays(-30).toString("yyyyMMdd")));
+        QStringList allLogList = Util::getFiles(Util::getLogsDir(), false);
+        for (int i = 0; i < allLogList.size(); i++) {
+            if (allLogList[i] < deleteDate) {
+                QFile::remove(allLogList[i]);
+            }
+        }
+
         s_logWrap.file = new QFile(QString("%1/log%2.log").arg(dir.absolutePath()).arg(s_logWrap.date));
         if (s_logWrap.file->open(QIODevice::WriteOnly | QIODevice::Append)) {
             s_logWrap.ts = new QTextStream(s_logWrap.file);

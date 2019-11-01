@@ -19,6 +19,7 @@ namespace Util {
 	QString getConfigDir();
 	QString getConfigPath();
     QString getIndexDir(const QString &name = "");
+    QString getLogsDir();
     bool removeDir(const QString &dir, bool containSubDir = true);
     QString getImagesDir();
 	QString getSystemDir(int csidl);

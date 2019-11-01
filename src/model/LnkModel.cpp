@@ -255,9 +255,9 @@ bool LnkModel::addSearcher(const QString &name)
         info.searcher = newLucene<IndexSearcher>(info.reader);
         info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
         info.nameParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
-        //info.nameParser->setAllowLeadingWildcard(true);
+        info.nameParser->setAllowLeadingWildcard(true);
         info.contentParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"contents", info.analyzer);
-        //info.contentParser->setAllowLeadingWildcard(true);
+        info.contentParser->setAllowLeadingWildcard(true);
 
         bool isExist = false;
         for (int i = 0; i < g_searcherList.size(); i++) {
