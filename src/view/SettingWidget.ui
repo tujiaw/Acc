@@ -216,7 +216,7 @@
              <item>
               <widget class="QCheckBox" name="cbOpenUrlOn">
                <property name="text">
-                <string>&lt; prefix open url.(eg:&lt; 3inns.cn)</string>
+                <string>&lt; prefix open url.(eg:&lt; ningto.com)</string>
                </property>
               </widget>
              </item>

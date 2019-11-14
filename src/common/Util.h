@@ -21,6 +21,7 @@ namespace Util {
     QString getIndexDir(const QString &name = "");
     QString getLogsDir();
     bool removeDir(const QString &dir, bool containSubDir = true);
+    bool clearDir(const QString &dir, bool containSubDir = true);
     QString getImagesDir();
 	QString getSystemDir(int csidl);
 	QStringList getAllLnk();

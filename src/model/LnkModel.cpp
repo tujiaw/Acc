@@ -75,6 +75,7 @@ void WorkerThread::run()
     };
 
     Lucene::String localIndexDir = Util::getIndexDir(indexName).toStdWString();
+    IndexWriter::setDefaultWriteLockTimeout(3000);
     IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
 
 	QFileInfo info;

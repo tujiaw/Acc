@@ -72,34 +72,106 @@ void EnumerateFileInDirectory(const QString &dir, bool containsSubDir, QStringLi
 
 namespace Util
 {
+    class DirHelper {
+    public:
+        DirHelper(QString path) : path_(path), maxLimit_(-1)
+        {
 
-    QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
-	{
-        QStringList result;
-        if (path.isEmpty()) {
-            return result;
         }
-        QDirIterator iter(path, QStringList(), QDir::Files, containsSubDir ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags);
-        while (iter.hasNext()) {
-            if (filterSuffix.isEmpty()) {
-                result.push_back(iter.next());
-            } else {
-                QString suffix = iter.fileInfo().suffix();
-                if (suffix.isEmpty()) {
-                    result.push_back(iter.next());
-                } else if (!filterSuffix.contains(suffix, Qt::CaseInsensitive)) {
-                    result.push_back(iter.next());
-                } else {
-                    iter.next();
-                }
-            }
+        DirHelper(QString path, int maxLimit, const QStringList &filterSuffix)
+            : path_(path), maxLimit_(maxLimit), filterSuffix_(filterSuffix)
+        {
 
-            if (maxLimit > 0 && result.size() >= maxLimit) {
+        }
+
+        // 优化，让顶层目录中的文件优先被获取
+        QStringList getFiles(bool containsSubDir = true)
+        {
+            QStringList result, subDirs;
+            getFileDir(path_, result, subDirs);
+            if (!containsSubDir) {
                 return result;
             }
+
+            while (!subDirs.isEmpty()) {
+                QStringList tmpDirs;
+                for (int i = 0; i < subDirs.size(); i++) {
+                    QStringList newDirs;
+                    getFileDir(subDirs[i], result, newDirs);
+                    tmpDirs.append(newDirs);
+                }
+                subDirs = tmpDirs;
+            }
+            return result;
         }
-        return result;
-	}
+
+    private:
+        void getFileDir(QString path, QStringList &outFiles, QStringList &outDirs)
+        {
+            QDir dir(path);
+            QFileInfoList fileList = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+            for (int i = 0; i < fileList.size(); i++) {
+                QString absPath = fileList[i].absoluteFilePath();
+                if (fileList[i].isDir()) {
+                    outDirs.push_back(absPath);
+                } else {
+                    if (maxLimit_ >= 0 && outFiles.size() >= maxLimit_) {
+                        return;
+                    }
+
+                    if (filterSuffix_.isEmpty()) {
+                        outFiles.push_back(absPath);
+                    } else {
+                        QString suffix = fileList[i].suffix();
+                        if (suffix.isEmpty()) {
+                            outFiles.push_back(absPath);
+                        } else if (!filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
+                            outFiles.push_back(absPath);
+                        }
+                    }
+                }
+            }
+        }
+
+    private:
+        QString path_;
+        int maxLimit_;
+        QStringList filterSuffix_;
+    };
+
+    //QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
+    //{
+    //    QStringList result;
+    //    if (path.isEmpty()) {
+    //        return result;
+    //    }
+    //    QDirIterator iter(path, QStringList(), QDir::Files, containsSubDir ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags);
+    //    while (iter.hasNext()) {
+    //        if (filterSuffix.isEmpty()) {
+    //            result.push_back(iter.next());
+    //        } else {
+    //            QString suffix = iter.fileInfo().suffix();
+    //            if (suffix.isEmpty()) {
+    //                result.push_back(iter.next());
+    //            } else if (!filterSuffix.contains(suffix, Qt::CaseInsensitive)) {
+    //                result.push_back(iter.next());
+    //            } else {
+    //                iter.next();
+    //            }
+    //        }
+
+    //        if (maxLimit > 0 && result.size() >= maxLimit) {
+    //            return result;
+    //        }
+    //    }
+    //    return result;
+    //}
+
+    QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
+    {
+        DirHelper dh(path, maxLimit, filterSuffix);
+        return dh.getFiles(containsSubDir);
+    }
 
 	bool shellExecute(const QString &path)
 	{
@@ -234,6 +306,20 @@ namespace Util
 
     bool removeDir(const QString &path, bool containSubDir)
     {
+        if (!clearDir(path, containSubDir)) {
+            return false;
+        }
+
+        QDir dir(path);
+        QString dirName = dir.dirName();
+        if (dir.cdUp()) {
+            return dir.rmdir(dirName);
+        }
+        return false;
+    }
+
+    bool clearDir(const QString &path, bool containSubDir)
+    {
         QDir dir(path);
         QFileInfoList fileList = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
         for (int i = 0; i < fileList.size(); i++) {
@@ -242,14 +328,12 @@ namespace Util
                     return false;
                 }
             } else {
-                dir.remove(fileList[i].fileName());
+                if (!dir.remove(fileList[i].fileName())) {
+                    return false;
+                }
             }
         }
-        QString dirName = dir.dirName();
-        if (dir.cdUp()) {
-            return dir.rmdir(dirName);
-        }
-        return false;
+        return true;
     }
 
     QString getImagesDir()
