@@ -5,6 +5,7 @@
 #include "view/MainWidget.h"
 #include "view/ClipboardWidget.h"
 #include "view/SettingWidget.h"
+#include "view/tools/ToolsWidget.h"
 #include "common/Util.h"
 #include "common/HttpRequest.h"
 #include "common/CronTask.h"
@@ -90,6 +91,14 @@ void Acc::openWidget(const QString &id)
             widget->setTitle(title);
             widget->setContent(content);
             widget->resize(400, 600);
+        } else if (id == WidgetID::TOOLS) {
+            TitleWidget *title = new TitleWidget(widget);
+            title->setTitle(tr("Tools"));
+            connect(title, &TitleWidget::sigClose, [this] { closeWidget(WidgetID::TOOLS); });
+            ToolsWidget *content = new ToolsWidget(widget);
+            widget->setTitle(title);
+            widget->setContent(content);
+            widget->resize(500, 400);
         }
 
 		widgets_[id] = widget;

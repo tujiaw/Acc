@@ -23,8 +23,9 @@ int main(int argc, char *argv[])
 
 	a.setQuitOnLastWindowClosed(false);
 	QObject::connect(&a, &QApplication::aboutToQuit, []{ Acc::instance()->destory(); });
-	Acc::instance()->openWidget(WidgetID::MAIN);
-	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
+	//Acc::instance()->openWidget(WidgetID::MAIN);
+	//Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
+    Acc::instance()->openWidget(WidgetID::TOOLS);
 
     qDebug() << "app running";
     qDebug() << "config dir:" << Util::getConfigDir();

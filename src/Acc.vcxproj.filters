@@ -65,6 +65,9 @@
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+    <Filter Include="view\tools">
+      <UniqueIdentifier>{6f99cfd5-1879-47c8-995c-f6266accdd26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="rc\images\Acc.ico" />
@@ -191,6 +194,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ClipboardWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ColorToolWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -399,6 +405,24 @@
     <ClCompile Include="common\CronTask.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="view\tools\ToolsWidget.cpp">
+      <Filter>view\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ToolsWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ToolsWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ColorToolWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ColorToolWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\tools\ColorToolWidget.cpp">
+      <Filter>view\tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -469,6 +493,18 @@
     </CustomBuild>
     <CustomBuild Include="common\CronTask.h">
       <Filter>common</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\ToolsWidget.cbt">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\ToolsWidget.h">
+      <Filter>view\tools</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\ColorToolWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\ColorToolWidget.h">
+      <Filter>view\tools</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
