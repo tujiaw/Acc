@@ -14,30 +14,37 @@ ColorToolWidget::~ColorToolWidget()
 {
 }
 
-void ColorToolWidget::keyPressEvent(QKeyEvent *e)
+void ColorToolWidget::showEvent(QShowEvent *event)
 {
-    QWidget::keyPressEvent(e);
-    if (e->modifiers() & Qt::ControlModifier) {
+    QWidget::showEvent(event);
+    qApp->installEventFilter(this);
+}
+
+void ColorToolWidget::hideEvent(QHideEvent *event)
+{
+    QWidget::hideEvent(event);
+    qApp->removeEventFilter(this);
+}
+
+bool ColorToolWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *e = static_cast<QKeyEvent*>(event);
         if (e->key() == Qt::Key_S) {
             emit ui.pbPickColorStart->clicked();
             ui.pbPickColorStart->setFocus();
         } else if (e->key() == Qt::Key_D) {
             emit ui.pbPickColorStop->clicked();
             ui.pbPickColorStop->setFocus();
+        } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
+            if (ui.leRgb == this->focusWidget()) {
+                on_leRgb_returnPressed();
+            } else if (ui.leHex == this->focusWidget()) {
+                on_leHex_returnPressed();
+            }
         }
     }
-}
-
-void ColorToolWidget::showEvent(QShowEvent *event)
-{
-    QWidget::showEvent(event);
-    this->grabKeyboard();
-}
-
-void ColorToolWidget::hideEvent(QHideEvent *event)
-{
-    QWidget::hideEvent(event);
-    this->releaseKeyboard();
+    return false;
 }
 
 void ColorToolWidget::on_leRgb_returnPressed()
@@ -58,7 +65,7 @@ void ColorToolWidget::on_leRgb_returnPressed()
     }
 
     if (!isOk) {
-        QMessageBox::information(this, tr("show"), tr("RGB(255,255,255),格式错误!"));
+        QMessageBox::information(this, tr("show"), tr("RGB(255,255,255), format error!"));
     }
 }
 
@@ -72,7 +79,7 @@ void ColorToolWidget::on_leHex_returnPressed()
         ui.leRgb->setText(QString("%1,%2,%3").arg(r).arg(g).arg(b));
         clrShow(clr);
     } else {
-        QMessageBox::information(this, tr("show"), tr("#ffffff,格式错误!"));
+        QMessageBox::information(this, tr("show"), tr("#ffffff, format error!"));
     }
 }
 

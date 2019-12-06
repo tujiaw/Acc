@@ -14,8 +14,11 @@
    <string>ColorToolWidget</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="topMargin">
+    <number>9</number>
+   </property>
    <property name="bottomMargin">
-    <number>100</number>
+    <number>9</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

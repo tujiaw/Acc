@@ -199,6 +199,15 @@
     <ClInclude Include="GeneratedFiles\ui_ColorToolWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_TimeToolWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UuidToolWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_JsonToolWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
@@ -423,6 +432,33 @@
     <ClCompile Include="view\tools\ColorToolWidget.cpp">
       <Filter>view\tools</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TimeToolWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TimeToolWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UuidToolWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UuidToolWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_JsonToolWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_JsonToolWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="view\tools\JsonToolWidget.cpp">
+      <Filter>view\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="view\tools\TimeToolWidget.cpp">
+      <Filter>view\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="view\tools\UuidToolWidget.cpp">
+      <Filter>view\tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -504,6 +540,24 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="view\tools\ColorToolWidget.h">
+      <Filter>view\tools</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\TimeToolWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\UuidToolWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\JsonToolWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\JsonToolWidget.h">
+      <Filter>view\tools</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\TimeToolWidget.h">
+      <Filter>view\tools</Filter>
+    </CustomBuild>
+    <CustomBuild Include="view\tools\UuidToolWidget.h">
       <Filter>view\tools</Filter>
     </CustomBuild>
   </ItemGroup>

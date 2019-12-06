@@ -12,9 +12,9 @@ public:
     ~ColorToolWidget();
 
 protected:
-    void keyPressEvent(QKeyEvent *);
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
+    bool eventFilter(QObject *watched, QEvent *event);
 
 private:
     QString clr2rgb(QColor clr);
