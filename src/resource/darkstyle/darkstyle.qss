@@ -385,3 +385,7 @@ QListView::item:hover {
 QFrame#TitleWidget {
 	background:#696969;
 }
+
+QTextEdit {
+	color:#ffffff;
+}

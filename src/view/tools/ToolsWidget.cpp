@@ -21,8 +21,8 @@ ToolsWidget::ToolsWidget(QWidget *parent)
     m_stacked = new QStackedWidget(this);
     m_stacked->addWidget(new ColorToolWidget(this));
     m_stacked->addWidget(new TimeToolWidget(this));
-    m_stacked->addWidget(new UuidToolWidget(this));
     m_stacked->addWidget(new JsonToolWidget(this));
+    m_stacked->addWidget(new UuidToolWidget(this));
 
     QHBoxLayout *mLayout = new QHBoxLayout();
     this->setLayout(mLayout);

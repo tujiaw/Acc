@@ -13,7 +13,11 @@ public:
     ~TimeToolWidget();
 
 private slots:
+    void onStart();
+    void onPause();
     void onTimer();
+    void onUnixTime();
+    void onBeijingTime();
 
 private:
     Ui::TimeToolWidget ui;
