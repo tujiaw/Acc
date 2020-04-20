@@ -6,6 +6,7 @@
 class QxtGlobalShortcut;
 class LnkListView;
 class QLineEdit;
+class QLabel;
 
 class MainWidget : public QFrame
 {
@@ -37,6 +38,7 @@ private:
 	SystemTray *tray_;
 	QxtGlobalShortcut *mainShortcut_;
 	QLineEdit *m_lineEdit;
+    QLabel *m_headLabel;
 	LnkListView *m_lnkListView;
 	QTimer *m_searchTimer;
     QTimer *m_wallpaperTimer;

@@ -16,6 +16,7 @@ namespace Util {
 	QPixmap img(const QString &name);
 	QString getRunDir();
     QString getWritebaleDir();
+    QFileInfoList getRecentFileList();
 	QString getConfigDir();
 	QString getConfigPath();
     QString getIndexDir(const QString &name = "");

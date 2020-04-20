@@ -71,7 +71,7 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	font.setPixelSize(16);
 	painter->setFont(font);
 	painter->setPen(QColor("#fff"));
-	rect.setX(LNK_ICON_SIZE.width() + 4 * padding);
+	rect.setX(LNK_ICON_SIZE.width() + 2 * padding);
 	painter->drawText(rect, Qt::AlignLeft, vm["lnkName"].toString());
 	//this->drawHighlightText(painter, rect, vm["lnkName"].toString(), s_searchText, QColor("#fff"), QColor("#ffcc00"));
 

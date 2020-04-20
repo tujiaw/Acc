@@ -60,6 +60,7 @@ public:
 	~LnkModel();
 	void load(const QString &dir = "");
 	void filter(const QString &text);
+    const QString& head() const { return head_; }
 	int showCount() const;
     bool removeSearcher(const QString &name);
     bool addSearcher(const QString &name);
@@ -75,4 +76,5 @@ private:
 
 private:
 	QList<QSharedPointer<LnkData>> pfilterdata_;
+    QString head_;
 };

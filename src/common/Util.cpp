@@ -10,6 +10,10 @@
 #include <QJsonArray>
 #include <QCryptographicHash>
 #include <QStandardPaths>
+#include <QMessageBox>
+#include <QProcess>
+#include <filesystem>
+#include <mutex>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -88,7 +92,7 @@ namespace Util
         QStringList getFiles(bool containsSubDir = true)
         {
             QStringList result, subDirs;
-            getFileDir(path_, result, subDirs);
+            getFileDir2(path_, result, subDirs);
             if (!containsSubDir) {
                 return result;
             }
@@ -97,7 +101,7 @@ namespace Util
                 QStringList tmpDirs;
                 for (int i = 0; i < subDirs.size(); i++) {
                     QStringList newDirs;
-                    getFileDir(subDirs[i], result, newDirs);
+                    getFileDir2(subDirs[i], result, newDirs);
                     tmpDirs.append(newDirs);
                 }
                 subDirs = tmpDirs;
@@ -109,7 +113,7 @@ namespace Util
         void getFileDir(QString path, QStringList &outFiles, QStringList &outDirs)
         {
             QDir dir(path);
-            QFileInfoList fileList = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+            QFileInfoList fileList = dir.entryInfoList();
             for (int i = 0; i < fileList.size(); i++) {
                 QString absPath = fileList[i].absoluteFilePath();
                 if (fileList[i].isDir()) {
@@ -127,6 +131,43 @@ namespace Util
                             outFiles.push_back(absPath);
                         } else if (!filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
                             outFiles.push_back(absPath);
+                        }
+                    }
+                }
+            }
+        }
+
+        void getFileDir2(QString path, QStringList &outFiles, QStringList &outDirs)
+        {
+            std::tr2::sys::wdirectory_iterator iter(path.toStdWString());
+            std::tr2::sys::wdirectory_iterator end;
+            for (; iter != end; ++iter) {
+                if (std::tr2::sys::is_directory(iter->status())) {
+                    outDirs.push_back(QString::fromStdWString(iter->path()));
+                } else {
+                    if (maxLimit_ >= 0 && outFiles.size() >= maxLimit_) {
+                        return;
+                    }
+
+                    QString path = QString::fromStdWString(iter->path());
+                    if (filterSuffix_.isEmpty()) {
+                        outFiles.push_back(path);
+                    } else {
+                        int pos = path.lastIndexOf(".");
+                        //if (pos > 0) {
+                        //    QString suffix = path.mid(pos + 1);
+                        //    if (!filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
+                        //        outFiles.push_back(path);
+                        //    }
+                        //} else {
+                        //    outFiles.push_back(path);
+                        //}
+
+                        if (pos > 0) {
+                            QString suffix = path.mid(pos + 1);
+                            if (filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
+                                outFiles.push_back(path);
+                            }
                         }
                     }
                 }
@@ -183,11 +224,17 @@ namespace Util
         if (path.isEmpty()) {
             return false;
         }
-
+        
         HINSTANCE hinst = ShellExecute(NULL, operation.toStdWString().c_str(), path.toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
-        LONG64 result = (LONG64)hinst;
-        if (result <= 32) {
-            qDebug() << "shellExecute failed, code:" << result;
+        LONG64 code = (LONG64)hinst;
+        if (code <= 32) {
+            LPVOID pbuf;
+            wchar_t buf[1024];
+            FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, code,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pbuf, 0, NULL);
+            wsprintf(buf, L"shellExecute failed %s(error:%d)", pbuf, code);
+            LocalFree(pbuf);
+            qDebug() << QString::fromStdWString(buf);
             return false;
         }
         return true;
@@ -261,6 +308,18 @@ namespace Util
             dir = QDir(getRunDir());
         }
         return dir.absolutePath();
+    }
+
+    QFileInfoList getRecentFileList()
+    {
+        QStringList pathList = QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
+        if (pathList.size() > 0) {
+            QDir dir(pathList[0]);
+            if (dir.cd("AppData") && dir.cd("Roaming") && dir.cd("Microsoft") && dir.cd("Windows") && dir.cd("Recent")) {
+                return dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Time);
+            }
+        }
+        return QFileInfoList();
     }
 
 	QString getConfigDir()

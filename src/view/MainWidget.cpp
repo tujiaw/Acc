@@ -47,12 +47,17 @@ MainWidget::MainWidget(QWidget *parent)
 	m_lineEdit->setObjectName("SearchLineEdit");
 	connect(m_lineEdit, &QLineEdit::textChanged, this, &MainWidget::slotTextChanged);
 
+    m_headLabel = new QLabel(this);
+    m_headLabel->setFixedHeight(15);
+    m_headLabel->setHidden(true);
+
 	m_lnkListView = new LnkListView(this);
 	m_lnkListView->setModel(Acc::instance()->getLnkModel());
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
 	m_lnkListView->hide();
 
 	mLayout->addWidget(m_lineEdit);
+    mLayout->addWidget(m_headLabel);
 	mLayout->addWidget(m_lnkListView, 1);
 
 	qApp->installEventFilter(this);
@@ -171,6 +176,8 @@ void MainWidget::slotSearchTimer()
     LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
     if (model) {
         model->filter(text.trimmed());
+        m_headLabel->setText(model->head());
+        m_headLabel->setHidden(model->head().isEmpty());
         m_lnkListView->setSelect(0);
 
         if (model->showCount() > 0) {

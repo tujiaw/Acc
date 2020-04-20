@@ -1,4 +1,5 @@
 #include "LnkModel.h"
+
 #include <QFileIconProvider>
 #include <QDebug>
 #include <QStandardPaths>
@@ -78,9 +79,9 @@ void WorkerThread::run()
     IndexWriter::setDefaultWriteLockTimeout(3000);
     IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
 
-	QFileInfo info;
     QSet<QString> repeat;
     for (auto iter = pathList.begin(); iter != pathList.end(); ++iter) {
+        QFileInfo info;
 		info.setFile(*iter);
         QString target = info.filePath();
         QString linkTarget = info.symLinkTarget();
@@ -135,7 +136,7 @@ void WorkerThread::run()
 LnkModel::LnkModel(QObject *parent)
 	: QAbstractListModel(parent)
 {
-	load();
+    load(Util::getIndexDir(DEFAULT_INDEX));
     QStringList successList;
     auto indexList = Acc::instance()->getSettingModel()->getIndexList();
     for (auto iter = indexList.begin(); iter != indexList.end(); ++iter) {
@@ -154,29 +155,44 @@ LnkModel::~LnkModel()
 
 void LnkModel::load(const QString &dir)
 {
-    QString realDir = dir;
-    if (dir.isEmpty()) {
-        realDir = Util::getIndexDir(DEFAULT_INDEX);
-    }
     WorkerThread *workerThread = new WorkerThread(this);
     connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult, Qt::QueuedConnection);
     connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
-    workerThread->go(realDir, Acc::instance()->getSettingModel()->getDirMaxLimit());
+    workerThread->go(dir, Acc::instance()->getSettingModel()->getDirMaxLimit());
 }
 
 void LnkModel::filter(const QString &text)
 {
+    head_.clear();
 	pfilterdata_.clear(); 
+    QSet<QString> repeat;
+    auto isBreak = [&]() -> bool {
+        const int MAX_RESULT = 30;
+        return pfilterdata_.size() >= MAX_RESULT;
+    };
+    auto addItem = [&](const QString &name, const QString &path) {
+        if (isBreak()) {
+            return;
+        }
+        QSharedPointer<LnkData> p(new LnkData());
+        p->lnkName = name;
+        p->targetPath = path;
+        QFileInfo info(p->targetPath);
+        if (info.exists()) {
+            p->icon = g_iconProvider.icon(QFileInfo(p->targetPath));
+        }
+        if (p->icon.isNull()) {
+            p->icon = g_iconProvider.icon(QFileIconProvider::File);
+        }
+
+        if (repeat.find(p->targetPath) == repeat.end()) {
+            pfilterdata_.append(p);
+            repeat.insert(p->targetPath);
+        }
+    };
+
 	if (!text.isEmpty() ) {
-
-        QSet<QString> repeat;
-        int queryIndex = 0;
-        auto query = [this, &repeat, &queryIndex](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
-            const int MAX_RESULT = 50;
-            if (pfilterdata_.size() >= MAX_RESULT) {
-                return;
-            }
-
+        auto query = [&](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
             QList<QSharedPointer<LnkData>> result;
             try {
                 QueryPtr query = parser->parse(text.toStdWString());
@@ -185,23 +201,10 @@ void LnkModel::filter(const QString &text)
                 searcher->search(query, collector);
                 Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
                 for (int i = 0; i < hits.size(); i++) {
-                    if (pfilterdata_.size() >= MAX_RESULT) {
-                        break;
-                    }
-
                     DocumentPtr doc = searcher->doc(hits[i]->doc);
-                    QSharedPointer<LnkData> p(new LnkData());
-                    p->lnkName = QString::fromStdWString(doc->get(L"name"));
-                    p->targetPath = QString::fromStdWString(doc->get(L"path"));
-                    p->icon = g_iconProvider.icon(QFileInfo(p->targetPath));
-                    if (p->icon.isNull()) {
-                        p->icon = g_iconProvider.icon(QFileIconProvider::File);
-                    }
-
-                    if (repeat.find(p->targetPath) == repeat.end()) {
-                        pfilterdata_.append(p);
-                        repeat.insert(p->targetPath);
-                    }
+                    QString name = QString::fromStdWString(doc->get(L"name"));
+                    QString path = QString::fromStdWString(doc->get(L"path"));
+                    addItem(name, path);
                 }
             }
             catch (LuceneException& e) {
@@ -216,6 +219,9 @@ void LnkModel::filter(const QString &text)
 
         for (int i = 0; i < g_searcherList.size(); i++) {
             search(g_searcherList[i], text);
+            if (isBreak()) {
+                break;
+            }
         }
 
         qSort(pfilterdata_.begin(), pfilterdata_.end(),
@@ -224,7 +230,19 @@ void LnkModel::filter(const QString &text)
             int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->lnkName, right->targetPath);
             return leftHits > rightHits;
         });
-	}
+    } else {
+        head_ = QStringLiteral("显示最近使用的项目");
+        QFileInfoList recentFileList = Util::getRecentFileList();
+        for (int i = 0; i < recentFileList.size(); i++) {
+            const QFileInfo &info = recentFileList[i];
+            if (info.isSymLink()) {
+                addItem(info.fileName().remove(".lnk"), info.symLinkTarget());
+                if (isBreak()) {
+                    break;
+                }
+            }
+        }
+    }
 	int count = pfilterdata_.size();
 	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));
 }
