@@ -68,6 +68,9 @@
     <Filter Include="view\tools">
       <UniqueIdentifier>{6f99cfd5-1879-47c8-995c-f6266accdd26}</UniqueIdentifier>
     </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{f81ed4ba-63e7-4cc4-97db-d2a352445f5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="rc\images\Acc.ico" />
@@ -207,6 +210,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_JsonToolWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="net\BusConnection.h">
+      <Filter>net</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -458,6 +464,9 @@
     </ClCompile>
     <ClCompile Include="view\tools\UuidToolWidget.cpp">
       <Filter>view\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="net\BusConnection.cpp">
+      <Filter>net</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

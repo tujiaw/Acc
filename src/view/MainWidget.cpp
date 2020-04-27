@@ -185,7 +185,11 @@ void MainWidget::slotSearchTimer()
                 m_lnkListView->show();
             }
             int maxResult = Acc::instance()->getSettingModel()->maxResult();
-            this->parentWidget()->setFixedHeight(qMin(maxResult, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12);
+            int listHeight = qMin(maxResult, model->showCount()) * ROW_HEIGHT + TOP_HEIGHT + 12;
+            if (m_headLabel->isVisible()) {
+                listHeight += m_headLabel->height() + 10;
+            }
+            this->parentWidget()->setFixedHeight(listHeight);
         } else {
             m_lnkListView->hide();
             this->parentWidget()->setFixedHeight(TOP_HEIGHT);
