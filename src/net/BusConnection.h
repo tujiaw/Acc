@@ -18,7 +18,7 @@
 #include "qpid/messaging/Receiver.h"
 
 using namespace qpid::messaging;
-using QMsgPtr = std::shared_ptr<Message>;
+using MessagePtr = std::shared_ptr<Message>;
 
 time_t GetCurrentTimeSec();
 std::string NewMessageId();
@@ -62,14 +62,14 @@ private:
 class BusConnection
 {
 public:
-    using ResponseCallback = std::function<void(const QMsgPtr &sendMsg, const QMsgPtr &resMsg)>;
+    using ResponseCallback = std::function<void(const MessagePtr &sendMsg, const MessagePtr &resMsg)>;
     using ServerCallback = std::function<void(const Message &msg, Message &reply)>;
     using SubscribeCallback = std::function<void(const Message &msg)>;
 
     struct RequestInfo {
         RequestInfo() : second(1) , time(GetCurrentTimeSec()) , msg(nullptr), cb(nullptr) {}
-        RequestInfo(int s, const QMsgPtr &m, const ResponseCallback &c) : second(s), time(GetCurrentTimeSec()), msg(m), cb(c) {}
-        int second; time_t time; QMsgPtr msg; ResponseCallback cb;
+        RequestInfo(int s, const MessagePtr &m, const ResponseCallback &c) : second(s), time(GetCurrentTimeSec()), msg(m), cb(c) {}
+        int second; time_t time; MessagePtr msg; ResponseCallback cb;
     };
 
     BusConnection(const std::string &url);
@@ -77,15 +77,16 @@ public:
     void operator=(const BusConnection &) = delete;
     ~BusConnection();
 
+	bool isOpen() const { return _is_open; }
     void AddQueueServer(const std::string &serverAddr, const ServerCallback &cb);
     void AddTopicServer(const std::string &serverAddr, const SubscribeCallback &cb);
-    bool PostMsg(const std::string &name, const QMsgPtr &msg, int second, const ResponseCallback &cb);
+    bool PostMsg(const std::string &name, const MessagePtr &msg, int second, const ResponseCallback &cb);
     bool SendMsg(const std::string &name, const Message &requestMsg, Message &responseMsg, int milliseconds = 1000);
     bool PublishMsg(const std::string &topic, const Message &msg);
+	void Close();
 
 private:
     bool Open(const std::string& url);
-    void Close();
     void StartThread();
     void ReceiveRunning();
     void TimeoutRunning();

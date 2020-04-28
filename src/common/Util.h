@@ -38,4 +38,6 @@ namespace Util {
     QString md5(const QString &str);
     QString getTimeInterval(quint64 msInterval);
     bool ImproveProcPriv();
+	QString getSystemInfo();
+	QString getLocalHost();
 }

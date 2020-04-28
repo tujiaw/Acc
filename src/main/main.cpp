@@ -4,6 +4,8 @@
 #include "common/RunGuard.h"
 #include "common/Util.h"
 #include "common/LogHandler.h"
+#include "net/BusService.h"
+#include <thread>
 
 int main(int argc, char *argv[])
 {	
@@ -12,17 +14,32 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+#ifndef DEBUG
     qInstallMessageHandler(myMessageOutput);
+#endif
+
 	QApplication a(argc, argv);
 	a.setWindowIcon(QIcon(":/images/Acc.ico"));
+	qDebug() << "==============================================";
+	qDebug() << Util::getSystemInfo();
+	qDebug() << "Local host:" << Util::getLocalHost();
+	qDebug() << "==============================================";
 
 	QString family = Acc::instance()->getSettingModel()->fontFamily();
 	bool bold = Acc::instance()->getSettingModel()->isBold();
 	CDarkStyle::setFontFamily(family, bold);
 	CDarkStyle::assign();
 
+	if (!BusService::instance().start()) {
+		qDebug() << "bus service start failed";
+		return 1;
+	}
+
 	a.setQuitOnLastWindowClosed(false);
-	QObject::connect(&a, &QApplication::aboutToQuit, []{ Acc::instance()->destory(); });
+	QObject::connect(&a, &QApplication::aboutToQuit, []{ 
+		BusService::instance().stop();
+		Acc::instance()->destory();
+	});
 	Acc::instance()->openWidget(WidgetID::MAIN);
 	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
     //Acc::instance()->openWidget(WidgetID::TOOLS);

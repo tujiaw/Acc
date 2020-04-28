@@ -7,6 +7,19 @@
 
 std::function<void(const char*)> BusTrace::write_ = nullptr;
 
+void tryExecute(const std::function<void()> &cb, const std::string &info = std::string())
+{
+	try {
+		cb();
+	} catch (const std::exception& error) {
+		if (info.empty()) {
+			Error("tryExecute error: %s", error.what());
+		} else {
+			Error("tryExecute error: %s, %s", info.c_str(), error.what());
+		}
+	}
+}
+
 time_t GetCurrentTimeSec()
 {
     return time(NULL);
@@ -23,7 +36,7 @@ BusConnection::BusConnection(const std::string &url)
     , _is_open(false)
 {
     _connection->setOption("reconnect", true);
-    _connection->setOption("heartbeat", 5);    
+    _connection->setOption("heartbeat", 10);    // 设置心跳
     Open(url);
 }
 
@@ -71,43 +84,39 @@ bool BusConnection::Open(const std::string& url)
 
 void BusConnection::Close()
 {
+	if (!_is_open) {
+		return;
+	}
+
     _is_open = false;
 
-    if (_receiveThread && _receiveThread->joinable()) {
-        _receiveThread->join();
-    }
+	tryExecute([this]() {
+		for (auto iter = _senderCache.begin(); iter != _senderCache.end(); ++iter) {
+			if (iter->second.isValid()) {
+				iter->second.close();
+			}
+		}
+	}, "sender cache close");
 
-    for (const auto &t : _handlerThreadList) {
-        if (t->joinable()) {
-            t->join();
-        }
-    }
+	if (_syncReceiver) {
+		tryExecute([this]() { _asyncReceiver.close(); }, "sync receiver close");
+	}
 
-    try {
-        for (auto iter = _senderCache.begin(); iter != _senderCache.end(); ++iter) {
-            if (iter->second.isValid()) {
-                iter->second.close();
-            }
-        }
+	if (_session) {
+		tryExecute([this]() { _session.close(); }, "session close");
+	}
 
-        if (_asyncReceiver) {
-            _asyncReceiver.close();
-        }
-        if (_syncReceiver) {
-            _syncReceiver.close();
-        }
-        if (_session) {
-            _session.close();
-        }
-    } catch (const std::exception& error) {
-		Error("BusConnection::Close, error:%s", error.what());
-    }
+	if (_receiveThread && _receiveThread->joinable()) {
+		_receiveThread->join();
+	}
 
-    try {
-        _connection->close();
-    } catch (const std::exception &error) {
-		Error("BusConnection::Close, connecton close error:%s", error.what());
-    }
+	for (const auto &t : _handlerThreadList) {
+		if (t->joinable()) {
+			t->join();
+		}
+	}
+
+	tryExecute([this]() { _connection->close(); }, "connection close");
 }
 
 void BusConnection::StartThread()
@@ -124,7 +133,8 @@ void BusConnection::ReceiveRunning()
 {
     while (_is_open) {
         try {
-            QMsgPtr p(new Message());
+            MessagePtr p(new Message());
+			Debug("receive running");
             while (_asyncReceiver.fetch(*p.get(), Duration::SECOND)) {
                 RequestInfo info;
                 {
@@ -173,7 +183,7 @@ void BusConnection::TimeoutRunning()
 
         if (!timeoutList.empty()) {
             for (auto iter = timeoutList.begin(); iter != timeoutList.end(); ++iter) {
-                iter->cb(iter->msg, QMsgPtr(new Message()));
+                iter->cb(iter->msg, MessagePtr(new Message()));
             }
         }
     }
@@ -234,7 +244,7 @@ void BusConnection::TopicServerRunning(const std::string &addr, const SubscribeC
     }
 }
 
-bool BusConnection::PostMsg(const std::string &name, const QMsgPtr &msg, int second, const ResponseCallback &cb)
+bool BusConnection::PostMsg(const std::string &name, const MessagePtr &msg, int second, const ResponseCallback &cb)
 {
     bool result = false;
     Sender &sender = GetSender(name, "queue");
@@ -304,9 +314,9 @@ Sender& BusConnection::GetSender(const std::string &name, const std::string &nod
             std::string address = name;
             if (nodeType == "queue") {
                 //address += "; {create:always, delete:always, node: {type:queue, x-declare:{auto-delete:true}}}"; // 非持久
-                address += "; {create:always, node: {type:queue}}"; // 持久
+                address += ";{create:always, node:{type:queue, x-declare:{arguments:{qpid.max_count:10000, qpid.max_size:102400, qpid.policy_type:ring}}}}";
             } else if (nodeType == "topic") {
-                address += "; {create: always , node:{type:topic , x-declare:{type:fanout}}}";
+                address += ";{create:always , node:{type:topic, x-declare:{type:fanout}}}";
             } else {
                 std::cerr << "AddSender error, node type error:" << nodeType;
                 return _emptySender;

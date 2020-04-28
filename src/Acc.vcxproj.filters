@@ -468,6 +468,15 @@
     <ClCompile Include="net\BusConnection.cpp">
       <Filter>net</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_BusService.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_BusService.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="net\BusService.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -568,6 +577,9 @@
     </CustomBuild>
     <CustomBuild Include="view\tools\UuidToolWidget.h">
       <Filter>view\tools</Filter>
+    </CustomBuild>
+    <CustomBuild Include="net\BusService.h">
+      <Filter>net</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

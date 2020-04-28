@@ -1,4 +1,8 @@
 #include "Util.h"
+
+#include <filesystem>
+#include <mutex>
+
 #include <QStringList>
 #include <QDir>
 #include <QDirIterator>
@@ -12,8 +16,8 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QProcess>
-#include <filesystem>
-#include <mutex>
+#include <QHostAddress>
+#include <QNetworkInterface>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -641,4 +645,25 @@ namespace Util
         CloseHandle(token);
         return true;
     }
+
+	QString getSystemInfo()
+	{
+		QStringList strList;
+		strList << ("Abi:" + QSysInfo::buildAbi());
+		strList << ("System:" + QSysInfo::prettyProductName());
+		strList << ("Kernel Type:" + QSysInfo::kernelType());
+		strList << ("Kernel Version:" + QSysInfo::kernelVersion());
+		return strList.join(", ");
+	}
+
+	QString getLocalHost()
+	{
+		QStringList ipList;
+		const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+		for (const QHostAddress &address : QNetworkInterface::allAddresses()) {
+			if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
+			ipList << address.toString();
+		}
+		return ipList.join("-");
+	}
 }
