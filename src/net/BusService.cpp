@@ -1,6 +1,7 @@
 #include "BusService.h"
 #include <QDebug>
 #include "Util.h"
+#include "WinTool.h"
 
 const std::string BUS_HOST = "118.24.4.114";
 const std::string ACC_COMMON = "acc_common";
@@ -49,5 +50,9 @@ void BusService::onCommonMessage(const Message &msg)
 		conn_->PostMsg(ACC_REPORT, rsp, 3, [](const MessagePtr &req, const MessagePtr &rsp) {
 			qDebug() << "report finished!";
 		});
+	}
+	else if (subject == "lock") {
+		qDebug() << "will lock system";
+		WinTool::LockSystem();
 	}
 }

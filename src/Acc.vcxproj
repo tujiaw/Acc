@@ -313,6 +313,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\WinTool.h" />
     <ClInclude Include="GeneratedFiles\ui_JsonToolWidget.h" />
     <ClInclude Include="GeneratedFiles\ui_TimeToolWidget.h" />
     <ClInclude Include="GeneratedFiles\ui_UuidToolWidget.h" />
@@ -790,6 +791,7 @@
     <ClCompile Include="common\pinyin.cpp" />
     <ClCompile Include="common\RunGuard.cpp" />
     <ClCompile Include="common\Util.cpp" />
+    <ClCompile Include="common\WinTool.cpp" />
     <ClCompile Include="component\ElidedLabel.cpp" />
     <ClCompile Include="component\FramelessWidget.cpp" />
     <ClCompile Include="component\ImageButton.cpp" />

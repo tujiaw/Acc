@@ -49,7 +49,7 @@ void BusConnection::AddQueueServer(const std::string &serverAddr, const ServerCa
 {
     assert(!serverAddr.empty());
     assert(!!cb);
-    std::string serverAddress = serverAddr + "; {create:always, node: {type:queue}}";
+    std::string serverAddress = serverAddr + "; {create:always, node:{type:queue}}";
     std::shared_ptr<std::thread> t(new std::thread(std::bind(&BusConnection::QueueServerRunning, this, serverAddress, cb)));
     _handlerThreadList.push_back(t);
 }
@@ -58,7 +58,7 @@ void BusConnection::AddTopicServer(const std::string &serverAddr, const Subscrib
 {
     assert(!serverAddr.empty());
     assert(!!cb);
-    std::string serverAddress = serverAddr + "; {create:always, node: {type:topic}}";
+    std::string serverAddress = serverAddr + "; {create:always, node:{type:topic, x-declare:{type: fanout}}}";
     std::shared_ptr<std::thread> t(new std::thread(std::bind(&BusConnection::TopicServerRunning, this, serverAddress, cb)));
     _handlerThreadList.push_back(t);
 }

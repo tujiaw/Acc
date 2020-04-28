@@ -214,6 +214,9 @@
     <ClInclude Include="net\BusConnection.h">
       <Filter>net</Filter>
     </ClInclude>
+    <ClInclude Include="common\WinTool.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ForegroundWindowGuard.cpp">
@@ -476,6 +479,9 @@
     </ClCompile>
     <ClCompile Include="net\BusService.cpp">
       <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="common\WinTool.cpp">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
