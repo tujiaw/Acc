@@ -22,7 +22,7 @@ using MessagePtr = std::shared_ptr<Message>;
 
 time_t GetCurrentTimeSec();
 std::string NewMessageId();
-
+std::string Uuid();
 
 #define Debug BusTrace(__FILE__, __LINE__, "[Debug]")
 #define Error BusTrace(__FILE__, __LINE__, "[Error]")

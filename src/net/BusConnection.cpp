@@ -31,6 +31,11 @@ std::string NewMessageId()
     return uuid.str();
 }
 
+std::string Uuid()
+{
+	return NewMessageId();
+}
+
 BusConnection::BusConnection(const std::string &url)
     : _connection(new Connection(url))
     , _is_open(false)

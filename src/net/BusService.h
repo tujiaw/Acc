@@ -9,6 +9,7 @@ class BusService : public QObject
 
 public:
 	static BusService& instance();
+	static const std::string& id();
 	bool start();
 	void stop();
 
@@ -17,6 +18,7 @@ private:
 	~BusService();
 
 	void onCommonMessage(const Message &msg);
+	void onEchoMessage(const Message &req, Message &rsp);
 
 private:
 	std::unique_ptr<BusConnection> conn_;

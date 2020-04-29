@@ -4,7 +4,8 @@
 #include "WinTool.h"
 
 const std::string BUS_HOST = "118.24.4.114";
-const std::string ACC_COMMON = "acc_common";
+const std::string ACC_TOPIC_COMMON = "acc_common";
+const std::string ACC_QUEUE_ECHO = "acc_queue_echo";
 const std::string ACC_REPORT = "acc_report";
 
 BusService::BusService(QObject *parent)
@@ -22,10 +23,21 @@ BusService& BusService::instance()
 	return s_inst;
 }
 
+const std::string& BusService::id()
+{
+	static std::string s_id;
+	static std::once_flag once;
+	std::call_once(once, []() {
+		s_id = Uuid();
+	});
+	return s_id;
+}
+
 bool BusService::start()
 {
 	conn_.reset(new BusConnection(BUS_HOST));
-	conn_->AddTopicServer(ACC_COMMON, std::bind(&BusService::onCommonMessage, this, std::placeholders::_1));
+	conn_->AddQueueServer(ACC_QUEUE_ECHO, std::bind(&BusService::onEchoMessage, this, std::placeholders::_1, std::placeholders::_2));
+	conn_->AddTopicServer(ACC_TOPIC_COMMON, std::bind(&BusService::onCommonMessage, this, std::placeholders::_1));
 	return conn_->isOpen();
 }
 
@@ -42,17 +54,28 @@ void BusService::onCommonMessage(const Message &msg)
 	qDebug() << "on common msg subject:" << QString::fromStdString(subject);
 	qDebug() << "content:" << QString::fromStdString(msg.getContent());
 	if (subject == "report") {
-		QStringList infoList;
-		infoList << ("[system]" + Util::getSystemInfo());
-		infoList << ("[host]" + Util::getLocalHost());
+		qpid::types::Variant::Map data;
+		data["id"] = id();
+		data["system"] = Util::getSystemInfo().toStdString();
+		data["host"] = Util::getLocalHost().toStdString();
+		data["pid"] = (uint32_t)WinTool::GetCurrentPid();
+		data["name"] = "Acc";
 		MessagePtr rsp(new Message());
-		rsp->setContent(infoList.join("\n").toStdString());
+		rsp->setContentObject(data);
 		conn_->PostMsg(ACC_REPORT, rsp, 3, [](const MessagePtr &req, const MessagePtr &rsp) {
 			qDebug() << "report finished!";
 		});
 	}
 	else if (subject == "lock") {
-		qDebug() << "will lock system";
-		WinTool::LockSystem();
+		std::string targetId = msg.getContent();
+		if (targetId.empty() || targetId == BusService::id()) {
+			qDebug() << "will lock system, target id:" << QString::fromStdString(targetId);
+			WinTool::LockSystem();
+		}
 	}
+}
+
+void BusService::onEchoMessage(const Message &req, Message &rsp)
+{
+	rsp.setContent(req.getContent());
 }

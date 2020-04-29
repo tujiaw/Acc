@@ -11,4 +11,8 @@ namespace WinTool {
 		LockWorkStation();
 	}
 
+	unsigned long GetCurrentPid()
+	{
+		return GetCurrentProcessId();
+	}
 }
