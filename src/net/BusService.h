@@ -10,6 +10,7 @@ class BusService : public QObject
 public:
 	static BusService& instance();
 	static const std::string& id();
+	void setHost(const QString &host);
 	bool start();
 	void stop();
 
@@ -22,5 +23,6 @@ private:
 
 private:
 	std::unique_ptr<BusConnection> conn_;
+	QString address_;
 };
 

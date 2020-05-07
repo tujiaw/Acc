@@ -47,6 +47,8 @@ public:
     QString getFilterSuffix() const;
     QStringList filterSuffix() const;
 
+	QString host() const;
+
 private:
 	QSettings settings_;
 };

@@ -61,6 +61,9 @@ void Acc::openWidget(const QString &id)
 		FramelessWidget *widget = new FramelessWidget();
 		if (id == WidgetID::MAIN) {
 			isShow = false;
+			Qt::WindowFlags flags = widget->windowFlags();
+			flags |= Qt::WindowStaysOnTopHint;
+			widget->setWindowFlags(flags);
 			MainWidget *content = new MainWidget(widget);
 			widget->setContent(content);
 
@@ -104,6 +107,7 @@ void Acc::openWidget(const QString &id)
 		widgets_[id] = widget;
 		if (isShow) {
 			widget->show();
+			widget->raise();
 		}
 	}
 }

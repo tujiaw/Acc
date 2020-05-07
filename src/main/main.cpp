@@ -6,7 +6,7 @@
 #include "common/LogHandler.h"
 #include "net/BusService.h"
 #include <thread>
-
+#include <QHostInfo>
 int main(int argc, char *argv[])
 {	
 	RunGuard guard("69619FA7-4944-4CCA-BF69-83323F34D32F");
@@ -29,10 +29,11 @@ int main(int argc, char *argv[])
 	bool bold = Acc::instance()->getSettingModel()->isBold();
 	CDarkStyle::setFontFamily(family, bold);
 	CDarkStyle::assign();
-
-	if (!BusService::instance().start()) {
-		qDebug() << "bus service start failed";
-		return 1;
+	
+	QString host = Acc::instance()->getSettingModel()->host();
+	if (!host.isEmpty()) {
+		BusService::instance().setHost(host);
+		BusService::instance().start();
 	}
 
 	a.setQuitOnLastWindowClosed(false);

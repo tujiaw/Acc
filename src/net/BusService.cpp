@@ -1,9 +1,9 @@
 #include "BusService.h"
 #include <QDebug>
+#include <QHostInfo>
 #include "Util.h"
 #include "WinTool.h"
 
-const std::string BUS_HOST = "118.24.4.114";
 const std::string ACC_TOPIC_COMMON = "acc_common";
 const std::string ACC_QUEUE_ECHO = "acc_queue_echo";
 const std::string ACC_REPORT = "acc_report";
@@ -33,9 +33,21 @@ const std::string& BusService::id()
 	return s_id;
 }
 
+void BusService::setHost(const QString &host)
+{
+	QHostInfo hostInfo = QHostInfo::fromName(host);
+	QList<QHostAddress> addrList = hostInfo.addresses();
+	if (addrList.size() > 0) {
+		address_ = addrList[0].toString();
+	}
+}
+
 bool BusService::start()
 {
-	conn_.reset(new BusConnection(BUS_HOST));
+	if (address_.isEmpty()) {
+		return false;
+	}
+	conn_.reset(new BusConnection(address_.toStdString()));
 	conn_->AddQueueServer(ACC_QUEUE_ECHO, std::bind(&BusService::onEchoMessage, this, std::placeholders::_1, std::placeholders::_2));
 	conn_->AddTopicServer(ACC_TOPIC_COMMON, std::bind(&BusService::onCommonMessage, this, std::placeholders::_1));
 	return conn_->isOpen();
