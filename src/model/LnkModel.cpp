@@ -31,7 +31,8 @@ QStringList fetchFile(const QString &dir)
 {
     QStringList result;
     QProcess pro;
-    pro.start("F:\\github\\godemo\\fetchfile.exe", QStringList() << dir);
+    QString fetchfile = Util::getRunDir() + "/fetchfile.exe";
+    pro.start(fetchfile, QStringList() << dir);
     if (pro.waitForStarted()) {
         while (pro.waitForReadyRead()) {
             QByteArray b = pro.readAllStandardOutput();
