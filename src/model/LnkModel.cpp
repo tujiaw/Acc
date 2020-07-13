@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <QImageReader>
+#include <QProcess>
+
 #include "controller/Acc.h"
 #include "common/Util.h"
 #include "common/FileVersionInfo.h"
@@ -24,6 +26,22 @@ struct SearcherInfo {
 
 QFileIconProvider g_iconProvider;
 QList<SearcherInfo> g_searcherList;
+
+QStringList fetchFile(const QString &dir)
+{
+    QStringList result;
+    QProcess pro;
+    pro.start("F:\\github\\godemo\\fetchfile.exe", QStringList() << dir);
+    if (pro.waitForStarted()) {
+        while (pro.waitForReadyRead()) {
+            QByteArray b = pro.readAllStandardOutput();
+            b = b.replace("\\", "/");
+            QStringList strList = QString::fromUtf8(b).split('\n');
+            result.append(strList);
+        }
+    }
+    return result;
+}
 
 WorkerThread::WorkerThread(QObject *parent) 
     : QThread(parent), maxLimit_(-1)
@@ -47,12 +65,15 @@ void WorkerThread::run()
 {
     QStringList pathList;
     QString indexName;
+    bool isLnk = false;
     if (indexDir_ == Util::getIndexDir(DEFAULT_INDEX)) {
+        isLnk = true;
         pathList = Util::getAllLnk();
         indexName = DEFAULT_INDEX;
     } else {
         QStringList filterSuffix = Acc::instance()->getSettingModel()->filterSuffix();
-        pathList = Util::getFiles(indexDir_, true, maxLimit_, filterSuffix);
+        //pathList = Util::getFiles(indexDir_, true, maxLimit_, filterSuffix);
+        pathList = fetchFile(indexDir_);
         indexName = Util::md5(indexDir_);
     }
 
@@ -75,54 +96,75 @@ void WorkerThread::run()
         return doc;
     };
 
+    auto addStrDocument = [](QString &str) -> DocumentPtr {
+        int start = str.lastIndexOf("/");
+        if (start >= 0) {
+            DocumentPtr doc = newLucene<Document>();
+            String name = str.mid(start + 1).toStdWString();
+            String path = str.toStdWString();
+            String contents = str.replace("/", " ").toStdWString();
+            doc->add(newLucene<Field>(L"name", name, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+            doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+            doc->add(newLucene<Field>(L"contents", contents, Field::STORE_YES, Field::INDEX_ANALYZED));
+            return doc;
+        }
+        return nullptr;
+    };
+
     Lucene::String localIndexDir = Util::getIndexDir(indexName).toStdWString();
     IndexWriter::setDefaultWriteLockTimeout(3000);
     IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
 
     QSet<QString> repeat;
     for (auto iter = pathList.begin(); iter != pathList.end(); ++iter) {
-        QFileInfo info;
-		info.setFile(*iter);
-        QString target = info.filePath();
-        QString linkTarget = info.symLinkTarget();
-        // 排除链接目标是：C:/Windows/Installer中的文件
-        if (info.isSymLink() && !linkTarget.contains("installer", Qt::CaseInsensitive)) {
-            target = info.symLinkTarget();
+        DocumentPtr doc;
+        if (isLnk) {
+            QFileInfo info;
+            info.setFile(*iter);
+            QString target = info.filePath();
+            QString linkTarget = info.symLinkTarget();
+            // 排除链接目标是：C:/Windows/Installer中的文件
+            if (info.isSymLink() && !linkTarget.contains("installer", Qt::CaseInsensitive)) {
+                target = info.symLinkTarget();
+            }
+            if (target.isEmpty()) {
+                continue;
+            }
+
+            QSharedPointer<LnkData> p(new LnkData());
+            // 链接名
+            p->lnkName = info.fileName().remove(".lnk", Qt::CaseInsensitive);
+            // 链接路径
+            p->lnkPath = info.filePath();
+            // 目录可执行程序路径
+            p->targetPath = target;
+            // 目标名字
+            p->targetName = QFileInfo(p->targetPath).baseName();
+
+            if (p->targetName.contains(p->lnkName, Qt::CaseInsensitive)) {
+                CFileVersionInfo verinfo;
+                if (verinfo.Create(p->targetPath.toStdWString().c_str())) {
+                    std::wstring desc = verinfo.GetFileDescription();
+                    if (!desc.empty()) {
+                        p->lnkName = QString::fromStdWString(desc);
+                    }
+                }
+            }
+
+            // 过滤重复
+            if (repeat.find(p->key()) != repeat.end()) {
+                continue;
+            }
+
+            p->pinyin = QString::fromStdString(getFullAndInitialWithSeperator(p->lnkName.trimmed().toStdString()));
+            doc = addDocument(p);
+            repeat.insert(p->key());
+        } else {
+            doc = addStrDocument(*iter);
         }
-		if (target.isEmpty()) {
-			continue;
-		}
 
-		QSharedPointer<LnkData> p(new LnkData());
-		// 链接名
-		p->lnkName = info.fileName().remove(".lnk", Qt::CaseInsensitive);
-		// 链接路径
-		p->lnkPath = info.filePath();
-		// 目录可执行程序路径
-		p->targetPath = target;
-		// 目标名字
-		p->targetName = QFileInfo(p->targetPath).baseName();
-
-		if (p->targetName.contains(p->lnkName, Qt::CaseInsensitive)) {
-			CFileVersionInfo verinfo;
-			if (verinfo.Create(p->targetPath.toStdWString().c_str())) {
-				std::wstring desc = verinfo.GetFileDescription();
-				if (!desc.empty()) {
-					p->lnkName = QString::fromStdWString(desc);
-				}
-			}
-		}
-
-		// 过滤重复
-        if (repeat.find(p->key()) != repeat.end()) {
-            continue;
-        }
-
-        p->pinyin = QString::fromStdString(getFullAndInitialWithSeperator(p->lnkName.trimmed().toStdString()));
-        DocumentPtr doc = addDocument(p);
         if (doc) {
             writer->addDocument(doc);
-            repeat.insert(p->key());
         }
 	}
 
@@ -230,18 +272,6 @@ void LnkModel::filter(const QString &text)
             int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->lnkName, right->targetPath);
             return leftHits > rightHits;
         });
-    } else {
-        head_ = QStringLiteral("显示最近使用的项目");
-        QFileInfoList recentFileList = Util::getRecentFileList();
-        for (int i = 0; i < recentFileList.size(); i++) {
-            const QFileInfo &info = recentFileList[i];
-            if (info.isSymLink()) {
-                addItem(info.fileName().remove(".lnk"), info.symLinkTarget());
-                if (isBreak()) {
-                    break;
-                }
-            }
-        }
     }
 	int count = pfilterdata_.size();
 	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));
