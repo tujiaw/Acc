@@ -25,6 +25,7 @@ namespace Util {
     bool clearDir(const QString &dir, bool containSubDir = true);
     QString getImagesDir();
 	QString getSystemDir(int csidl);
+    QStringList getAllLnkDir();
 	QStringList getAllLnk();
 	QVariantMap json2map(const QByteArray &val);
 	QString map2json(const QVariantMap &val);

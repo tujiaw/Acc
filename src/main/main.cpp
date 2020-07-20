@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    RunGuard guard("69619FA7-4944-4CCA-BF69-83323F34D32F");
+    RunGuard guard("F97AF7C2-7181-4504-AF0E-DE3CA928EF9B");
     if (!guard.tryToRun()) {
         return 0;
     }
@@ -31,11 +31,11 @@ int main(int argc, char *argv[])
     CDarkStyle::setFontFamily(family, bold);
     CDarkStyle::assign();
 
-	QString host = Acc::instance()->getSettingModel()->host();
-	if (!host.isEmpty()) {
-		BusService::instance().setHost(host);
-		BusService::instance().start();
-	}
+	//QString host = Acc::instance()->getSettingModel()->host();
+	//if (!host.isEmpty()) {
+	//	BusService::instance().setHost(host);
+	//	BusService::instance().start();
+	//}
 
 	a.setQuitOnLastWindowClosed(false);
 	QObject::connect(&a, &QApplication::aboutToQuit, []{ 

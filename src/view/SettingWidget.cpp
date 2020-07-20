@@ -50,11 +50,6 @@ SettingWidget::SettingWidget(QWidget *parent)
     ui.indexListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
     ui.indexStatusListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
     ui.indexListWidget->setAutoFillBackground(true);
-    connect(ui.leFilterSuffix, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leFilterSuffix); });
-
-    ui.leDirMaxLimit->setValidator(new QRegExpValidator(QRegExp("[0-9]*"), ui.leDirMaxLimit));
-    ui.leDirMaxLimit->setMaxLength(7);
-    connect(ui.leDirMaxLimit, &QLineEdit::editingFinished, [this]() { this->writeData(ui.leDirMaxLimit); });
 
     connect(ui.pbIndexAdd, &QPushButton::clicked, this, &SettingWidget::slotIndexAdd);
     connect(ui.pbIndexRemove, &QPushButton::clicked, this, &SettingWidget::slotIndexRemove);
@@ -83,8 +78,6 @@ void SettingWidget::readData()
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
     ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
-    ui.leDirMaxLimit->setText(QString::number(settingModel->getDirMaxLimit()));
-    ui.leFilterSuffix->setText(settingModel->getFilterSuffix());
     addIndexItemList(settingModel->getIndexList());
 }
 
@@ -155,12 +148,6 @@ void SettingWidget::writeData(QObject *sender)
             indexList.push_back(ui.indexListWidget->item(i)->text());
         }
         Acc::instance()->getSettingModel()->setIndexList(indexList);
-    }
-    if (!sender || ui.leDirMaxLimit == sender) {
-        Acc::instance()->getSettingModel()->setDirMaxLimit(ui.leDirMaxLimit->text().toInt());
-    }
-    if (!sender || ui.leFilterSuffix == sender) {
-        Acc::instance()->getSettingModel()->setFilterSuffix(ui.leFilterSuffix->text().trimmed());
     }
 }
 

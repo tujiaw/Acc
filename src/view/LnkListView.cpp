@@ -78,11 +78,11 @@ void LnkListView::openIndex(const QModelIndex &index)
 
 	Acc::instance()->hideWidget(WidgetID::MAIN);
 	QVariantMap vm = this->model()->data(index).toMap();
-	QString path = vm["targetPath"].toString();
+	QString path = vm["path"].toString();
     bool ok = Util::shellExecute(path);
 	if (ok) {
-		QString title = vm["lnkName"].toString();
-		QString subtitle = vm["targetPath"].toString();
+		QString title = vm["name"].toString();
+		QString subtitle = vm["path"].toString();
 		Acc::instance()->getHitsModel()->increase(T_LNK, title, subtitle);
 	}
 }
@@ -156,7 +156,7 @@ bool LnkListView::enableButtonsVisible() const
 QString LnkListView::getPathFromIndex(const QModelIndex &index) const
 {
     if (index.isValid()) {
-        QString targetPath = this->model()->data(index).toMap()["targetPath"].toString();
+        QString targetPath = this->model()->data(index).toMap()["path"].toString();
         QFileInfo info(targetPath);
         if (info.exists()) {
             return targetPath;

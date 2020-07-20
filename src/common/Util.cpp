@@ -18,6 +18,7 @@
 #include <QProcess>
 #include <QHostAddress>
 #include <QNetworkInterface>
+#include <QSet>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -439,20 +440,33 @@ namespace Util
 		return QString::fromStdWString(szDir);
 	}
 
+    QStringList getAllLnkDir()
+    {
+        QList<qint64> csidlList;
+        csidlList << CSIDL_DESKTOP << CSIDL_DESKTOPDIRECTORY << CSIDL_COMMON_PROGRAMS << CSIDL_COMMON_STARTMENU
+            << CSIDL_COMMON_STARTUP << CSIDL_COMMON_DESKTOPDIRECTORY << CSIDL_PROGRAMS;
+
+        QSet<QString> dirSet;
+        foreach(qint64 id, csidlList) {
+            auto dir = getSystemDir(id);
+            if (!dir.isEmpty()) {
+                dirSet.insert(dir);
+            }
+        }
+        
+        return dirSet.toList();
+    }
+
 	QStringList getAllLnk()
 	{
-		QStringList result;
-		QString desktop = getSystemDir(CSIDL_DESKTOP);
-		QString commonPrograms = getSystemDir(CSIDL_COMMON_PROGRAMS);
-		QString programs = getSystemDir(CSIDL_PROGRAMS);
-        QString commonDesktop = getSystemDir(CSIDL_COMMON_DESKTOPDIRECTORY);
-
-		result.append(getFiles(desktop, false));
-		result.append(getFiles(commonPrograms));
-		result.append(getFiles(programs));
-        result.append(getFiles(commonDesktop));
-
-		return result;
+        QStringList lnkDir = getAllLnkDir();
+        QStringList filterSuffix = QStringList() << "lnk" << "exe" << "com" << "bat";
+        QStringList allPath;
+        foreach(const QString &dir, lnkDir) {
+            auto files = getFiles(dir, true, 30000, filterSuffix);
+            allPath.append(files);
+        }
+        return allPath;
 	}
 	QVariantMap json2map(const QByteArray &val)
 	{

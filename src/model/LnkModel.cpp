@@ -64,38 +64,13 @@ void WorkerThread::go(const QString &indexDir, int maxLimit)
 
 void WorkerThread::run()
 {
-    QStringList pathList;
-    QString indexName;
-    bool isLnk = false;
-    if (indexDir_ == Util::getIndexDir(DEFAULT_INDEX)) {
-        isLnk = true;
-        pathList = Util::getAllLnk();
-        indexName = DEFAULT_INDEX;
-    } else {
-        QStringList filterSuffix = Acc::instance()->getSettingModel()->filterSuffix();
-        //pathList = Util::getFiles(indexDir_, true, maxLimit_, filterSuffix);
-        pathList = fetchFile(indexDir_);
-        indexName = Util::md5(indexDir_);
-    }
-
+    QStringList pathList = fetchFile(indexDir_);
+    QString indexName = Util::md5(indexDir_);
+    QStringList filterSuffix = Acc::instance()->getSettingModel()->filterSuffix();
     if (pathList.isEmpty()) {
         emit resultReady("Directory is empty", indexName);
         return;
     }
-
-    auto addDocument = [](const QSharedPointer<LnkData> &data) -> DocumentPtr {
-        DocumentPtr doc = newLucene<Document>();
-        String name = data->lnkName.toStdWString();
-        String path = data->targetPath.toStdWString();
-        QString tmpContents = data->targetPath + " " + data->lnkPath + " " + data->pinyin;
-        String contents = tmpContents.replace("/", " ").toStdWString();
-        doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
-        doc->add(newLucene<Field>(L"modified", DateTools::timeToString(FileUtils::fileModified(path), DateTools::RESOLUTION_MINUTE),
-            Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
-        doc->add(newLucene<Field>(L"name", name, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
-        doc->add(newLucene<Field>(L"contents", contents, Field::STORE_YES, Field::INDEX_ANALYZED));
-        return doc;
-    };
 
     auto addStrDocument = [](QString &str) -> DocumentPtr {
         int start = str.lastIndexOf("/");
@@ -115,55 +90,8 @@ void WorkerThread::run()
     Lucene::String localIndexDir = Util::getIndexDir(indexName).toStdWString();
     IndexWriter::setDefaultWriteLockTimeout(3000);
     IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
-
-    QSet<QString> repeat;
     for (auto iter = pathList.begin(); iter != pathList.end(); ++iter) {
-        DocumentPtr doc;
-        if (isLnk) {
-            QFileInfo info;
-            info.setFile(*iter);
-            QString target = info.filePath();
-            QString linkTarget = info.symLinkTarget();
-            // 排除链接目标是：C:/Windows/Installer中的文件
-            if (info.isSymLink() && !linkTarget.contains("installer", Qt::CaseInsensitive)) {
-                target = info.symLinkTarget();
-            }
-            if (target.isEmpty()) {
-                continue;
-            }
-
-            QSharedPointer<LnkData> p(new LnkData());
-            // 链接名
-            p->lnkName = info.fileName().remove(".lnk", Qt::CaseInsensitive);
-            // 链接路径
-            p->lnkPath = info.filePath();
-            // 目录可执行程序路径
-            p->targetPath = target;
-            // 目标名字
-            p->targetName = QFileInfo(p->targetPath).baseName();
-
-            if (p->targetName.contains(p->lnkName, Qt::CaseInsensitive)) {
-                CFileVersionInfo verinfo;
-                if (verinfo.Create(p->targetPath.toStdWString().c_str())) {
-                    std::wstring desc = verinfo.GetFileDescription();
-                    if (!desc.empty()) {
-                        p->lnkName = QString::fromStdWString(desc);
-                    }
-                }
-            }
-
-            // 过滤重复
-            if (repeat.find(p->key()) != repeat.end()) {
-                continue;
-            }
-
-            p->pinyin = QString::fromStdString(getFullAndInitialWithSeperator(p->lnkName.trimmed().toStdString()));
-            doc = addDocument(p);
-            repeat.insert(p->key());
-        } else {
-            doc = addStrDocument(*iter);
-        }
-
+        DocumentPtr doc = addStrDocument(*iter);
         if (doc) {
             writer->addDocument(doc);
         }
@@ -177,9 +105,10 @@ void WorkerThread::run()
 
 //////////////////////////////////////////////////////////////////////////
 LnkModel::LnkModel(QObject *parent)
-	: QAbstractListModel(parent)
+    : QAbstractListModel(parent), watcher_(this)
 {
-    load(Util::getIndexDir(DEFAULT_INDEX));
+    init();
+
     QStringList successList;
     auto indexList = Acc::instance()->getSettingModel()->getIndexList();
     for (auto iter = indexList.begin(); iter != indexList.end(); ++iter) {
@@ -190,10 +119,69 @@ LnkModel::LnkModel(QObject *parent)
     if (successList != indexList) {
         Acc::instance()->getSettingModel()->setIndexList(successList);
     }
+
+
+    watcher_.addPaths(Util::getAllLnkDir());
+    connect(&watcher_, &QFileSystemWatcher::directoryChanged, this, &LnkModel::onDirChanged);
 }
 
 LnkModel::~LnkModel()
 {
+}
+
+void LnkModel::init()
+{
+    CFileVersionInfo verinfo;
+    QStringList lnkList = Util::getAllLnk();
+    QSet<QString> repeat;
+    foreach(const QString &lnk, lnkList) {
+        QFileInfo info;
+        info.setFile(lnk);
+        QString target = info.filePath();
+        QString linkTarget = info.symLinkTarget();
+        // 排除链接目标是：C:/Windows/Installer中的文件
+        if (!linkTarget.isEmpty() && info.isSymLink() && !linkTarget.contains("installer", Qt::CaseInsensitive)) {
+            target = linkTarget;
+            if (!QFile::exists(target)) {
+                target = target.remove(" (x86)");
+                if (!QFile::exists(target)) {
+                    qDebug() << "not found" << linkTarget;
+                    continue;
+                }
+            }
+        }
+
+        QSharedPointer<LnkData> p(new LnkData());
+        p->name = info.baseName();
+        p->path = target;
+
+        QString key = (p->name + p->path).toLower();
+        if (repeat.find(key) != repeat.end()) {
+            continue;
+        }
+        repeat.insert(key);
+
+        QString searchText = p->name;
+        
+        QString targetName = target.mid(target.lastIndexOf("/") + 1);
+        if (p->name != targetName) {
+            searchText += " " + targetName;
+        }
+
+        QString descName;
+        if (verinfo.Create(p->path.toStdWString().c_str())) {
+            std::wstring desc = verinfo.GetFileDescription();
+            if (!desc.empty()) {
+                descName = QString::fromStdWString(desc);
+                searchText += " " + descName;
+            }
+        }
+
+        p->pinyin = QString::fromStdString(getFullAndInitialWithSeperator(searchText.toStdString()));
+        p->searchText += searchText + " " + p->pinyin;
+        pinitdata_.append(p);
+    }
+    qDebug() << "LnkModel init finished, size:" << pinitdata_.size();
 }
 
 void LnkModel::load(const QString &dir)
@@ -209,8 +197,9 @@ void LnkModel::filter(const QString &text)
     head_.clear();
 	pfilterdata_.clear(); 
     QSet<QString> repeat;
+    
     auto isBreak = [&]() -> bool {
-        const int MAX_RESULT = 30;
+        const int MAX_RESULT = 50;
         return pfilterdata_.size() >= MAX_RESULT;
     };
     auto addItem = [&](const QString &name, const QString &path) {
@@ -218,60 +207,75 @@ void LnkModel::filter(const QString &text)
             return;
         }
         QSharedPointer<LnkData> p(new LnkData());
-        p->lnkName = name;
-        p->targetPath = path;
-        QFileInfo info(p->targetPath);
+        p->name = name;
+        p->path = path;
+        QString key = (p->name + p->path).toLower();
+        if (repeat.find(key) != repeat.end()) {
+            return;
+        }
+
+        repeat.insert(key);
+        QFileInfo info(p->path);
         if (info.exists()) {
-            p->icon = g_iconProvider.icon(QFileInfo(p->targetPath));
+            p->icon = g_iconProvider.icon(QFileInfo(p->path));
         }
         if (p->icon.isNull()) {
             p->icon = g_iconProvider.icon(QFileIconProvider::File);
         }
 
-        if (repeat.find(p->targetPath) == repeat.end()) {
-            pfilterdata_.append(p);
-            repeat.insert(p->targetPath);
+        pfilterdata_.append(p);
+    };
+
+    auto query = [&](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
+        QList<QSharedPointer<LnkData>> result;
+        try {
+            QueryPtr query = parser->parse(text.toStdWString());
+            const int hitsPerPage = 10;
+            TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
+            searcher->search(query, collector);
+            Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
+            for (int i = 0; i < hits.size(); i++) {
+                DocumentPtr doc = searcher->doc(hits[i]->doc);
+                QString name = QString::fromStdWString(doc->get(L"name"));
+                QString path = QString::fromStdWString(doc->get(L"path"));
+                addItem(name, path);
+            }
+        }
+        catch (LuceneException& e) {
+            qDebug() << "Exception: " << QString::fromStdWString(e.getError()) << L"\n";
         }
     };
 
+    auto search = [&query](const SearcherInfo &info, const QString &text) {
+        query(info.searcher, info.nameParser, text + "*");
+        query(info.searcher, info.contentParser, text + "*");
+    };
+
 	if (!text.isEmpty() ) {
-        auto query = [&](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
-            QList<QSharedPointer<LnkData>> result;
-            try {
-                QueryPtr query = parser->parse(text.toStdWString());
-                const int hitsPerPage = 10;
-                TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
-                searcher->search(query, collector);
-                Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
-                for (int i = 0; i < hits.size(); i++) {
-                    DocumentPtr doc = searcher->doc(hits[i]->doc);
-                    QString name = QString::fromStdWString(doc->get(L"name"));
-                    QString path = QString::fromStdWString(doc->get(L"path"));
-                    addItem(name, path);
+        foreach(const QSharedPointer<LnkData> &data, pinitdata_) {
+            if (data->searchText.contains(text, Qt::CaseInsensitive)) {
+                addItem(data->name, data->path);
+            }
+        }
+
+        if (text.length() > 1) {
+            for (int i = 0; i < g_searcherList.size(); i++) {
+                search(g_searcherList[i], text);
+                if (isBreak()) {
+                    break;
                 }
-            }
-            catch (LuceneException& e) {
-                qDebug() << "Exception: " << QString::fromStdWString(e.getError()) << L"\n";
-            }
-        };
-
-        auto search = [&query](const SearcherInfo &info, const QString &text) {
-            query(info.searcher, info.nameParser, text + "*");
-            query(info.searcher, info.contentParser, text + "*");
-        };
-
-        for (int i = 0; i < g_searcherList.size(); i++) {
-            search(g_searcherList[i], text);
-            if (isBreak()) {
-                break;
             }
         }
 
         qSort(pfilterdata_.begin(), pfilterdata_.end(),
             [](const QSharedPointer<LnkData> &left, const QSharedPointer<LnkData> &right) -> bool {
-            int leftHits = Acc::instance()->getHitsModel()->hits(T_LNK, left->lnkName, left->targetPath);
-            int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->lnkName, right->targetPath);
-            return leftHits > rightHits;
+            int leftHits = Acc::instance()->getHitsModel()->hits(T_LNK, left->name, left->path);
+            int rightHits = Acc::instance()->getHitsModel()->hits(T_LNK, right->name, right->path);
+            if (leftHits != rightHits) {
+                return leftHits > rightHits;
+            } else {
+                return left->path < right->path;
+            }
         });
     }
 	int count = pfilterdata_.size();
@@ -376,4 +380,9 @@ void LnkModel::handleResult(const QString &err, const QString &indexName)
         qDebug() << "ERROR:" << err;
     }
     emit Acc::instance()->sigIndexResult(err, indexName);
+}
+
+void LnkModel::onDirChanged(const QString &path)
+{
+    qDebug() << "dir changed:" << path;
 }

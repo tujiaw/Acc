@@ -72,7 +72,7 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	painter->setFont(font);
 	painter->setPen(QColor("#fff"));
 	rect.setX(LNK_ICON_SIZE.width() + 2 * padding);
-	painter->drawText(rect, Qt::AlignLeft, vm["lnkName"].toString());
+	painter->drawText(rect, Qt::AlignLeft, vm["name"].toString());
 	//this->drawHighlightText(painter, rect, vm["lnkName"].toString(), s_searchText, QColor("#fff"), QColor("#ffcc00"));
 
 	const int titleVSpace = 4;
@@ -80,7 +80,7 @@ void LnkItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	font.setPixelSize(14);
 	painter->setFont(font);
 
-	QString path = vm["targetPath"].toString();
+	QString path = vm["path"].toString();
 	path = painter->fontMetrics().elidedText(path, Qt::TextElideMode::ElideMiddle, rect.width());
 	painter->setPen(QColor("#c5c5c5"));
 	painter->drawText(rect, Qt::AlignLeft, path);

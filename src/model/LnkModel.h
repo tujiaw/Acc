@@ -2,6 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QSharedDataPointer>
+#include <QFileSystemWatcher>
 #include <QPixmap>
 #include <QIcon>
 #include <QThread>
@@ -13,22 +14,16 @@ public:
 	QVariant toVariant() const
 	{
 		QVariantMap result;
-		result["lnkName"] = lnkName;
-		result["targetPath"] = targetPath;
+		result["name"] = name;
+		result["path"] = path;
 		result["icon"] = icon;
 		return result;
 	}
 
-	QString key() const
-	{
-		return lnkName + "-" + targetPath;
-	}
-
-	QString lnkName;
-	QString lnkPath;
-	QString targetName;
-	QString targetPath;
+	QString name;
+	QString path;
 	QString pinyin;
+    QString searchText;
 	QIcon icon;
 };
 
@@ -58,6 +53,8 @@ class LnkModel : public QAbstractListModel
 public:
 	LnkModel(QObject *parent);
 	~LnkModel();
+
+    void init();
 	void load(const QString &dir = "");
 	void filter(const QString &text);
     const QString& head() const { return head_; }
@@ -73,8 +70,11 @@ protected:
 
 private:
 	void handleResult(const QString &err, const QString &indexName);
+    void onDirChanged(const QString &path);
 
 private:
+    QList<QSharedPointer<LnkData>> pinitdata_;
 	QList<QSharedPointer<LnkData>> pfilterdata_;
     QString head_;
+    QFileSystemWatcher watcher_;
 };
