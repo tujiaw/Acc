@@ -11,15 +11,28 @@
 class LnkData : public QSharedData
 {
 public:
+    enum Type {
+        TUnkown = 0,
+        TPath = 1,
+        TSearchEngine = 2,
+    };
+
+    LnkData()
+        : type(TUnkown)
+    {
+    }
+
 	QVariant toVariant() const
 	{
 		QVariantMap result;
+        result["type"] = (int)type;
 		result["name"] = name;
 		result["path"] = path;
 		result["icon"] = icon;
 		return result;
 	}
 
+    Type type;
 	QString name;
 	QString path;
 	QString pinyin;
@@ -54,15 +67,13 @@ public:
 	LnkModel(QObject *parent);
 	~LnkModel();
 
-    void init();
+    void initLnk();
+    void initSearchEngine();
 	void load(const QString &dir = "");
 	void filter(const QString &text);
     const QString& head() const { return head_; }
 	int showCount() const;
     bool removeSearcher(const QString &name);
-    bool addSearcher(const QString &name);
-    void sortSearcher();
-    QString getSearcherStatus(const QString &name) const;
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;

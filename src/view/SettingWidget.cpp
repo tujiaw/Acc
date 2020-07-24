@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include "controller/Acc.h"
 #include "view/MainWidget.h"
+#include "common/LocalSearch.h"
 #include "common/DarkStyle.h"
 #include "common/Util.h"
 
@@ -237,7 +238,6 @@ void SettingWidget::slotIndexUp()
     ui.indexListWidget->setCurrentItem(upItem);
     writeData(ui.indexListWidget);
 
-    Acc::instance()->getLnkModel()->sortSearcher();
     updateIndexStatus();
 }
 
@@ -261,7 +261,7 @@ void SettingWidget::slotIndexDown()
     ui.indexListWidget->setCurrentItem(downItem);
     writeData(ui.indexListWidget);
 
-    Acc::instance()->getLnkModel()->sortSearcher();
+    //Acc::instance()->getLnkModel()->sortSearcher();
     updateIndexStatus();
 }
 
@@ -292,7 +292,7 @@ void SettingWidget::updateIndexStatus()
     ui.indexStatusListWidget->clear();
     for (int i = 0; i < ui.indexListWidget->count(); i++) {
         QString text = ui.indexListWidget->item(i)->text();
-        QString status = Acc::instance()->getLnkModel()->getSearcherStatus(Util::md5(text));
+        QString status = LocalSearcher::instance().isExit(Util::md5(text)) ? "Ok" : "Wait";
         QListWidgetItem *item = new QListWidgetItem(status);
         item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
         ui.indexStatusListWidget->addItem(item);

@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    setlocale(LC_ALL, "");
 #ifndef DEBUG
     qInstallMessageHandler(myMessageOutput);
 #endif

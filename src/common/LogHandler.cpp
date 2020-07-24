@@ -69,10 +69,12 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
         // 清理一个月之前的日志
         QString deleteDate = QString("%1/log%2.log").arg(dir.absolutePath()).arg((QDate::currentDate().addDays(-30).toString("yyyyMMdd")));
-        QStringList allLogList = Util::getFiles(Util::getLogsDir(), false);
+        std::vector<std::wstring> allLogList;
+        Util::getFiles(Util::getLogsDir().toStdWString(), allLogList);
         for (int i = 0; i < allLogList.size(); i++) {
-            if (allLogList[i] < deleteDate) {
-                QFile::remove(allLogList[i]);
+            QString path = QString::fromStdWString(allLogList[i]);
+            if (path < deleteDate) {
+                QFile::remove(path);
             }
         }
 

@@ -483,6 +483,9 @@
     <ClCompile Include="common\WinTool.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="common\LocalSearch.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="component\FramelessWidget.h">
@@ -586,6 +589,9 @@
     </CustomBuild>
     <CustomBuild Include="net\BusService.h">
       <Filter>net</Filter>
+    </CustomBuild>
+    <CustomBuild Include="common\LocalSearch.h">
+      <Filter>common</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

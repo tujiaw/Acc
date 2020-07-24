@@ -52,6 +52,7 @@ MainWidget::MainWidget(QWidget *parent)
     m_headLabel->setHidden(true);
 
 	m_lnkListView = new LnkListView(this);
+    m_lnkListView->setLineEdit(m_lineEdit);
 	m_lnkListView->setModel(Acc::instance()->getLnkModel());
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
 	m_lnkListView->hide();
@@ -172,10 +173,10 @@ void MainWidget::slotClearResult()
 void MainWidget::slotSearchTimer()
 {
 	m_searchTimer->stop();
-	QString text = m_lineEdit->text().trimmed();
+    QString text = m_lineEdit->text();
     LnkModel *model = qobject_cast<LnkModel*>(m_lnkListView->model());
     if (model) {
-        model->filter(text.trimmed());
+        model->filter(text);
         m_headLabel->setText(model->head());
         m_headLabel->setHidden(model->head().isEmpty());
         m_lnkListView->setSelect(0);
@@ -211,39 +212,61 @@ void MainWidget::slotTextChanged(const QString &text)
 
 void MainWidget::slotReturnPressed()
 {
-	QPair<QString, QString> search = getPrefixAndText();
-	if (search.first == OPEN_URL_PREFIX && Acc::instance()->getSettingModel()->enableOpenUrl()) {
-		Util::shellExecute(getUrl());
-	} else if (search.first == SEARCH_ENGINE_PREFIX && Acc::instance()->getSettingModel()->searchEngine().first) {
-		QString searchEngine = Acc::instance()->getSettingModel()->searchEngine().second.toLower();
-		if (!searchEngine.isEmpty()) {
-			QString searchUrl;
-			if (searchEngine.contains("baidu")) {
-				searchUrl = "https://www.baidu.com/s?wd=%1";
-			} else if (searchEngine.contains("bing")) {
-				searchUrl = "http://cn.bing.com/search?q=%1";
-			} else if (searchEngine.contains("google")) {
-				searchUrl = "https://www.google.com/search?q=%1";
-			}
-			if (!searchUrl.isEmpty() && !search.second.isEmpty()) {
-				searchUrl = searchUrl.arg(QString(QUrl::toPercentEncoding(search.second)));
-				Util::shellExecute(searchUrl);
-			}
-		}
-    } else if (m_lnkListView->isVisible()) {
-		m_lnkListView->openIndex(m_lnkListView->currentIndex());
-	} else {
-        if (Util::shellExecute(search.second)) {
-            if (search.second.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
-                QFileInfo f(search.second);
-                if (f.isFile()) {
-                    Acc::instance()->getHitsModel()->increase(T_FILE, f.fileName(), f.absoluteFilePath());
-                } else if (f.isDir()) {
-                    Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
-                }
+    if (m_lnkListView->isVisible()) {
+        m_lnkListView->openIndex(m_lnkListView->currentIndex());
+    } else {
+        QString text = m_lineEdit->text().trimmed();
+        const QStringList urlSuffix = QStringList() << ".com" << ".org" << ".net" << ".cn" << ".gov" << ".edu" << ".info";
+        bool isUrl = false;
+        foreach(const QString &suffix, urlSuffix) {
+            if (text.mid(text.size() - suffix.size()).toLower() == suffix) {
+                isUrl = true;
+                break;
             }
         }
-	}
+        if (isUrl) {
+            QString url = text;
+            if (url.indexOf("http") != 0) {
+                url = "http://" + url;
+            }
+            Util::shellExecute(url);
+        }
+    }
+
+
+	//QPair<QString, QString> search = getPrefixAndText();
+	//if (search.first == OPEN_URL_PREFIX && Acc::instance()->getSettingModel()->enableOpenUrl()) {
+	//	Util::shellExecute(getUrl());
+	//} else if (search.first == SEARCH_ENGINE_PREFIX && Acc::instance()->getSettingModel()->searchEngine().first) {
+	//	QString searchEngine = Acc::instance()->getSettingModel()->searchEngine().second.toLower();
+	//	if (!searchEngine.isEmpty()) {
+	//		QString searchUrl;
+	//		if (searchEngine.contains("baidu")) {
+	//			searchUrl = "https://www.baidu.com/s?wd=%1";
+	//		} else if (searchEngine.contains("bing")) {
+	//			searchUrl = "http://cn.bing.com/search?q=%1";
+	//		} else if (searchEngine.contains("google")) {
+	//			searchUrl = "https://www.google.com/search?q=%1";
+	//		}
+	//		if (!searchUrl.isEmpty() && !search.second.isEmpty()) {
+	//			searchUrl = searchUrl.arg(QString(QUrl::toPercentEncoding(search.second)));
+	//			Util::shellExecute(searchUrl);
+	//		}
+	//	}
+ //   } else if (m_lnkListView->isVisible()) {
+	//	m_lnkListView->openIndex(m_lnkListView->currentIndex());
+	//} else {
+ //       if (Util::shellExecute(search.second)) {
+ //           if (search.second.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
+ //               QFileInfo f(search.second);
+ //               if (f.isFile()) {
+ //                   Acc::instance()->getHitsModel()->increase(T_FILE, f.fileName(), f.absoluteFilePath());
+ //               } else if (f.isDir()) {
+ //                   Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
+ //               }
+ //           }
+ //       }
+	//}
 }
 
 void MainWidget::slotWallpaper()

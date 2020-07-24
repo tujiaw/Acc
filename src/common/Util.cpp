@@ -81,142 +81,42 @@ void EnumerateFileInDirectory(const QString &dir, bool containsSubDir, QStringLi
 
 namespace Util
 {
-    class DirHelper {
-    public:
-        DirHelper(QString path) : path_(path), maxLimit_(-1)
-        {
-
-        }
-        DirHelper(QString path, int maxLimit, const QStringList &filterSuffix)
-            : path_(path), maxLimit_(maxLimit), filterSuffix_(filterSuffix)
-        {
-
-        }
-
-        // 优化，让顶层目录中的文件优先被获取
-        QStringList getFiles(bool containsSubDir = true)
-        {
-            QStringList result, subDirs;
-            getFileDir2(path_, result, subDirs);
-            if (!containsSubDir) {
-                return result;
-            }
-
-            while (!subDirs.isEmpty()) {
-                QStringList tmpDirs;
-                for (int i = 0; i < subDirs.size(); i++) {
-                    QStringList newDirs;
-                    getFileDir2(subDirs[i], result, newDirs);
-                    tmpDirs.append(newDirs);
-                }
-                subDirs = tmpDirs;
-            }
-            return result;
-        }
-
-    private:
-        void getFileDir(QString path, QStringList &outFiles, QStringList &outDirs)
-        {
-            QDir dir(path);
-            QFileInfoList fileList = dir.entryInfoList();
-            for (int i = 0; i < fileList.size(); i++) {
-                QString absPath = fileList[i].absoluteFilePath();
-                if (fileList[i].isDir()) {
-                    outDirs.push_back(absPath);
-                } else {
-                    if (maxLimit_ >= 0 && outFiles.size() >= maxLimit_) {
-                        return;
-                    }
-
-                    if (filterSuffix_.isEmpty()) {
-                        outFiles.push_back(absPath);
-                    } else {
-                        QString suffix = fileList[i].suffix();
-                        if (suffix.isEmpty()) {
-                            outFiles.push_back(absPath);
-                        } else if (!filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
-                            outFiles.push_back(absPath);
-                        }
-                    }
-                }
-            }
-        }
-
-        void getFileDir2(QString path, QStringList &outFiles, QStringList &outDirs)
-        {
-            std::tr2::sys::wdirectory_iterator iter(path.toStdWString());
-            std::tr2::sys::wdirectory_iterator end;
-            for (; iter != end; ++iter) {
-                if (std::tr2::sys::is_directory(iter->status())) {
-                    outDirs.push_back(QString::fromStdWString(iter->path()));
-                } else {
-                    if (maxLimit_ >= 0 && outFiles.size() >= maxLimit_) {
-                        return;
-                    }
-
-                    QString path = QString::fromStdWString(iter->path());
-                    if (filterSuffix_.isEmpty()) {
-                        outFiles.push_back(path);
-                    } else {
-                        int pos = path.lastIndexOf(".");
-                        //if (pos > 0) {
-                        //    QString suffix = path.mid(pos + 1);
-                        //    if (!filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
-                        //        outFiles.push_back(path);
-                        //    }
-                        //} else {
-                        //    outFiles.push_back(path);
-                        //}
-
-                        if (pos > 0) {
-                            QString suffix = path.mid(pos + 1);
-                            if (filterSuffix_.contains(suffix, Qt::CaseInsensitive)) {
-                                outFiles.push_back(path);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-    private:
-        QString path_;
-        int maxLimit_;
-        QStringList filterSuffix_;
-    };
-
-    //QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
-    //{
-    //    QStringList result;
-    //    if (path.isEmpty()) {
-    //        return result;
-    //    }
-    //    QDirIterator iter(path, QStringList(), QDir::Files, containsSubDir ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags);
-    //    while (iter.hasNext()) {
-    //        if (filterSuffix.isEmpty()) {
-    //            result.push_back(iter.next());
-    //        } else {
-    //            QString suffix = iter.fileInfo().suffix();
-    //            if (suffix.isEmpty()) {
-    //                result.push_back(iter.next());
-    //            } else if (!filterSuffix.contains(suffix, Qt::CaseInsensitive)) {
-    //                result.push_back(iter.next());
-    //            } else {
-    //                iter.next();
-    //            }
-    //        }
-
-    //        if (maxLimit > 0 && result.size() >= maxLimit) {
-    //            return result;
-    //        }
-    //    }
-    //    return result;
-    //}
-
-    QStringList getFiles(QString path, bool containsSubDir, int maxLimit, const QStringList &filterSuffix)
+    void getFiles(const std::string &folder, std::vector<std::string> &outFiles)
     {
-        DirHelper dh(path, maxLimit, filterSuffix);
-        return dh.getFiles(containsSubDir);
+        WIN32_FIND_DATAA fd;
+        HANDLE hFind = ::FindFirstFileA((folder + "/*.*").c_str(), &fd);
+        if (hFind != INVALID_HANDLE_VALUE) {
+            do {
+                std::string name(fd.cFileName);
+                if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                    if (name != "." && name != "..") {
+                        getFiles(folder + "/" + name, outFiles);
+                    }
+                } else {
+                    outFiles.push_back(folder + "/" + name);
+                }
+            } while (::FindNextFileA(hFind, &fd));
+            ::FindClose(hFind);
+        }
+    }
+
+    void getFiles(const std::wstring &folder, std::vector<std::wstring> &outFiles)
+    {
+        WIN32_FIND_DATA fd;
+        HANDLE hFind = ::FindFirstFile((folder + L"/*.*").c_str(), &fd);
+        if (hFind != INVALID_HANDLE_VALUE) {
+            do {
+                std::wstring name(fd.cFileName);
+                if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                    if (name != L"." && name != L"..") {
+                        getFiles(folder + L"/" + name, outFiles);
+                    }
+                } else {
+                    outFiles.push_back(folder + L"/" + name);
+                }
+            } while (::FindNextFile(hFind, &fd));
+            ::FindClose(hFind);
+        }
     }
 
 	bool shellExecute(const QString &path)
@@ -461,13 +361,25 @@ namespace Util
 	{
         QStringList lnkDir = getAllLnkDir();
         QStringList filterSuffix = QStringList() << "lnk" << "exe" << "com" << "bat";
-        QStringList allPath;
+        std::vector<std::wstring> allPath;
         foreach(const QString &dir, lnkDir) {
-            auto files = getFiles(dir, true, 30000, filterSuffix);
-            allPath.append(files);
+            std::vector<std::wstring> files;
+            getFiles(dir.toStdWString(), files);
+            allPath.insert(allPath.end(), files.begin(), files.end());
         }
-        return allPath;
+        QStringList result;
+        for (auto &path : allPath) {
+            int p = path.find_last_of('.');
+            if (p > 0) {
+                std::wstring suffix = path.substr(p + 1);
+                if (suffix == L"lnk" || suffix == L"exe" || suffix == L"com" || suffix == L"bat") {
+                    result.push_back(QString::fromStdWString(path));
+                }
+            }
+        }
+        return result;
 	}
+
 	QVariantMap json2map(const QByteArray &val)
 	{
 		QJsonParseError jError;
@@ -680,4 +592,20 @@ namespace Util
 		}
 		return ipList.join("-");
 	}
+
+    void convert(const std::vector<std::string> &in, QStringList &out)
+    {
+        out.reserve(in.size());
+        for (auto &i : in) {
+            out.push_back(QString::fromStdString(i));
+        }
+    }
+
+    void convert(const std::vector<std::wstring> &in, QStringList &out)
+    {
+        out.reserve(in.size());
+        for (auto &i : in) {
+            out.push_back(QString::fromStdWString(i));
+        }
+    }
 }

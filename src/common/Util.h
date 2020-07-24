@@ -2,11 +2,13 @@
 
 #include <QObject>
 #include <string>
+#include <vector>
 #include "Constants.h"
 
 class QWidget;
 namespace Util {
-	QStringList getFiles(QString path, bool containsSubDir = true, int maxLimit = -1, const QStringList &filterSuffix = QStringList());
+    void getFiles(const std::string &folder, std::vector<std::string> &outFiles);
+    void getFiles(const std::wstring &folder, std::vector<std::wstring> &outFiles);
 	bool shellExecute(const QString &path);
     bool shellExecute(const QString &path, const QString &operation);
 	bool locateFile(const QString &dir);
@@ -41,4 +43,6 @@ namespace Util {
     bool ImproveProcPriv();
 	QString getSystemInfo();
 	QString getLocalHost();
+    void convert(const std::vector<std::string> &in, QStringList &out);
+    void convert(const std::vector<std::wstring> &in, QStringList &out);
 }

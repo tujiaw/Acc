@@ -3,6 +3,7 @@
 #include <QListView>
 
 class ImageButton;
+class QLineEdit;
 class LnkListView : public QListView
 {
 	Q_OBJECT
@@ -10,6 +11,8 @@ class LnkListView : public QListView
 public:
 	LnkListView(QWidget *parent);
 	~LnkListView();
+
+    void setLineEdit(QLineEdit *lineEdit);
 	void selectNext();
 	void selectPrev();
 	void setSelect(int row);
@@ -32,6 +35,7 @@ private slots :
 	void slotItemClicked(const QModelIndex &index);
 
 private:
+    QLineEdit *lineEdit_;
 	ImageButton *folderOpenBtn_;
     ImageButton *shieldBtn_;
 };

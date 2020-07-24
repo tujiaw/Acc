@@ -3,6 +3,7 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QScrollBar>
+#include <QLineEdit>
 #include "component/ImageButton.h"
 #include "common/Util.h"
 #include "controller/Acc.h"
@@ -31,6 +32,11 @@ LnkListView::LnkListView(QWidget *parent)
 
 LnkListView::~LnkListView()
 {
+}
+
+void LnkListView::setLineEdit(QLineEdit *lineEdit)
+{
+    lineEdit_ = lineEdit;
 }
 
 void LnkListView::selectNext()
@@ -78,13 +84,34 @@ void LnkListView::openIndex(const QModelIndex &index)
 
 	Acc::instance()->hideWidget(WidgetID::MAIN);
 	QVariantMap vm = this->model()->data(index).toMap();
-	QString path = vm["path"].toString();
-    bool ok = Util::shellExecute(path);
-	if (ok) {
-		QString title = vm["name"].toString();
-		QString subtitle = vm["path"].toString();
-		Acc::instance()->getHitsModel()->increase(T_LNK, title, subtitle);
-	}
+    int type = vm["type"].toInt();
+    QString name = vm["name"].toString();
+    QString path = vm["path"].toString();
+    if (type == LnkData::TSearchEngine) {
+        QStringList textList = lineEdit_->text().split(" ", QString::SkipEmptyParts);
+        QString searchUrl;
+        QString searchText;
+        if (textList.size() > 1) {
+            searchText = QString(QUrl::toPercentEncoding(textList[1].trimmed()));
+        }
+        if (name == "baidu") {
+            searchUrl = "https://www.baidu.com" + (searchText.isEmpty() ? "" : ("/s?wd=" + searchText));
+        } else if (name == "bing") {
+            searchUrl = "http://cn.bing.com" + (searchText.isEmpty() ? "" : ("/search?q=" + searchText));
+        } else if (name == "google") {
+            searchUrl = "https://www.google.com" + (searchText.isEmpty() ? "" : ("/search?q=" + searchText));
+        }
+        if (!searchUrl.isEmpty()) {
+            Util::shellExecute(searchUrl);
+        }
+    } else {
+        bool ok = Util::shellExecute(path);
+        if (ok) {
+            QString title = vm["name"].toString();
+            QString subtitle = vm["path"].toString();
+            Acc::instance()->getHitsModel()->increase(T_LNK, title, subtitle);
+        }
+    }
 }
 
 void LnkListView::mouseMoveEvent(QMouseEvent *e)
