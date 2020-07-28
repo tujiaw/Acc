@@ -124,18 +124,21 @@ void LnkModel::initLnk()
 void LnkModel::initSearchEngine()
 {
     QSharedPointer<LnkData> baidu(new LnkData());
+    baidu->icon = QIcon(":/images/baidu.png");
     baidu->type = LnkData::TSearchEngine;
     baidu->name = "baidu";
     baidu->searchText = baidu->name;
     baidu->path = QStringLiteral("百度一下你就知道");
 
     QSharedPointer<LnkData> bing(new LnkData());
+    bing->icon = QIcon(":/images/bing.png");
     bing->type = LnkData::TSearchEngine;
     bing->name = "bing";
     bing->searchText = bing->name;
     bing->path = QStringLiteral("必应搜索");
 
     QSharedPointer<LnkData> google(new LnkData());
+    google->icon = QIcon(":/images/google.png");
     google->type = LnkData::TSearchEngine;
     google->name = "google";
     google->searchText = google->name;
