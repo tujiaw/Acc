@@ -14,5 +14,8 @@
         <file>images/icon_link.png</file>
         <file>images/icon_text.png</file>
         <file>images/icon_wait.png</file>
+        <file>images/baidu.png</file>
+        <file>images/bing.png</file>
+        <file>images/google.png</file>
     </qresource>
 </RCC>
