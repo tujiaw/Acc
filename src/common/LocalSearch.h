@@ -14,7 +14,7 @@ public:
         Lucene::IndexReaderPtr reader;
         Lucene::SearcherPtr searcher;
         Lucene::AnalyzerPtr analyzer;
-        Lucene::QueryParserPtr nameParser, contentParser;
+        Lucene::QueryParserPtr parser1, parser2;
     };
 
     static LocalSearcher& instance();

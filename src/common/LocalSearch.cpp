@@ -1,5 +1,6 @@
 #include "LocalSearch.h"
 #include "Util.h"
+#include "lucene/ChineseAnalyzer.h"
 #include <QDebug>
 using namespace Lucene;
 
@@ -25,8 +26,15 @@ QString LocalSearcher::addDir(const QString &dir)
         if (start >= 0) {
             DocumentPtr doc = newLucene<Document>();
             String name = path.substr(start + 1);
-            doc->add(newLucene<Field>(L"name", name, Field::STORE_YES, Field::INDEX_ANALYZED));
-            doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+            doc->add(newLucene<Field>(L"name", name, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+            doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NO));
+
+            String dir = path.substr(0, start);
+            start = dir.find_last_of(L'/');
+            if (start >= 0) {
+                dir = dir.substr(start + 1);
+                doc->add(newLucene<Field>(L"dir", dir, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
+            }
             return doc;
         }
         return nullptr;
@@ -55,12 +63,12 @@ bool LocalSearcher::addSearch(const QString &name)
         info.reader = IndexReader::open(FSDirectory::open(Util::getIndexDir(name).toStdWString()), true);
         info.searcher = newLucene<IndexSearcher>(info.reader);
         info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
-        info.nameParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
-        info.nameParser->setAllowLeadingWildcard(true);
-        info.contentParser = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"path", info.analyzer);
-        info.contentParser->setAllowLeadingWildcard(true);
-        bool isExist = false;
+        info.parser1 = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
+        info.parser1->setAllowLeadingWildcard(true);
+        info.parser2 = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"dir", info.analyzer);
+        info.parser2->setAllowLeadingWildcard(true);
 
+        bool isExist = false;
         std::lock_guard<std::mutex> lock(mutex_);
         for (int i = 0; i < list_.size(); i++) {
             if (list_[i].indexName == info.indexName) {
@@ -132,8 +140,8 @@ void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
 
     std::lock_guard<std::mutex> lock(mutex_);
     for (int i = 0; i < list_.size(); i++) {
-        query(list_[i].searcher, list_[i].nameParser, text + "*");
-        //query(info.searcher, info.contentParser, text + "*");
+        query(list_[i].searcher, list_[i].parser1, text + "*");
+        query(list_[i].searcher, list_[i].parser2, text + "*");
     }
 }
 
