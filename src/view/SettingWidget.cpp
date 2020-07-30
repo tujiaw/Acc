@@ -193,6 +193,10 @@ void SettingWidget::slotWallpaperIndex(int index)
 void SettingWidget::slotIndexAdd()
 {
     QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Select index directory"));
+    if (dir.isEmpty()) {
+        return;
+    }
+
     auto newItem = addIndexItem(dir);
     writeData(ui.indexListWidget);
 
@@ -290,13 +294,10 @@ void SettingWidget::updateIndexStatus()
 {
     for (int i = 0; i < ui.indexListWidget->count(); i++) {
         QString text = ui.indexListWidget->item(i)->text();
-        QString status = LocalSearcher::instance().isExit(Util::md5(text)) ? "Ok" : "Wait";
-        QListWidgetItem *item = new QListWidgetItem(status);
-        item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
         if (LocalSearcher::instance().isExit(Util::md5(text))) {
             ui.indexListWidget->item(i)->setIcon(QIcon(":/images/ok.png"));
         } else {
-            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/remove.png"));
+            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/wait.png"));
         }
     }
 }
