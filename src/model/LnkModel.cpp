@@ -5,7 +5,7 @@
 #include <QStandardPaths>
 #include <QImageReader>
 #include <QProcess>
-
+#include <thread>
 #include "controller/Acc.h"
 #include "common/Util.h"
 #include "common/FileVersionInfo.h"
@@ -13,35 +13,13 @@
 #include "common/LocalSearch.h"
 
 QFileIconProvider g_iconProvider;
-WorkerThread::WorkerThread(QObject *parent) 
-    : QThread(parent), maxLimit_(-1)
-{
-}
-
-WorkerThread::~WorkerThread()
-{
-    qDebug() << "worker thread exit";
-}
-
-void WorkerThread::go(const QString &indexDir, int maxLimit)
-{
-    indexDir_ = indexDir;
-    maxLimit_ = maxLimit;
-    start();
-}
-
-void WorkerThread::run()
-{
-    QString name = LocalSearcher::instance().addDir(indexDir_);
-    emit resultReady("", name);
-}
-
 //////////////////////////////////////////////////////////////////////////
 LnkModel::LnkModel(QObject *parent)
     : QAbstractListModel(parent), watcher_(this)
 {
     initSearchEngine();
-    initLnk();
+    std::thread t(std::bind(&LnkModel::initLnk, this));
+    t.detach();
 
     QStringList successList;
     auto indexList = Acc::instance()->getSettingModel()->getIndexList();
@@ -59,6 +37,7 @@ LnkModel::LnkModel(QObject *parent)
 
     watcher_.addPaths(Util::getAllLnkDir());
     connect(&watcher_, &QFileSystemWatcher::directoryChanged, this, &LnkModel::onDirChanged);
+    connect(this, &LnkModel::sigLoaded, this, &LnkModel::handleResult, Qt::QueuedConnection);
 }
 
 LnkModel::~LnkModel()
@@ -151,10 +130,11 @@ void LnkModel::initSearchEngine()
 
 void LnkModel::load(const QString &dir)
 {
-    WorkerThread *workerThread = new WorkerThread(this);
-    connect(workerThread, &WorkerThread::resultReady, this, &LnkModel::handleResult, Qt::QueuedConnection);
-    connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
-    workerThread->go(dir, Acc::instance()->getSettingModel()->getDirMaxLimit());
+    std::thread t([dir, this]() {
+        QString name = LocalSearcher::instance().addDir(dir);
+        emit this->sigLoaded("", name);
+    });
+    t.detach();
 }
 
 void LnkModel::filter(const QString &text)

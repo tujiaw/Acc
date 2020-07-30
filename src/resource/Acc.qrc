@@ -17,5 +17,8 @@
         <file>images/baidu.png</file>
         <file>images/bing.png</file>
         <file>images/google.png</file>
+        <file>images/ok.png</file>
+        <file>images/remove.png</file>
+        <file>images/wait.png</file>
     </qresource>
 </RCC>

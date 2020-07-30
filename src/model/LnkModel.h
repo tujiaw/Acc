@@ -5,7 +5,6 @@
 #include <QFileSystemWatcher>
 #include <QPixmap>
 #include <QIcon>
-#include <QThread>
 #include <QString>
 
 class LnkData : public QSharedData
@@ -40,25 +39,6 @@ public:
 	QIcon icon;
 };
 
-class WorkerThread : public QThread
-{
-	Q_OBJECT
-public:
-	WorkerThread(QObject *parent = 0);
-    ~WorkerThread();
-    void go(const QString &indexDir, int maxLimit);
-
-signals:
-	void resultReady(const QString &err, const QString &indexDir);
-
-protected:
-	void run();
-
-private:
-    QString indexDir_;
-    int maxLimit_;
-};
-
 class LnkModel : public QAbstractListModel
 {
 	Q_OBJECT
@@ -69,11 +49,14 @@ public:
 
     void initLnk();
     void initSearchEngine();
-	void load(const QString &dir = "");
+	void load(const QString &dir);
 	void filter(const QString &text);
     const QString& head() const { return head_; }
 	int showCount() const;
     bool removeSearcher(const QString &name);
+
+signals:
+    void sigLoaded(const QString &err, const QString &name);
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;

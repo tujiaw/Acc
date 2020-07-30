@@ -118,11 +118,11 @@ void LocalSearcher::sortSearch()
 
 void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
 {
+    const int MAX_COUNT = 50;
     auto query = [&](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
         try {
             QueryPtr query = parser->parse(text.toStdWString());
-            const int hitsPerPage = 10;
-            TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(5 * hitsPerPage, false);
+            TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(MAX_COUNT, false);
             searcher->search(query, collector);
             Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
             for (int i = 0; i < hits.size(); i++) {
@@ -141,7 +141,9 @@ void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
     std::lock_guard<std::mutex> lock(mutex_);
     for (int i = 0; i < list_.size(); i++) {
         query(list_[i].searcher, list_[i].parser1, text + "*");
-        query(list_[i].searcher, list_[i].parser2, text + "*");
+        if (result.size() < MAX_COUNT) {
+            query(list_[i].searcher, list_[i].parser2, text + "*");
+        }
     }
 }
 

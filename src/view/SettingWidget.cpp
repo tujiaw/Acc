@@ -49,7 +49,6 @@ SettingWidget::SettingWidget(QWidget *parent)
 
     // index tab
     ui.indexListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
-    ui.indexStatusListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
     ui.indexListWidget->setAutoFillBackground(true);
 
     connect(ui.pbIndexAdd, &QPushButton::clicked, this, &SettingWidget::slotIndexAdd);
@@ -273,7 +272,7 @@ QListWidgetItem* SettingWidget::addIndexItem(const QString &name)
         }
     }
 
-    auto item = new QListWidgetItem(name);
+    auto item = new QListWidgetItem(QIcon(":/images/wait.png"), name);
     item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
     ui.indexListWidget->addItem(item);
     return item;
@@ -289,13 +288,16 @@ void SettingWidget::addIndexItemList(const QStringList &nameList)
 
 void SettingWidget::updateIndexStatus()
 {
-    ui.indexStatusListWidget->clear();
     for (int i = 0; i < ui.indexListWidget->count(); i++) {
         QString text = ui.indexListWidget->item(i)->text();
         QString status = LocalSearcher::instance().isExit(Util::md5(text)) ? "Ok" : "Wait";
         QListWidgetItem *item = new QListWidgetItem(status);
         item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
-        ui.indexStatusListWidget->addItem(item);
+        if (LocalSearcher::instance().isExit(Util::md5(text))) {
+            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/ok.png"));
+        } else {
+            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/remove.png"));
+        }
     }
 }
 
