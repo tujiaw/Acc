@@ -92,8 +92,9 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 				m_lnkListView->selectPrev();
                 return true;
             } else if (keyEvent->key() == Qt::Key_O) {
-                this->parentWidget()->hide();
-                m_lnkListView->openCurrentFolder();
+                if (m_lnkListView->openCurrentFolder()) {
+                    this->parentWidget()->hide();
+                }
                 return true;
             }
         } else if (object == m_lineEdit) {

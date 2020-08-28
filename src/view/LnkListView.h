@@ -21,7 +21,7 @@ public:
 	void setEnableButtonsVisible(bool visible);
     bool enableButtonsVisible() const;
     QString getPathFromIndex(const QModelIndex &index) const;
-    void openCurrentFolder();
+    bool openCurrentFolder();
 
 protected:
 	void mouseMoveEvent(QMouseEvent *e);
