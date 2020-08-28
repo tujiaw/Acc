@@ -35,10 +35,7 @@ std::string Sqlite::errmsg()
 
 void Sqlite::query(const std::string &sql, const std::function<void(const std::string &name, const std::string &value)> &fn)
 {
-    if (!db_) {
-        return;
-    }
-
+    if (!db_) return;
     char **dbResult;
     int row = 0;
     int col = 0;
@@ -55,10 +52,7 @@ void Sqlite::query(const std::string &sql, const std::function<void(const std::s
 
 void Sqlite::query2(const std::string &sql, const std::function<void(int row, int col, char **result)> &fn)
 {
-    if (!db_) {
-        return;
-    }
-
+    if (!db_) return;
     char **dbResult;
     int row = 0;
     int col = 0;
@@ -69,15 +63,13 @@ void Sqlite::query2(const std::string &sql, const std::function<void(int row, in
 
 bool Sqlite::execute(const std::string &sql)
 {
+    if (!db_) return false;
     return SQLITE_OK == sqlite3_exec(db_, sql.c_str(), NULL, NULL, NULL);
 }
 
 bool Sqlite::execute(const std::string &sql, const std::vector<std::vector<std::string>> &bindText)
 {
-    if (!db_) {
-        return false;
-    }
-       
+    if (!db_) return false;
     sqlite3_exec(db_, "begin;", NULL, NULL, NULL);
     sqlite3_stmt *stmt;
     int errcode = sqlite3_prepare_v2(db_, sql.c_str(), sql.size(), &stmt, nullptr);
@@ -86,20 +78,18 @@ bool Sqlite::execute(const std::string &sql, const std::vector<std::vector<std::
     }
 
     for (std::size_t i = 0; i < bindText.size(); i++) {
-        sqlite3_reset(stmt);
         for (std::size_t j = 0; j < bindText[i].size(); j++) {
             sqlite3_bind_text(stmt, j + 1, bindText[i][j].c_str(), -1, nullptr);
         }
         errcode = sqlite3_step(stmt);
         if (errcode != SQLITE_DONE) {
+            sqlite3_finalize(stmt);
             return false;
         }
+        sqlite3_reset(stmt);
     }
 
-    errcode = sqlite3_finalize(stmt);
-    if (errcode != SQLITE_OK) {
-        return false;
-    }
+    sqlite3_finalize(stmt);
     sqlite3_exec(db_, "commit;", NULL, NULL, NULL);
     return true;
 }
@@ -178,17 +168,18 @@ bool LocalSearcher::initTable(const QString &name, const QString &dir)
         return false;
     }
 
-    std::vector<std::string> files;
-    Util::getFiles(dir.toStdString(), files);
+    std::vector<std::wstring> files;
+    Util::getFiles(dir.toStdWString(), files);
 
     std::vector<std::vector<std::string>> datas;
     for (auto iter = files.begin(); iter != files.end(); ++iter) {
-        int start = iter->find_last_of('/');
+        int start = iter->find_last_of(L'/');
         if (start > 0) {
             std::vector<std::string> bindText;
-            std::string name = iter->substr(start + 1);
+            std::wstring wname = iter->substr(start + 1);
+            std::string name = QString::fromStdWString(wname).toStdString();
             bindText.push_back(name);
-            bindText.push_back(*iter);
+            bindText.push_back(QString::fromStdWString(*iter).toStdString());
             bindText.push_back(name);
             datas.push_back(bindText);
         }

@@ -192,6 +192,14 @@ QString LnkListView::getPathFromIndex(const QModelIndex &index) const
     return "";
 }
 
+void LnkListView::openCurrentFolder()
+{
+    QModelIndex index = currentIndex();
+    if (index.isValid()) {
+        Util::locateFile(getPathFromIndex(index));
+    }
+}
+
 void LnkListView::slotFolerOpen()
 {
     Util::locateFile(getPathFromIndex(this->sender()->property("index").toModelIndex()));

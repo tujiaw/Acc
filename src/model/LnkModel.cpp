@@ -155,13 +155,18 @@ void LnkModel::filter(const QString &text)
     };
 
     QStringList searchList = text.split(" ", QString::SkipEmptyParts);
-    QString searchText = searchList.isEmpty() ? "" : searchList.last();
-    if (searchText.isEmpty()) {
+    if (searchList.isEmpty()) {
         return;
     }
 
+    for (int i = 0; i < pinitdata_.size(); i++) {
+        if (pinitdata_.at(i)->searchText.contains(searchList.first())) {
+            addItem(pinitdata_.at(i));
+        }
+    }
+
     QList<QVariantMap> datas;
-    LocalSearcher::instance().query(searchText, datas);
+    LocalSearcher::instance().query(searchList.last(), datas);
     foreach(const QVariantMap &data, datas) {
         QSharedPointer<LnkData> p(new LnkData());
         p->name = data["name"].toString();
