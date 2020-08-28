@@ -78,7 +78,13 @@ void SettingWidget::readData()
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
     ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
-    addIndexItemList(settingModel->getIndexList());
+    QStringList indexList = settingModel->getIndexList();
+    foreach(const QString &index, indexList) {
+        if (LocalSearcher::instance().isExit(Util::md5(index))) {
+            addIndexItem(index);
+        }
+    }
+    updateIndexStatus();
 }
 
 void SettingWidget::writeData(QObject *sender)

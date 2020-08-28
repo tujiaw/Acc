@@ -55,9 +55,6 @@ public:
 	int showCount() const;
     bool removeSearcher(const QString &name);
 
-signals:
-    void sigLoaded(const QString &err, const QString &name);
-
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

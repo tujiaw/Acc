@@ -19,6 +19,7 @@
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QSet>
+#include <QSysInfo>
 
 #pragma warning(disable:4091)
 #include <ShlObj.h>
@@ -205,7 +206,7 @@ namespace Util
 
     QString getWritebaleDir()
     {
-        QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+        QDir dir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
         if (!dir.exists()) {
             dir.mkpath(dir.absolutePath());
         }
@@ -574,12 +575,13 @@ namespace Util
 
 	QString getSystemInfo()
 	{
-		QStringList strList;
-		strList << ("Abi:" + QSysInfo::buildAbi());
-		strList << ("System:" + QSysInfo::prettyProductName());
-		strList << ("Kernel Type:" + QSysInfo::kernelType());
-		strList << ("Kernel Version:" + QSysInfo::kernelVersion());
-		return strList.join(", ");
+		//QStringList strList;
+		//strList << ("Abi:" + QSysInfo::buildAbi());
+		//strList << ("System:" + QSysInfo::prettyProductName());
+		//strList << ("Kernel Type:" + QSysInfo::kernelType());
+		//strList << ("Kernel Version:" + QSysInfo::kernelVersion());
+		//return strList.join(", ");
+        return "";
 	}
 
 	QString getLocalHost()

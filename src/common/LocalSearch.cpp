@@ -1,12 +1,112 @@
 #include "LocalSearch.h"
 #include "Util.h"
-#include "lucene/ChineseAnalyzer.h"
 #include <QDebug>
-using namespace Lucene;
+#include "sqlite3/sqlite3.h"
+
+Sqlite::Sqlite() 
+    : db_(nullptr)
+{
+}
+Sqlite::~Sqlite()
+{
+    close();
+}
+
+bool Sqlite::open(const std::string &path)
+{
+    return SQLITE_OK == sqlite3_open(path.c_str(), &db_);
+}
+
+void Sqlite::close()
+{
+    if (db_) {
+        sqlite3_close(db_);
+        db_ = nullptr;
+    }
+}
+
+std::string Sqlite::errmsg()
+{
+    if (!db_) {
+        return "db is null";
+    }
+    return sqlite3_errmsg(db_);
+}
+
+void Sqlite::query(const std::string &sql, const std::function<void(const std::string &name, const std::string &value)> &fn)
+{
+    if (!db_) {
+        return;
+    }
+
+    char **dbResult;
+    int row = 0;
+    int col = 0;
+    sqlite3_get_table(db_, sql.c_str(), &dbResult, &row, &col, NULL);
+    int index = col;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            fn(dbResult[j], dbResult[index]);
+            index++;
+        }
+    }
+    sqlite3_free_table(dbResult);
+}
+
+void Sqlite::query2(const std::string &sql, const std::function<void(int row, int col, char **result)> &fn)
+{
+    if (!db_) {
+        return;
+    }
+
+    char **dbResult;
+    int row = 0;
+    int col = 0;
+    sqlite3_get_table(db_, sql.c_str(), &dbResult, &row, &col, NULL);
+    fn(row, col, dbResult);
+    sqlite3_free_table(dbResult);
+}
+
+bool Sqlite::execute(const std::string &sql)
+{
+    return SQLITE_OK == sqlite3_exec(db_, sql.c_str(), NULL, NULL, NULL);
+}
+
+bool Sqlite::execute(const std::string &sql, const std::vector<std::vector<std::string>> &bindText)
+{
+    if (!db_) {
+        return false;
+    }
+       
+    sqlite3_exec(db_, "begin;", NULL, NULL, NULL);
+    sqlite3_stmt *stmt;
+    int errcode = sqlite3_prepare_v2(db_, sql.c_str(), sql.size(), &stmt, nullptr);
+    if (errcode != SQLITE_OK) {
+        return false;
+    }
+
+    for (std::size_t i = 0; i < bindText.size(); i++) {
+        sqlite3_reset(stmt);
+        for (std::size_t j = 0; j < bindText[i].size(); j++) {
+            sqlite3_bind_text(stmt, j + 1, bindText[i][j].c_str(), -1, nullptr);
+        }
+        errcode = sqlite3_step(stmt);
+        if (errcode != SQLITE_DONE) {
+            return false;
+        }
+    }
+
+    errcode = sqlite3_finalize(stmt);
+    if (errcode != SQLITE_OK) {
+        return false;
+    }
+    sqlite3_exec(db_, "commit;", NULL, NULL, NULL);
+    return true;
+}
+//////////////////////////////////////////////////////////////////////////
 
 LocalSearcher::LocalSearcher()
 {
-
 }
 
 LocalSearcher& LocalSearcher::instance()
@@ -15,145 +115,130 @@ LocalSearcher& LocalSearcher::instance()
     return s_inst;
 }
 
-QString LocalSearcher::addDir(const QString &dir)
+bool LocalSearcher::open()
 {
-    std::vector<std::wstring> files;
-    Util::getFiles(dir.toStdWString(), files);
-    QString name = Util::md5(dir);
-
-    auto addDocument = [](std::wstring &path) -> DocumentPtr {
-        int start = path.find_last_of(L'/');
-        if (start >= 0) {
-            DocumentPtr doc = newLucene<Document>();
-            String name = path.substr(start + 1);
-            doc->add(newLucene<Field>(L"name", name, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
-            doc->add(newLucene<Field>(L"path", path, Field::STORE_YES, Field::INDEX_NO));
-
-            String dir = path.substr(0, start);
-            start = dir.find_last_of(L'/');
-            if (start >= 0) {
-                dir = dir.substr(start + 1);
-                doc->add(newLucene<Field>(L"dir", dir, Field::STORE_YES, Field::INDEX_NOT_ANALYZED));
-            }
-            return doc;
-        }
-        return nullptr;
-    };
-
-    Lucene::String localIndexDir = Util::getIndexDir(name).toStdWString();
-    IndexWriter::setDefaultWriteLockTimeout(3000);
-    IndexWriterPtr writer = newLucene<IndexWriter>(FSDirectory::open(localIndexDir), newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT), true, IndexWriter::MaxFieldLengthLIMITED);
-    for (auto iter = files.begin(); iter != files.end(); ++iter) {
-        DocumentPtr doc = addDocument(*iter);
-        if (doc) {
-            writer->addDocument(doc);
-        }
-    }
-
-    writer->optimize();
-    writer->close();
-    return name;
-}
-
-bool LocalSearcher::addSearch(const QString &name)
-{
-    try {
-        LocalSearcher::Info info;
-        info.indexName = name;
-        info.reader = IndexReader::open(FSDirectory::open(Util::getIndexDir(name).toStdWString()), true);
-        info.searcher = newLucene<IndexSearcher>(info.reader);
-        info.analyzer = newLucene<StandardAnalyzer>(LuceneVersion::LUCENE_CURRENT);
-        info.parser1 = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"name", info.analyzer);
-        info.parser1->setAllowLeadingWildcard(true);
-        info.parser2 = newLucene<QueryParser>(LuceneVersion::LUCENE_CURRENT, L"dir", info.analyzer);
-        info.parser2->setAllowLeadingWildcard(true);
-
-        bool isExist = false;
-        std::lock_guard<std::mutex> lock(mutex_);
-        for (int i = 0; i < list_.size(); i++) {
-            if (list_[i].indexName == info.indexName) {
-                list_[i] = info;
-                isExist = true;
-                break;
-            }
-        }
-        if (!isExist) {
-            list_.push_back(info);
-        }
-
-        sortSearch();
-        return true;
-    }
-    catch (...) {
+    if (!sqlite_.open("./data.db")) {
         return false;
     }
+
+    sqlite_.query("select name from sqlite_master where type='table'", [this](const std::string &name, const std::string &value) {
+        if (!value.empty() && value != "sqlite_sequence") {
+            tableList_.push_back(QString::fromStdString(value));
+        }
+    });
+    return true;
 }
 
-bool LocalSearcher::delSearch(const QString &name)
+bool LocalSearcher::initData(const std::string &name, const std::vector<std::vector<std::string>> &bindText)
 {
-    bool result = false;
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (int i = 0; i < list_.size(); i++) {
-        if (list_[i].indexName == name) {
-            list_.removeAt(i);
-            result = true;
-            break;
+    QString tableName = QString::fromStdString(name);
+    dropTable(tableName);
+    if (!createTable(tableName)) {
+        return false;
+    }
+
+    QString sql = QString("insert into '%1' values(NULL, ?, ?, ?)").arg(tableName);
+    return sqlite_.execute(sql.toStdString(), bindText);
+}
+
+bool LocalSearcher::createTable(const QString &name)
+{
+    if (tableList_.contains(name, Qt::CaseInsensitive)) {
+        return false;
+    }
+
+    tableList_.append(name);
+    QString sql = QString("create table if not exists '%1'("
+        "id integer primary key autoincrement, "
+        "name string not null, "
+        "content string not null, "
+        "search string)").arg(name);
+    return sqlite_.execute(sql.toStdString());
+}
+
+bool LocalSearcher::dropTable(const QString &name)
+{
+    QString sql = QString("drop table '%1'").arg(name);
+    if (sqlite_.execute(sql.toStdString())) {
+        tableList_.removeOne(name);
+        return true;
+    }
+    return false;
+}
+
+bool LocalSearcher::clearTable(const QString &name)
+{
+    QString sql = QString("delete from '%1'").arg(name);
+    return sqlite_.execute(sql.toStdString());
+}
+
+bool LocalSearcher::initTable(const QString &name, const QString &dir)
+{
+    if (isExit(name)) {
+        return false;
+    }
+
+    std::vector<std::string> files;
+    Util::getFiles(dir.toStdString(), files);
+
+    std::vector<std::vector<std::string>> datas;
+    for (auto iter = files.begin(); iter != files.end(); ++iter) {
+        int start = iter->find_last_of('/');
+        if (start > 0) {
+            std::vector<std::string> bindText;
+            std::string name = iter->substr(start + 1);
+            bindText.push_back(name);
+            bindText.push_back(*iter);
+            bindText.push_back(name);
+            datas.push_back(bindText);
         }
     }
-    sortSearch();
-    return result;
-}
-
-void LocalSearcher::sortSearch()
-{
-    //QStringList indexList = Acc::instance()->getSettingModel()->getIndexList();
-    //QMap<QString, int> indexMap;
-    //for (int i = 0; i < indexList.size(); i++) {
-    //    indexMap[Util::md5(indexList[i])] = i + 1;
-    //}
-    //qSort(list_.begin(), list_.end(), [&indexMap](const LocalSearcher::Info &left, const LocalSearcher::Info &right) -> bool {
-    //    return indexMap[left.indexName] < indexMap[right.indexName];
-    //});
+    
+    return initData(name.toStdString(), datas);
 }
 
 void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
 {
-    const int MAX_COUNT = 50;
-    auto query = [&](Lucene::SearcherPtr searcher, Lucene::QueryParserPtr parser, const QString &text) {
-        try {
-            QueryPtr query = parser->parse(text.toStdWString());
-            TopScoreDocCollectorPtr collector = TopScoreDocCollector::create(MAX_COUNT, false);
-            searcher->search(query, collector);
-            Collection<ScoreDocPtr> hits = collector->topDocs()->scoreDocs;
-            for (int i = 0; i < hits.size(); i++) {
-                DocumentPtr doc = searcher->doc(hits[i]->doc);
-                QVariantMap vm;
-                vm["name"] = QString::fromStdWString(doc->get(L"name"));
-                vm["path"] = QString::fromStdWString(doc->get(L"path"));
-                result.push_back(vm);
+    const int MAX_COUNT = 100;
+    int searchLen = 0;
+    for (int i = 0; i < text.size(); i++) {
+        ushort u = text.at(i).unicode();
+        if (u >= 0x4E00 && u <= 0x9FA5) {
+            searchLen += 3;
+        } else {
+            searchLen += 1;
+        }
+    }
+    foreach(const QString &table, tableList_) {
+        QString sql;
+        if (searchLen >= 3) {
+            sql = QString("select name, content from '%1' where search like '%%2%' order by name desc limit %3;")
+                .arg(table).arg(text).arg(MAX_COUNT / 2);
+        } else {
+            sql = QString("select name, content from '%1' where search like '%2%' order by name desc limit %3;")
+                .arg(table).arg(text).arg(MAX_COUNT / 2);
+        }
+        
+        sqlite_.query2(sql.toStdString().c_str(), [&](int row, int col, char **dbResult) {
+            int index = col;
+            for (int i = 0; i < row; i++) {
+                if (col == 2) {
+                    QVariantMap vm;
+                    vm["name"] = QString(dbResult[index++]);
+                    vm["path"] = QString(dbResult[index++]);
+                    result.push_back(vm);
+                }
             }
-        }
-        catch (LuceneException& e) {
-            qDebug() << "Exception: " << QString::fromStdWString(e.getError()) << L"\n";
-        }
-    };
-
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (int i = 0; i < list_.size(); i++) {
-        query(list_[i].searcher, list_[i].parser1, text + "*");
-        if (result.size() < MAX_COUNT) {
-            query(list_[i].searcher, list_[i].parser2, text + "*");
-        }
+        });
     }
 }
 
 bool LocalSearcher::isExit(const QString &name)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (int i = 0; i < list_.size(); i++) {
-        if (list_[i].indexName == name) {
-            return list_[i].reader->isOptimized();
-        }
-    }
-    return false;
+    return tableList_.contains(name, Qt::CaseInsensitive);
+}
+
+void LocalSearcher::setTableList(const QStringList &tableList)
+{
+    tableList_ = tableList;
 }
