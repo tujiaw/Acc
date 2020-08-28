@@ -220,14 +220,21 @@ void MainWidget::slotReturnPressed()
             }
         }
         if (isUrl) {
-            QString url = text;
-            if (url.indexOf("http") != 0) {
-                url = "http://" + url;
+            QString path = text;
+            if (path.indexOf("http") != 0) {
+                path = "http://" + path;
             }
-            Util::shellExecute(url);
+            Util::shellExecute(path);
+            if (path.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
+                QFileInfo f(path);
+                if (f.isFile()) {
+                    Acc::instance()->getHitsModel()->increase(T_FILE, f.fileName(), f.absoluteFilePath());
+                } else if (f.isDir()) {
+                    Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
+                }
+            }
         }
     }
-
 
 	//QPair<QString, QString> search = getPrefixAndText();
 	//if (search.first == OPEN_URL_PREFIX && Acc::instance()->getSettingModel()->enableOpenUrl()) {
