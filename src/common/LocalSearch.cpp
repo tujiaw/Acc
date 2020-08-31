@@ -107,7 +107,8 @@ LocalSearcher& LocalSearcher::instance()
 
 bool LocalSearcher::open()
 {
-    if (!sqlite_.open("./data.db")) {
+    std::string dataPath = Util::getWritebaleDir().toStdString() + "/data.db";
+    if (!sqlite_.open(dataPath)) {
         return false;
     }
 

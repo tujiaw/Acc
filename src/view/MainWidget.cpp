@@ -225,17 +225,17 @@ void MainWidget::slotReturnPressed()
             }
         }
         if (isUrl) {
-            QString path = text;
-            if (path.indexOf("http") != 0) {
-                path = "http://" + path;
+            if (text.indexOf("http") != 0) {
+                text = "http://" + text;
             }
-            Util::shellExecute(path);
-            if (path.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
-                QFileInfo f(path);
+            Util::shellExecute(text);
+        } else {
+            if (text.indexOf(QRegExp("[a-z|A-Z]:")) == 0) {
+                QFileInfo f(text);
                 if (f.isFile()) {
-                    Acc::instance()->getHitsModel()->increase(T_FILE, f.fileName(), f.absoluteFilePath());
+                    Util::locateFile(text);
                 } else if (f.isDir()) {
-                    Acc::instance()->getHitsModel()->increase(T_DIR, f.fileName(), f.absoluteFilePath());
+                    Util::shellExecute(text);
                 }
             }
         }

@@ -17,7 +17,6 @@ QFileIconProvider g_iconProvider;
 LnkModel::LnkModel(QObject *parent)
     : QAbstractListModel(parent), watcher_(this)
 {
-    LocalSearcher::instance().open();
     initSearchEngine();
     //std::thread t(std::bind(&LnkModel::initLnk, this));
     //t.detach();

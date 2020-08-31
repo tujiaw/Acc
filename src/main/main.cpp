@@ -4,6 +4,7 @@
 #include "common/RunGuard.h"
 #include "common/Util.h"
 #include "common/LogHandler.h"
+#include "common/LocalSearch.h"
 #include "net/BusService.h"
 #include <thread>
 #include <QHostInfo>
@@ -43,6 +44,11 @@ int main(int argc, char *argv[])
 		BusService::instance().stop();
 		Acc::instance()->destory();
 	});
+    if (!LocalSearcher::instance().open()) {
+        qDebug() << "sqlite open failed";
+        return 0;
+    }
+
 	Acc::instance()->openWidget(WidgetID::MAIN);
 	Acc::instance()->setWindowOpacity(WidgetID::MAIN, Acc::instance()->getSettingModel()->mainOpacity());
     //Acc::instance()->openWidget(WidgetID::TOOLS);
