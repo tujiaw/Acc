@@ -5,7 +5,6 @@
 #include "common/Util.h"
 #include "common/LogHandler.h"
 #include "common/LocalSearch.h"
-#include "net/BusService.h"
 #include <thread>
 #include <QHostInfo>
 
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 
 	a.setQuitOnLastWindowClosed(false);
 	QObject::connect(&a, &QApplication::aboutToQuit, []{ 
-		BusService::instance().stop();
+		//BusService::instance().stop();
 		Acc::instance()->destory();
 	});
     if (!LocalSearcher::instance().open()) {

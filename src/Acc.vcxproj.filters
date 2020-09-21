@@ -211,9 +211,6 @@
     <ClInclude Include="GeneratedFiles\ui_JsonToolWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="net\BusConnection.h">
-      <Filter>net</Filter>
-    </ClInclude>
     <ClInclude Include="common\WinTool.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -468,17 +465,11 @@
     <ClCompile Include="view\tools\UuidToolWidget.cpp">
       <Filter>view\tools</Filter>
     </ClCompile>
-    <ClCompile Include="net\BusConnection.cpp">
-      <Filter>net</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_BusService.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_BusService.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="net\BusService.cpp">
-      <Filter>net</Filter>
     </ClCompile>
     <ClCompile Include="common\WinTool.cpp">
       <Filter>common</Filter>
@@ -586,9 +577,6 @@
     </CustomBuild>
     <CustomBuild Include="view\tools\UuidToolWidget.h">
       <Filter>view\tools</Filter>
-    </CustomBuild>
-    <CustomBuild Include="net\BusService.h">
-      <Filter>net</Filter>
     </CustomBuild>
     <CustomBuild Include="common\LocalSearch.h">
       <Filter>common</Filter>
