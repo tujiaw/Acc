@@ -6,6 +6,7 @@
 #include <QPixmap>
 #include <QIcon>
 #include <QString>
+#include <functional>
 
 class LnkData : public QSharedData
 {
@@ -13,7 +14,8 @@ public:
     enum Type {
         TUnkown = 0,
         TPath = 1,
-        TSearchEngine = 2,
+        TIndexDir = 2,
+        TSearchEngine = 3,
     };
 
     LnkData()
@@ -39,6 +41,44 @@ public:
 	QIcon icon;
 };
 
+class ModelData : public QObject {
+public:
+    ModelData(QObject *parent) : QObject(parent){}
+    virtual ~ModelData() {}
+    void setBreak(const std::function<bool()> &fn) { fn_ = fn; }
+    bool isBreak() { if (fn_) return fn_(); return false; }
+    virtual QList<QSharedPointer<LnkData>> filter(const QString &text) = 0;
+private:
+    std::function<bool()> fn_;
+};
+
+class InitModelData : public ModelData {
+public:
+    InitModelData(QObject *parent = 0);
+    QList<QSharedPointer<LnkData>> filter(const QString &text) override;
+
+private:
+    QList<QSharedPointer<LnkData>> datalist_;
+};
+
+class LnkModelData : public ModelData {
+public:
+    LnkModelData(QObject *parent = 0);
+    QList<QSharedPointer<LnkData>> filter(const QString &text) override;
+    void load(const QString &key, const QString &dir, const QString &filter);
+    bool removeSearcher(const QString &name);
+};
+
+class CmdModelData : public ModelData {
+public:
+    CmdModelData(QObject *parent = 0);
+    QList<QSharedPointer<LnkData>> filter(const QString &text) override;
+    void updateIndexDir();
+
+private:
+    QList<QSharedPointer<LnkData>> datalist_;
+};
+
 class LnkModel : public QAbstractListModel
 {
 	Q_OBJECT
@@ -46,26 +86,22 @@ class LnkModel : public QAbstractListModel
 public:
 	LnkModel(QObject *parent);
 	~LnkModel();
+    void insertModelData(const QString &name, QSharedPointer<ModelData> modelData);
+    void removeModelData(const QString &name);
+    QSharedPointer<ModelData> getModelData(const QString &name);
 
-    void initLnk();
-    void initSearchEngine();
-	void load(const QString &dir);
 	void filter(const QString &text);
     const QString& head() const { return head_; }
+    bool isBreak() const;
 	int showCount() const;
-    bool removeSearcher(const QString &name);
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 private:
-	void handleResult(const QString &err, const QString &indexName);
-    void onDirChanged(const QString &path);
-
-private:
-    QList<QSharedPointer<LnkData>> pinitdata_;
+    QStringList namelist_;
+    QMap<QString, QSharedPointer<ModelData>> modeldata_;
 	QList<QSharedPointer<LnkData>> pfilterdata_;
     QString head_;
-    QFileSystemWatcher watcher_;
 };

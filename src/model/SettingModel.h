@@ -4,6 +4,28 @@
 #include <QKeySequence>
 #include <QSettings>
 
+struct IndexInfo {
+    IndexInfo() = default;
+    QString key;
+    QString filter;
+    QString path;
+    QVariantMap toMap() const {
+        QVariantMap v;
+        v["key"] = key;
+        v["filter"] = filter;
+        v["path"] = path;
+        return v;
+    }
+    void fromMap(const QVariantMap &v) {
+        key = v["key"].toString();
+        filter = v["filter"].toString();
+        path = v["path"].toString();
+    }
+    bool isEmpty() const {
+        return key.isEmpty() || path.isEmpty() || filter.isEmpty();
+    }
+};
+
 class SettingModel : public QObject
 {
 	Q_OBJECT
@@ -37,8 +59,10 @@ public:
     void setBindWallpaper(bool enable, int index);
     QPair<bool, int> bindWallpaperUrl() const;
 
-    void setIndexList(const QStringList &indexList);
-    QStringList getIndexList() const;
+    IndexInfo getIndex(const QString &key) const;
+    void setIndexList(const QList<IndexInfo> &infoList);
+    QList<IndexInfo> getIndexList() const;
+    bool containsTable(const QString &table) const;
 
     void setDirMaxLimit(int limit);
     int getDirMaxLimit() const;
@@ -51,4 +75,5 @@ public:
 
 private:
 	QSettings settings_;
+    QStringList tableList_;
 };

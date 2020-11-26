@@ -163,10 +163,16 @@ bool LocalSearcher::clearTable(const QString &name)
     return sqlite_.execute(sql.toStdString());
 }
 
-bool LocalSearcher::initTable(const QString &name, const QString &dir)
+bool LocalSearcher::initTable(const QString &name, const QString &dir, const QString &filter)
 {
-    if (isExit(name)) {
-        return false;
+    QStringList filterList = filter.split(";", QString::SkipEmptyParts);
+    QList<QRegExp> rxList;
+    foreach(const QString &v, filterList) {
+        QRegExp rx(v);
+        rx.setPatternSyntax(QRegExp::Wildcard);
+        if (rx.isValid()) {
+            rxList.append(rx);
+        }
     }
 
     std::vector<std::wstring> files;
@@ -178,11 +184,26 @@ bool LocalSearcher::initTable(const QString &name, const QString &dir)
         if (start > 0) {
             std::vector<std::string> bindText;
             std::wstring wname = iter->substr(start + 1);
-            std::string name = QString::fromStdWString(wname).toStdString();
-            bindText.push_back(name);
-            bindText.push_back(QString::fromStdWString(*iter).toStdString());
-            bindText.push_back(name);
-            datas.push_back(bindText);
+            QString qname = QString::fromStdWString(wname);
+            bool isOk = false;
+            if (!rxList.isEmpty()) {
+                foreach(const QRegExp &rx, rxList) {
+                    if (rx.exactMatch(qname)) {
+                        isOk = true;
+                        break;
+                    }
+                }
+            } else {
+                isOk = true;
+            }
+
+            if (isOk) {
+                std::string bindName = qname.toStdString();
+                bindText.push_back(bindName);
+                bindText.push_back(QString::fromStdWString(*iter).toStdString());
+                bindText.push_back(bindName);
+                datas.push_back(bindText);
+            }
         }
     }
     
@@ -191,7 +212,6 @@ bool LocalSearcher::initTable(const QString &name, const QString &dir)
 
 void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
 {
-    const int MAX_COUNT = 100;
     int searchLen = 0;
     for (int i = 0; i < text.size(); i++) {
         ushort u = text.at(i).unicode();
@@ -202,27 +222,36 @@ void LocalSearcher::query(const QString &text, QList<QVariantMap> &result)
         }
     }
     foreach(const QString &table, tableList_) {
-        QString sql;
-        if (searchLen >= 3) {
-            sql = QString("select name, content from '%1' where search like '%%2%' order by name desc limit %3;")
-                .arg(table).arg(text).arg(MAX_COUNT / 2);
-        } else {
-            sql = QString("select name, content from '%1' where search like '%2%' order by name desc limit %3;")
-                .arg(table).arg(text).arg(MAX_COUNT / 2);
-        }
-        
-        sqlite_.query2(sql.toStdString().c_str(), [&](int row, int col, char **dbResult) {
-            int index = col;
-            for (int i = 0; i < row; i++) {
-                if (col == 2) {
-                    QVariantMap vm;
-                    vm["name"] = QString(dbResult[index++]);
-                    vm["path"] = QString(dbResult[index++]);
-                    result.push_back(vm);
-                }
-            }
-        });
+        query(table, text, searchLen, result);
     }
+}
+
+void LocalSearcher::query(const QString &table, const QString &text, int length, QList<QVariantMap> &result)
+{
+    const int MAX_COUNT = 100;
+    QString sql;
+    if (length >= 3) {
+        sql = QString("select name, content from '%1' where search like '%%2%' order by name desc limit %3;")
+            .arg(table).arg(text).arg(MAX_COUNT / 2);
+    } else if(length > 0) {
+        sql = QString("select name, content from '%1' where search like '%2%' order by name desc limit %3;")
+            .arg(table).arg(text).arg(MAX_COUNT / 2);
+    } else {
+        sql = QString("select name, content from '%1' order by name desc limit %2;")
+            .arg(table).arg(MAX_COUNT / 2);
+    }
+
+    sqlite_.query2(sql.toStdString().c_str(), [&](int row, int col, char **dbResult) {
+        int index = col;
+        for (int i = 0; i < row; i++) {
+            if (col == 2) {
+                QVariantMap vm;
+                vm["name"] = QString(dbResult[index++]);
+                vm["path"] = QString(dbResult[index++]);
+                result.push_back(vm);
+            }
+        }
+    });
 }
 
 bool LocalSearcher::isExit(const QString &name)

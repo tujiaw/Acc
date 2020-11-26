@@ -30,9 +30,10 @@ public:
     bool dropTable(const QString &name);
     bool clearTable(const QString &name);
     bool initData(const std::string &name, const std::vector<std::vector<std::string>> &bindText);
-    bool initTable(const QString &name, const QString &dir);
+    bool initTable(const QString &name, const QString &dir, const QString &filter);
     void sortSearch();
     void query(const QString &text, QList<QVariantMap> &result);
+    void query(const QString &table, const QString &text, int length, QList<QVariantMap> &result);
     bool isExit(const QString &name);
     void setTableList(const QStringList &tableList);
     const QStringList& tableList() const { return tableList_; }

@@ -51,9 +51,14 @@ MainWidget::MainWidget(QWidget *parent)
     m_headLabel->setFixedHeight(15);
     m_headLabel->setHidden(true);
 
+    LnkModel *lnkModel = Acc::instance()->getLnkModel();
+    lnkModel->insertModelData("init", QSharedPointer<InitModelData>(new InitModelData()));
+    lnkModel->insertModelData("lnk", QSharedPointer<LnkModelData>(new LnkModelData()));
+    lnkModel->insertModelData("cmd", QSharedPointer<CmdModelData>(new CmdModelData()));
+
 	m_lnkListView = new LnkListView(this);
     m_lnkListView->setLineEdit(m_lineEdit);
-	m_lnkListView->setModel(Acc::instance()->getLnkModel());
+	m_lnkListView->setModel(lnkModel);
 	m_lnkListView->setItemDelegate(new LnkItemDelegate(this));
 	m_lnkListView->hide();
 
@@ -97,6 +102,17 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
                 }
                 return true;
             }
+        } else if (keyEvent->key() == Qt::Key_Tab) {
+            QString text = m_lineEdit->text();
+            if (text.size() > 0 && text[0] == '>' && !text.contains(" ")) {
+                QVariantMap v = m_lnkListView->getDataFromIndex(m_lnkListView->currentIndex());
+                QStringList nameList = v["name"].toString().split(" ");
+                if (nameList.size() > 0) {
+                    text = text[0] + nameList[0] + " ";
+                }
+                m_lineEdit->setText(text);
+                return true;
+            }
         } else if (object == m_lineEdit) {
             if (keyEvent->key() == Qt::Key_Down) {
                 m_lnkListView->selectNext();
@@ -105,7 +121,16 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
             }
         }
 	} else if (this == object && event->type() == QEvent::Show) {
-		m_lineEdit->selectAll();
+        QString text = m_lineEdit->text();
+        QStringList textList = text.split(" ", QString::SkipEmptyParts);
+        if (textList.size() > 1) {
+            int start = text.lastIndexOf(textList.last());
+            if (start >= 0) {
+                m_lineEdit->setSelection(start, text.length() - start);
+            }
+        } else {
+            m_lineEdit->selectAll();
+        }
 		m_lineEdit->setFocus();
     }
 
@@ -114,8 +139,8 @@ bool MainWidget::eventFilter(QObject *object, QEvent *event)
 
 void MainWidget::slotReload()
 {
-	LnkModel *model = static_cast<LnkModel*>(m_lnkListView->model());
-    model->initLnk();
+    Acc::instance()->getLnkModel()->removeModelData("lnk");
+    Acc::instance()->getLnkModel()->insertModelData("lnk", QSharedPointer<LnkModelData>(new LnkModelData()));
 }
 
 void MainWidget::slotTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -305,7 +330,7 @@ QPair<QString, QString> MainWidget::getPrefixAndText() const
 	QPair<QString, QString> result;
 	QString text = m_lineEdit->text().trimmed();
 	if (text.size() > 0) {
-		if (text[0] == OPEN_URL_PREFIX || text[0] == SEARCH_ENGINE_PREFIX) {
+		if (text[0] == OPEN_URL_PREFIX) {
 			result.first = text[0];
 			text = text.mid(1);
 		}

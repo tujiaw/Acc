@@ -47,11 +47,34 @@ SettingWidget::SettingWidget(QWidget *parent)
 	QStringList searchEngineList = QStringList() << tr("Baidu") << tr("Bing") << tr("Google");
 	ui.cbSearchEngine->addItems(searchEngineList);
 
-    // index tab
-    ui.indexListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
-    ui.indexListWidget->setAutoFillBackground(true);
+    ui.indexTableWidget->setHorizontalHeaderLabels(QStringList() << "Key" << "Path" << "Filter");
+    ui.indexTableWidget->setColumnCount(2);
+    ui.indexTableWidget->verticalHeader()->hide();
+    ui.indexTableWidget->horizontalHeader()->hide();
+    // 去掉虚线框
+    ui.indexTableWidget->setShowGrid(false);
+    // 单行选择
+    ui.indexTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui.indexTableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    // 禁止编辑
+    ui.indexTableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
+    // 关闭水平垂直滚动条，使用自定义的悬浮滚动条（为了满足样式需求）
+    ui.indexTableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // 鼠标跟踪
+    ui.indexTableWidget->setMouseTracking(true);
+    // 扩展最后一列
+    //ui.indexTableWidget->horizontalHeader()->setStretchLastSection(true);
 
-    connect(ui.pbIndexAdd, &QPushButton::clicked, this, &SettingWidget::slotIndexAdd);
+    ui.indexTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);    //x先自适应宽度
+    ui.indexTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    connect(ui.indexTableWidget, &QTableWidget::itemSelectionChanged, this, &SettingWidget::slotIndexTableSelectChanged);
+
+    // index tab
+    //ui.indexListWidget->setStyleSheet("QListWidget::item{ padding-left:2px;}");
+    //ui.indexListWidget->setAutoFillBackground(true);
+
+    connect(ui.pbIndexOpen, &QPushButton::clicked, this, &SettingWidget::slotIndexOpen);
+    connect(ui.pbIndexSave, &QPushButton::clicked, this, &SettingWidget::slotIndexSave);
     connect(ui.pbIndexRemove, &QPushButton::clicked, this, &SettingWidget::slotIndexRemove);
     connect(ui.pbIndexUp, &QPushButton::clicked, this, &SettingWidget::slotIndexUp);
     connect(ui.pbIndexDown, &QPushButton::clicked, this, &SettingWidget::slotIndexDown);
@@ -78,13 +101,10 @@ void SettingWidget::readData()
 	ui.cbSearchEngine->setCurrentText(settingModel->searchEngine().second);
     ui.cbUseBing->setChecked(settingModel->bindWallpaperUrl().first);
     ui.cbWallpaperIndex->setCurrentIndex(settingModel->bindWallpaperUrl().second);
-    QStringList indexList = settingModel->getIndexList();
-    foreach(const QString &index, indexList) {
-        if (LocalSearcher::instance().isExit(Util::md5(index))) {
-            addIndexItem(index);
-        }
+    QList<IndexInfo> indexList = settingModel->getIndexList();
+    foreach(const IndexInfo &index, indexList) {
+        addIndexItem(index);
     }
-    updateIndexStatus();
 }
 
 void SettingWidget::writeData(QObject *sender)
@@ -148,13 +168,13 @@ void SettingWidget::writeData(QObject *sender)
         Acc::instance()->getSettingModel()->setBindWallpaper(ui.cbUseBing->isChecked(), ui.cbWallpaperIndex->currentIndex());
     }
     // 设置索引
-    if (!sender || ui.indexListWidget == sender) {
-        QStringList indexList;
-        for (int i = 0; i < ui.indexListWidget->count(); i++) {
-            indexList.push_back(ui.indexListWidget->item(i)->text());
-        }
-        Acc::instance()->getSettingModel()->setIndexList(indexList);
-    }
+    //if (!sender || ui.indexListWidget == sender) {
+    //    QStringList indexList;
+    //    for (int i = 0; i < ui.indexListWidget->count(); i++) {
+    //        indexList.push_back(ui.indexListWidget->item(i)->text());
+    //    }
+    //    Acc::instance()->getSettingModel()->setIndexList(indexList);
+    //}
 }
 
 void SettingWidget::slotMaxResultChanged(const QString &text)
@@ -196,119 +216,162 @@ void SettingWidget::slotWallpaperIndex(int index)
     Acc::instance()->setBindWallpaper(index);
 }
 
-void SettingWidget::slotIndexAdd()
+void SettingWidget::slotIndexTableSelectChanged()
+{
+    IndexInfo info;
+    QList<QTableWidgetItem*> items = ui.indexTableWidget->selectedItems();
+    int row = getSelectRow();
+    if (row >= 0) {
+        info = Acc::instance()->getSettingModel()->getIndex(ui.indexTableWidget->item(row, 0)->text());
+    }
+
+    ui.indexKey->setText(info.key);
+    ui.indexFilter->setText(info.filter);
+    ui.indexPath->setText(info.path);
+}
+
+void SettingWidget::slotIndexOpen()
 {
     QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Select index directory"));
     if (dir.isEmpty()) {
         return;
     }
 
-    auto newItem = addIndexItem(dir);
-    writeData(ui.indexListWidget);
+    int nameIndex = dir.lastIndexOf("/");
+    if (nameIndex < 0) {
+        nameIndex = dir.lastIndexOf("\\");
+    }
+    if (nameIndex >= 0) {
+        ui.indexKey->setText(dir.mid(nameIndex + 1).toLower());
+    }
+    ui.indexPath->setText(dir);
+    ui.indexFilter->setText("*.*");
+}
 
-    Acc::instance()->getLnkModel()->load(dir);
-    updateIndexStatus();
+void SettingWidget::slotIndexSave()
+{
+    IndexInfo info;
+    info.key = ui.indexKey->text().trimmed();
+    info.path = ui.indexPath->text().trimmed();
+    info.filter = ui.indexFilter->text().trimmed();
+    if (info.isEmpty()) {
+        return;
+    }
+
+    addIndexItem(info);
+    updateIndexModel();
+    QSharedPointer<ModelData> modelData = Acc::instance()->getLnkModel()->getModelData("lnk");
+    QSharedPointer<LnkModelData> lnkModelData = modelData.staticCast<LnkModelData>();
+    if (lnkModelData) {
+        lnkModelData->load(info.key, info.path, info.filter);
+    }
 }
 
 void SettingWidget::slotIndexRemove()
 {
-    auto items = ui.indexListWidget->selectedItems();
-    if (items.size() != 1) {
+    int row = getSelectRow();
+    if (row < 0) {
         return;
     }
-
-    QString removeText = items[0]->text();
-    if (Acc::instance()->getLnkModel()->removeSearcher(Util::md5(removeText))) {
-        int delRow = ui.indexListWidget->row(items[0]);
-        auto removeItem = ui.indexListWidget->takeItem(delRow);
-        ui.indexListWidget->removeItemWidget(removeItem);
-        writeData(ui.indexListWidget);
-        updateIndexStatus();
-    }    
+    QString key = ui.indexTableWidget->item(row, 0)->text();
+    ui.indexTableWidget->removeRow(row);
+    updateIndexModel();
 }
 
 void SettingWidget::slotIndexUp()
 {
-    auto items = ui.indexListWidget->selectedItems();
-    if (items.size() != 1) {
-        return;
+    QList<IndexInfo> infoList = getCurrentIndexList();
+    int row = getSelectRow();
+    if (row > 0) {
+        IndexInfo tmp = infoList[row];
+        infoList[row] = infoList[row - 1];
+        infoList[row - 1] = tmp;
+        clearIndexTableAllRow();
+        foreach(const IndexInfo &info, infoList) {
+            addIndexItem(info);
+        }
+        ui.indexTableWidget->selectRow(row - 1);
+        updateIndexModel();
     }
-
-    int row = ui.indexListWidget->row(items[0]);
-    if (row <= 0) {
-        return;
-    }
-
-    auto text = items[0]->text();
-    auto upItem = ui.indexListWidget->item(row - 1);
-    items[0]->setText(upItem->text());
-    upItem->setText(text);
-    
-    ui.indexListWidget->setCurrentItem(upItem);
-    writeData(ui.indexListWidget);
-
-    updateIndexStatus();
 }
 
 void SettingWidget::slotIndexDown()
 {
-    auto items = ui.indexListWidget->selectedItems();
-    if (items.size() != 1) {
-        return;
+    QList<IndexInfo> infoList = getCurrentIndexList();
+    int row = getSelectRow();
+    if (row >= 0 && row < infoList.size() - 1) {
+        IndexInfo tmp = infoList[row];
+        infoList[row] = infoList[row + 1];
+        infoList[row + 1] = tmp;
+        clearIndexTableAllRow();
+        foreach(const IndexInfo &info, infoList) {
+            addIndexItem(info);
+        }
+        ui.indexTableWidget->selectRow(row + 1);
+        updateIndexModel();
     }
-
-    int row = ui.indexListWidget->row(items[0]);
-    if (ui.indexListWidget->count() - 1 == row) {
-        return;
-    }
-
-    auto text = items[0]->text();
-    auto downItem = ui.indexListWidget->item(row + 1);
-    items[0]->setText(downItem->text());
-    downItem->setText(text);
-
-    ui.indexListWidget->setCurrentItem(downItem);
-    writeData(ui.indexListWidget);
-
-    //Acc::instance()->getLnkModel()->sortSearcher();
-    updateIndexStatus();
 }
 
-QListWidgetItem* SettingWidget::addIndexItem(const QString &name)
+void SettingWidget::addIndexItem(const IndexInfo &info)
 {
-    for (int i = 0; i < ui.indexListWidget->count(); i++) {
-        if (ui.indexListWidget->item(i)->text() == name) {
-            return nullptr;
+    int rowCount = ui.indexTableWidget->rowCount();
+    for (int i = 0; i < rowCount; i++) {
+        if (info.key == ui.indexTableWidget->item(i, 0)->text()) {
+            ui.indexTableWidget->item(i, 0)->setData(Qt::UserRole + 1, info.toMap());
+            ui.indexTableWidget->item(i, 1)->setText(info.path);
+            return;
         }
     }
 
-    auto item = new QListWidgetItem(QIcon(":/images/wait.png"), name);
-    item->setSizeHint(QSize(item->sizeHint().width(), INDEX_ROW_HEIGHT));
-    ui.indexListWidget->addItem(item);
-    return item;
+    int newRow = rowCount;
+    ui.indexTableWidget->setRowCount(rowCount + 1);
+    QTableWidgetItem *keyItem = new QTableWidgetItem(info.key);
+    keyItem->setData(Qt::UserRole + 1, info.toMap());
+    ui.indexTableWidget->setItem(newRow, 0, keyItem);
+    ui.indexTableWidget->setItem(newRow, 1, new QTableWidgetItem(info.path));
 }
 
-void SettingWidget::addIndexItemList(const QStringList &nameList)
+void SettingWidget::updateIndexModel()
 {
-    for (int i = 0; i < nameList.size(); i++) {
-        addIndexItem(nameList[i]);
+    Acc::instance()->getSettingModel()->setIndexList(getCurrentIndexList());
+    Acc::instance()->getSettingModel()->sync();
+    QSharedPointer<ModelData> modelData = Acc::instance()->getLnkModel()->getModelData("cmd");
+    QSharedPointer<CmdModelData> cmdModelData = modelData.staticCast<CmdModelData>();
+    if (cmdModelData) {
+        cmdModelData->updateIndexDir();
     }
-    updateIndexStatus();
 }
 
-void SettingWidget::updateIndexStatus()
+int SettingWidget::getSelectRow() const
 {
-    for (int i = 0; i < ui.indexListWidget->count(); i++) {
-        QString text = ui.indexListWidget->item(i)->text();
-        if (LocalSearcher::instance().isExit(Util::md5(text))) {
-            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/ok.png"));
-        } else {
-            ui.indexListWidget->item(i)->setIcon(QIcon(":/images/wait.png"));
+    QList<QTableWidgetItem*> items = ui.indexTableWidget->selectedItems();
+    if (items.isEmpty()) {
+        return -1;
+    }
+    return items.first()->row();
+}
+
+void SettingWidget::clearIndexTableAllRow()
+{
+    for (int i = ui.indexTableWidget->rowCount() - 1; i >= 0; i--) {
+        ui.indexTableWidget->removeRow(i);
+    }
+}
+
+QList<IndexInfo> SettingWidget::getCurrentIndexList() const
+{
+    QList<IndexInfo> infoList;
+    for (int i = 0; i < ui.indexTableWidget->rowCount(); i++) {
+        IndexInfo info;
+        info.fromMap(ui.indexTableWidget->item(i, 0)->data(Qt::UserRole + 1).toMap());
+        if (!info.isEmpty()) {
+            infoList.append(info);
         }
     }
+    return infoList;
 }
 
 void SettingWidget::slotIndexResult(const QString &err, const QString &indexName)
 {
-    updateIndexStatus();
+    
 }

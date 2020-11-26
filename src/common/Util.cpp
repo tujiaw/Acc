@@ -230,7 +230,7 @@ namespace Util
 
 	QString getConfigDir()
 	{
-        QDir dir(getWritebaleDir());
+        QDir dir(getRunDir());
         if (!dir.exists("config")) {
             dir.mkdir("config");
 		}

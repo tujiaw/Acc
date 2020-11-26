@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include "ui_SettingWidget.h"
+#include "model/SettingModel.h"
 
 class SettingWidget : public QWidget
 {
@@ -21,17 +22,21 @@ private slots:
     void slotMyBlog(const QString &link);
 	void slotSearchEngineActivated(const QString &text);
     void slotWallpaperIndex(int index);
+    void slotIndexTableSelectChanged();
 
-    void slotIndexAdd();
+    void slotIndexOpen();
+    void slotIndexSave();
     void slotIndexRemove();
     void slotIndexUp();
     void slotIndexDown();
     void slotIndexResult(const QString &err, const QString &indexName);
 
 private:
-    QListWidgetItem* addIndexItem(const QString &name);
-    void addIndexItemList(const QStringList &nameList);
-    void updateIndexStatus();
+    void addIndexItem(const IndexInfo &info);
+    void updateIndexModel();
+    int getSelectRow() const;
+    void clearIndexTableAllRow();
+    QList<IndexInfo> getCurrentIndexList() const;
 
 private:
 	Ui::SettingWidget ui;

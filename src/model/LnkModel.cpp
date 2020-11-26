@@ -12,24 +12,53 @@
 #include "common/pinyin.h"
 #include "common/LocalSearch.h"
 
-QFileIconProvider g_iconProvider;
+const QFileIconProvider g_iconProvider;
+InitModelData::InitModelData(QObject *parent) : ModelData(parent)
+{
+    QSharedPointer<LnkData> baidu(new LnkData());
+    baidu->icon = QIcon(":/images/baidu.png");
+    baidu->type = LnkData::TSearchEngine;
+    baidu->name = "baidu";
+    baidu->searchText = baidu->name;
+    baidu->path = QStringLiteral("百度一下你就知道");
+
+    QSharedPointer<LnkData> bing(new LnkData());
+    bing->icon = QIcon(":/images/bing.png");
+    bing->type = LnkData::TSearchEngine;
+    bing->name = "bing";
+    bing->searchText = bing->name;
+    bing->path = QStringLiteral("必应搜索");
+
+    QSharedPointer<LnkData> google(new LnkData());
+    google->icon = QIcon(":/images/google.png");
+    google->type = LnkData::TSearchEngine;
+    google->name = "google";
+    google->searchText = google->name;
+    google->path = QStringLiteral("谷歌搜索");
+
+    datalist_.append(baidu);
+    datalist_.append(bing);
+    datalist_.append(google);
+}
+
+QList<QSharedPointer<LnkData>> InitModelData::filter(const QString &text)
+{
+    QList<QSharedPointer<LnkData>> result;
+    QStringList ls = text.split(" ");
+    if (!ls.isEmpty()) {
+        for (int i = 0; i < datalist_.size() && !isBreak(); i++) {
+            if (datalist_.at(i)->searchText.contains(ls.first())) {
+                result.append(datalist_.at(i));
+            }
+        }
+    }
+    return result;
+}
+
 //////////////////////////////////////////////////////////////////////////
-LnkModel::LnkModel(QObject *parent)
-    : QAbstractListModel(parent), watcher_(this)
+LnkModelData::LnkModelData(QObject *parent) : ModelData(parent)
 {
-    initSearchEngine();
-    //std::thread t(std::bind(&LnkModel::initLnk, this));
-    //t.detach();
-    initLnk();
-    connect(&watcher_, &QFileSystemWatcher::directoryChanged, this, &LnkModel::onDirChanged);
-}
-
-LnkModel::~LnkModel()
-{
-}
-
-void LnkModel::initLnk()
-{
+    return;
     std::vector<std::vector<std::string>> bindText;
     CFileVersionInfo verinfo;
     QStringList lnkList = Util::getAllLnk();
@@ -63,7 +92,7 @@ void LnkModel::initLnk()
         repeat.insert(key);
 
         QString searchText = p->name;
-        
+
         QString targetName = target.mid(target.lastIndexOf("/") + 1);
         if (p->name != targetName) {
             searchText += " " + targetName;
@@ -89,7 +118,42 @@ void LnkModel::initLnk()
     qDebug() << "LnkModel init finished, size:" << bindText.size();
 }
 
-void LnkModel::initSearchEngine()
+QList<QSharedPointer<LnkData>> LnkModelData::filter(const QString &text)
+{
+    QList<QSharedPointer<LnkData>> result;
+    if (text.isEmpty() || text[0] == ">") {
+        return result;
+    }
+
+    QStringList ls = text.split(" ");
+    if (!ls.isEmpty()) {
+        QList<QVariantMap> datas;
+        LocalSearcher::instance().query(ls.last(), datas);
+        foreach(const QVariantMap &data, datas) {
+            if (!isBreak()) {
+                QSharedPointer<LnkData> p(new LnkData());
+                p->name = data["name"].toString();
+                p->path = data["path"].toString();
+                result.append(p);
+            }
+        }
+    }
+    return result;
+}
+
+void LnkModelData::load(const QString &key, const QString &dir, const QString &filter)
+{
+    LocalSearcher::instance().initTable(key, dir, filter);
+}
+
+bool LnkModelData::removeSearcher(const QString &name)
+{
+    return LocalSearcher::instance().dropTable(name);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+CmdModelData::CmdModelData(QObject *parent) : ModelData(parent)
 {
     QSharedPointer<LnkData> baidu(new LnkData());
     baidu->icon = QIcon(":/images/baidu.png");
@@ -112,15 +176,104 @@ void LnkModel::initSearchEngine()
     google->searchText = google->name;
     google->path = QStringLiteral("谷歌搜索");
 
-    pinitdata_.append(baidu);
-    pinitdata_.append(bing);
-    pinitdata_.append(google);
+    datalist_.append(baidu);
+    datalist_.append(bing);
+    datalist_.append(google);
+
+    updateIndexDir();
 }
 
-void LnkModel::load(const QString &dir)
+QList<QSharedPointer<LnkData>> CmdModelData::filter(const QString &text)
 {
-    LocalSearcher::instance().initTable(Util::md5(dir), dir);
+    QList<QSharedPointer<LnkData>> result;
+    if (text.isEmpty() || text[0] != '>') {
+        return result;
+    }
+
+    if (text == ">") {
+        return datalist_;
+    }
+
+    QList<QVariantMap> datas;
+    QStringList textList = text.mid(1).split(" ", QString::SkipEmptyParts);
+    if (textList.size() > 1) {
+        QString key = textList.first();
+        QString searchText = textList.last();
+        if (Acc::instance()->getSettingModel()->containsTable(key)) {
+            LocalSearcher::instance().query(key, searchText, searchText.length(), datas);
+        }
+    } else if (textList.size() > 0) {
+        QString searchText = textList.first();
+        foreach(const QSharedPointer<LnkData> &v, datalist_) {
+            if (v->searchText.contains(searchText)) {
+                result.append(v);
+            }
+        }
+        if (text.at(text.length() - 1) == ' ' && Acc::instance()->getSettingModel()->containsTable(searchText)) {
+            LocalSearcher::instance().query(searchText, "", 0, datas);
+        }
+    }
+
+    foreach(const QVariantMap &data, datas) {
+        if (!isBreak()) {
+            QSharedPointer<LnkData> p(new LnkData());
+            p->name = data["name"].toString();
+            p->path = data["path"].toString();
+            result.append(p);
+        }
+    }
+
+    return result;
 }
+
+void CmdModelData::updateIndexDir()
+{
+    foreach(const QSharedPointer<LnkData> &v, datalist_) {
+        if (v->type == LnkData::TIndexDir) {
+            datalist_.removeOne(v);
+        }
+    }
+
+    QList<IndexInfo> infoList = Acc::instance()->getSettingModel()->getIndexList();
+    foreach(const IndexInfo &info, infoList) {
+        QSharedPointer<LnkData> data(new LnkData());
+        data->type = LnkData::TIndexDir;
+        data->name = info.key + QString(" (%1)").arg(info.filter);
+        data->searchText = info.key;
+        data->path = info.path;
+        datalist_.append(data);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+LnkModel::LnkModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+}
+
+LnkModel::~LnkModel()
+{
+}
+
+void LnkModel::insertModelData(const QString &name, QSharedPointer<ModelData> modelData)
+{
+    modelData->setBreak(std::bind(&LnkModel::isBreak, this));
+    modeldata_[name] = modelData;
+    namelist_.removeOne(name);
+    namelist_.append(name);
+}
+
+void LnkModel::removeModelData(const QString &name)
+{
+    modeldata_.remove(name);
+    namelist_.removeOne(name);
+}
+
+QSharedPointer<ModelData> LnkModel::getModelData(const QString &name)
+{
+    return modeldata_[name];
+}
+
 
 void LnkModel::filter(const QString &text)
 {
@@ -128,10 +281,10 @@ void LnkModel::filter(const QString &text)
 	pfilterdata_.clear(); 
     QSet<QString> repeat;
     
-    auto isBreak = [&]() -> bool {
-        const int MAX_RESULT = 100;
-        return pfilterdata_.size() >= MAX_RESULT;
-    };
+    if (text.isEmpty()) {
+        return;
+    }
+
     auto addItem = [&](const QSharedPointer<LnkData> &data) {
         if (isBreak()) {
             return;
@@ -153,24 +306,14 @@ void LnkModel::filter(const QString &text)
         pfilterdata_.append(data);
     };
 
-    QStringList searchList = text.split(" ", QString::SkipEmptyParts);
-    if (searchList.isEmpty()) {
-        return;
-    }
-
-    for (int i = 0; i < pinitdata_.size(); i++) {
-        if (pinitdata_.at(i)->searchText.contains(searchList.first())) {
-            addItem(pinitdata_.at(i));
+    foreach(const QString &name, namelist_) {
+        QSharedPointer<ModelData> model = modeldata_[name];
+        if (model) {
+            QList<QSharedPointer<LnkData>> result = model->filter(text);
+            foreach(const QSharedPointer<LnkData> &data, result) {
+                addItem(data);
+            }
         }
-    }
-
-    QList<QVariantMap> datas;
-    LocalSearcher::instance().query(searchList.last(), datas);
-    foreach(const QVariantMap &data, datas) {
-        QSharedPointer<LnkData> p(new LnkData());
-        p->name = data["name"].toString();
-        p->path = data["path"].toString();
-        addItem(p);
     }
 
     qSort(pfilterdata_.begin(), pfilterdata_.end(),
@@ -184,7 +327,7 @@ void LnkModel::filter(const QString &text)
         if (leftHits != rightHits) {
             return leftHits > rightHits;
         } else {
-            return left->path < right->path;
+            return left->name.length() < right->name.length();
         }
     });
 
@@ -192,14 +335,15 @@ void LnkModel::filter(const QString &text)
 	emit dataChanged(this->index(0, 0), this->index(qMax(count, 0), 0));
 }
 
+bool LnkModel::isBreak() const
+{
+    const int MAX_RESULT = 100;
+    return pfilterdata_.size() >= MAX_RESULT;
+}
+
 int LnkModel::showCount() const
 {
 	return pfilterdata_.size();
-}
-
-bool LnkModel::removeSearcher(const QString &name)
-{
-    return LocalSearcher::instance().dropTable(name);
 }
 
 int LnkModel::rowCount(const QModelIndex &parent) const
@@ -214,9 +358,4 @@ QVariant LnkModel::data(const QModelIndex &index, int role) const
 		return pfilterdata_[row]->toVariant();
 	}
 	return QVariant();
-}
-
-void LnkModel::onDirChanged(const QString &path)
-{
-    qDebug() << "dir changed:" << path;
 }

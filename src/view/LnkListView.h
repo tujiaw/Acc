@@ -21,6 +21,7 @@ public:
 	void setEnableButtonsVisible(bool visible);
     bool enableButtonsVisible() const;
     QString getPathFromIndex(const QModelIndex &index) const;
+    QVariantMap getDataFromIndex(const QModelIndex &index) const;
     bool openCurrentFolder();
 
 protected:

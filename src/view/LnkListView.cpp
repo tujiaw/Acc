@@ -183,13 +183,23 @@ bool LnkListView::enableButtonsVisible() const
 QString LnkListView::getPathFromIndex(const QModelIndex &index) const
 {
     if (index.isValid()) {
-        QString targetPath = this->model()->data(index).toMap()["path"].toString();
+        QVariantMap v = getDataFromIndex(index);
+        QString targetPath = v["path"].toString();
         QFileInfo info(targetPath);
         if (info.exists()) {
             return targetPath;
         }
     }
     return "";
+}
+
+QVariantMap LnkListView::getDataFromIndex(const QModelIndex &index) const
+{
+    QVariantMap v;
+    if (index.isValid()) {
+        v = this->model()->data(index).toMap();
+    }
+    return v;
 }
 
 bool LnkListView::openCurrentFolder()

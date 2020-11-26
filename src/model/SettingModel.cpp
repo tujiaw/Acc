@@ -22,6 +22,10 @@ SettingModel::SettingModel(QObject *parent)
 	: QObject(parent)
 	, settings_(Util::getConfigPath(), QSettings::IniFormat)
 {
+    QList<IndexInfo> infoList = getIndexList();
+    foreach(const IndexInfo &info, infoList) {
+        tableList_.append(info.key);
+    }
 }
 
 void SettingModel::sync()
@@ -151,14 +155,44 @@ QPair<bool, int> SettingModel::bindWallpaperUrl() const
     return qMakePair(enable, index);
 }
 
-void SettingModel::setIndexList(const QStringList &indexList)
+IndexInfo SettingModel::getIndex(const QString &key) const
 {
-    settings_.setValue(INDEX_LIST, indexList.join(";"));
+    static IndexInfo s_emptyInfo;
+    QList<IndexInfo> infoList = getIndexList();
+    foreach(const IndexInfo &info, infoList) {
+        if (info.key == key) {
+            return info;
+        }
+    }
+    return s_emptyInfo;
 }
 
-QStringList SettingModel::getIndexList() const
+void SettingModel::setIndexList(const QList<IndexInfo> &infoList)
 {
-    return settings_.value(INDEX_LIST).toString().split(";", QString::SkipEmptyParts);
+    QVariantList ls;
+    tableList_.clear();
+    foreach(const IndexInfo &info, infoList) {
+        ls.append(info.toMap());
+        tableList_.append(info.key);
+    }
+    settings_.setValue(INDEX_LIST, QVariant(ls));
+}
+
+QList<IndexInfo> SettingModel::getIndexList() const
+{
+    QVariantList ls = settings_.value(INDEX_LIST).toList();
+    QList<IndexInfo> infoList;
+    foreach(const QVariant &v, ls) {
+        IndexInfo info;
+        info.fromMap(v.toMap());
+        infoList.append(info);
+    }
+    return infoList;
+}
+
+bool SettingModel::containsTable(const QString &table) const
+{
+    return tableList_.contains(table);
 }
 
 void SettingModel::setDirMaxLimit(int limit)

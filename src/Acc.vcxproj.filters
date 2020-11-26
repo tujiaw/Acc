@@ -465,12 +465,6 @@
     <ClCompile Include="view\tools\UuidToolWidget.cpp">
       <Filter>view\tools</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_BusService.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_BusService.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="common\WinTool.cpp">
       <Filter>common</Filter>
     </ClCompile>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>521</width>
-    <height>385</height>
+    <width>554</width>
+    <height>383</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -231,7 +231,7 @@
                <item>
                 <widget class="QCheckBox" name="cbSearchEngineOn">
                  <property name="text">
-                  <string>&gt; prefix use search engine</string>
+                  <string>&gt; prefix enter command mode</string>
                  </property>
                 </widget>
                </item>
@@ -373,27 +373,14 @@
         <attribute name="title">
          <string>Index</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
+        <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <property name="spacing">
             <number>0</number>
            </property>
            <item>
-            <widget class="QListWidget" name="indexListWidget">
-             <property name="autoScrollMargin">
-              <number>0</number>
-             </property>
-             <property name="editTriggers">
-              <set>QAbstractItemView::NoEditTriggers</set>
-             </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectRows</enum>
-             </property>
-             <property name="resizeMode">
-              <enum>QListView::Fixed</enum>
-             </property>
-            </widget>
+            <widget class="QTableWidget" name="indexTableWidget"/>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -403,13 +390,6 @@
              <property name="leftMargin">
               <number>10</number>
              </property>
-             <item>
-              <widget class="QPushButton" name="pbIndexAdd">
-               <property name="text">
-                <string>Add</string>
-               </property>
-              </widget>
-             </item>
              <item>
               <widget class="QPushButton" name="pbIndexRemove">
                <property name="text">
@@ -447,6 +427,94 @@
             </layout>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QWidget" name="widget_3" native="true">
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <property name="spacing">
+             <number>10</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="text">
+                   <string>Key: </string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="indexKey">
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_4">
+                  <property name="text">
+                   <string>Filter:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="indexFilter"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <item>
+                 <widget class="QLabel" name="label_3">
+                  <property name="text">
+                   <string>Path:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="indexPath"/>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <widget class="QPushButton" name="pbIndexOpen">
+                <property name="text">
+                 <string>Open</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbIndexSave">
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
